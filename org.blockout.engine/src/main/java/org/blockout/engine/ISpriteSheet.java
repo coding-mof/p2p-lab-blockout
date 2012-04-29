@@ -1,4 +1,4 @@
-package org.blogout.engine;
+package org.blockout.engine;
 
 import java.io.IOException;
 
@@ -11,7 +11,7 @@ import org.newdawn.slick.Image;
  * 
  * @author Florian Müller
  */
-public interface ISpriteManager {
+public interface ISpriteSheet {
 	/**
 	 * 
 	 * @param ref The location of the spritesheet file to load
