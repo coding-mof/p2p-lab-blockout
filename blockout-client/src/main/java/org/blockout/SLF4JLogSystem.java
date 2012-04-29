@@ -12,38 +12,43 @@ import org.slf4j.LoggerFactory;
  */
 public class SLF4JLogSystem implements LogSystem {
 
-	private static final Logger logger;
+	private static final Logger	logger;
 	static {
-		logger = LoggerFactory.getLogger(SLF4JLogSystem.class);
+		logger = LoggerFactory.getLogger( SLF4JLogSystem.class );
 	}
 
 	@Override
-	public void error(String message, Throwable e) {
-		logger.error(message, e);
+	public void error( final String message, final Throwable e ) {
+		logger.error( message, e );
 	}
 
 	@Override
-	public void error(Throwable e) {
-		logger.error("", e);
+	public void error( final Throwable e ) {
+		logger.error( "", e );
 	}
 
 	@Override
-	public void error(String message) {
-		logger.error(message);
+	public void error( final String message ) {
+		logger.error( message );
 	}
 
 	@Override
-	public void warn(String message) {
-		logger.warn(message);
+	public void warn( final String message ) {
+		logger.warn( message );
 	}
 
 	@Override
-	public void info(String message) {
-		logger.info(message);
+	public void info( final String message ) {
+		logger.info( message );
 	}
 
 	@Override
-	public void debug(String message) {
-		logger.debug(message);
+	public void debug( final String message ) {
+		logger.debug( message );
+	}
+
+	@Override
+	public void warn( final String message, final Throwable e ) {
+		logger.warn( message, e );
 	}
 }

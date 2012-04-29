@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty>
+
+    <useStyles filename="nifty-default-styles.xml" />
+    <useControls filename="nifty-default-controls.xml" />
+
+    <screen id="start" controller="org.blockout.ui.StartScreenController" >
+        <layer id="foreground" childLayout="vertical" >
+
+            <panel id="panel_top" align="center" backgroundColor="#f008" childLayout="center" height="25%" width="75%" >
+                <control name="label" height="100%" text="Blockout" width="100%" />
+            </panel>
+
+            <panel id="panel_mid" align="center" backgroundColor="#0f08" childLayout="center" height="50%" width="75%" >
+
+                <control name="label" height="100%"
+                    text="Game description goes here..."
+                    width="100%" wrap="true" />
+            </panel>
+
+            <panel id="panel_bottom" align="center"
+                backgroundColor="#00f8" childLayout="horizontal"
+                height="25%" width="75%" >
+
+                <panel id="panel_bottom_left"
+                    backgroundColor="#44f8" childLayout="center"
+                    height="50%" valign="center" width="33%" >
+
+                    <control id="startGame" name="button" align="center"
+                        backgroundColor="#0000" label="Start Game" >
+
+                        <interact onClick="startGame()" />
+                    </control>
+                </panel>
+
+                <panel
+                    id="panel_bottom_center"
+                    backgroundColor="#88f8"
+                    childLayout="center"
+                    height="50%"
+                    valign="center"
+                    width="34%" >
+
+                    <control
+                        id="settings"
+                        name="button"
+                        align="center"
+                        backgroundColor="#0000"
+                        label="Settings" >
+
+                        <interact onClick="showSettings()" />
+                    </control>
+                </panel>
+
+                <panel
+                    id="panel_bottom_right"
+                    backgroundColor="#88f8"
+                    childLayout="center"
+                    height="50%"
+                    valign="center"
+                    width="33%" >
+
+                    <control
+                        id="exit"
+                        name="button"
+                        align="center"
+                        backgroundColor="#0000"
+                        label="Exit" >
+
+                        <interact onClick="exitGame()" />
+                    </control>
+                </panel>
+            </panel>
+        </layer>
+    </screen>
+
+    <screen
+        id="selectProfile"
+        controller="org.blockout.ui.ProfileScreenController" >
+
+        <layer childLayout="vertical" >
+
+            
+            <panel
+                id="panel_top"
+                align="center"
+                backgroundColor="#f008"
+                childLayout="center"
+                height="25%"
+                width="75%" >
+
+                <panel childLayout="horizontal">
+	                <control name="label" text="Create new Player" width="50%" align="left"/>
+	                
+	                <panel childLayout="vertical" width="50%">
+	                    <control id="txtPlayerName" name="textfield" align="left"/>
+		                <control name="button" width="" backgroundColor="#0000" label="Start with new Profile" align="left" >
+		                    <interact onClick="createNewPlayer()" />
+		                </control>
+	                </panel>
+                </panel>
+                
+            </panel>
+            
+             <panel
+                id="panel_mid"
+                align="center"
+                backgroundColor="#0f08"
+                childLayout="center"
+                height="50%"
+                width="75%" >
+
+                <panel childLayout="vertical">
+                    <control name="label" text="Select existing Player" width="50%" align="left"/>
+                    <panel childLayout="horizontal">
+                        <control id="playerProfiles" name="listBox" displayItems="10" horizontal="optional" selection="Single" vertical="optional" width="50%" />
+                        
+                        <panel childLayout="horizontal" >
+		                    <panel backgroundColor="#AAA7" childLayout="vertical" width="50%" >
+		                        <control name="label" align="left" text="Name" />
+		                        <control name="label" align="left" text="Level" />
+		                        <control name="label" align="left" text="XP" />
+		                        <control name="label" align="left" text="Health" />
+		                    </panel>
+		
+		                    <panel backgroundColor="#AAA7" align="left" childLayout="vertical" width="50%" >
+		                        <control id="lblName" name="label" align="left" text="" width="100%" />
+		                        <control id="lblLevel" name="label" align="left" text="" width="100%" />
+		                        <control id="lblXP" name="label" align="left" text="" width="100%" />
+		                        <control id="lblHealth" name="label" align="left" text="" width="100%" />
+		                    </panel>
+                		</panel>
+                        
+                    </panel>
+                    <control id="btnStartWithSelected" name="button" align="right" backgroundColor="#0000" enabled="false" width="" label="Start Game" >
+	                    <interact onClick="startWithSelected()" />
+	                </control>
+                </panel>
+                
+            </panel>
+
+            <panel id="panel_bottom" align="center" backgroundColor="#00f8" childLayout="horizontal" height="25%" width="75%" >
+
+                <panel id="panel_bottom_left" backgroundColor="#44f8" childLayout="center" height="50%" valign="center" width="33%" >
+                    <control id="startGame" name="button" align="center" backgroundColor="#0000" label="Back" >
+                        <interact onClick="goBack()" />
+                    </control>
+                </panel>
+            </panel>
+        </layer>
+    </screen>
+</nifty>

@@ -1,0 +1,10 @@
+
+/.metadata
+/blockout-client/target
+/org.blockout.ai/target
+/org.blockout.common/target
+/org.blockout.engine/target
+/org.blockout.logic/target
+/org.blockout.network/target
+/org.blockout.ui/target
+/org.blockout.world/target

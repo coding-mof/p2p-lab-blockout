@@ -1,36 +1,27 @@
 package org.blockout.ui;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.state.StateBasedGame;
 
 @Named
-public class BlockOutGame extends BasicGame {
+public class BlockOutGame extends StateBasedGame {
 
-	public BlockOutGame() {
-		super("BlockOut");
+	private final MenuScreenGameState	gameState;
 
+	@Inject
+	public BlockOutGame(final MenuScreenGameState gameState) {
+		super( "BlockOut" );
+		this.gameState = gameState;
 	}
 
 	@Override
-	public void render(GameContainer gc, Graphics g) throws SlickException {
-	
-		
-	}
+	public void initStatesList( final GameContainer gc ) throws SlickException {
 
-	@Override
-	public void init(GameContainer gc) throws SlickException {
-		
-		
-	}
-
-	@Override
-	public void update(GameContainer gc, int deltaMillis) throws SlickException {
-
-		
+		addState( gameState );
 	}
 
 }

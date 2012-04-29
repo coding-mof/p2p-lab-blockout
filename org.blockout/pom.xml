@@ -42,6 +42,10 @@
 			<id>slick</id>
 			<url>http://slick.cokeandcode.com/mavenrepo</url>
 		</repository>
+		<repository>
+			<id>nifty-maven-repo.sourceforge.net</id>
+			<url>http://nifty-gui.sourceforge.net/nifty-maven-repo</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -115,6 +119,11 @@
 			<groupId>javax.inject</groupId>
 			<artifactId>javax.inject</artifactId>
 			<version>1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.synyx.hera</groupId>
+			<artifactId>org.synyx.hera.core</artifactId>
+			<version>0.7.0.RELEASE</version>
 		</dependency>
 
 		<!-- Testing dependencies -->
