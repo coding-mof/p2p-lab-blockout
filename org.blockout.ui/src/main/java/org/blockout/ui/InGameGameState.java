@@ -10,21 +10,28 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState;
 import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
 
 @Named
-public class InGameGameState extends NiftyOverlayBasicGameState {
+public class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {
 
+	private Nifty			nifty;
 	private Image			tile;
 
 	private float			centerX	= 0;
 	private float			centerY	= 0;
 
 	private WorldRenderer	renderer;
+	private Element			exitPopup;
 
 	@Override
 	protected void prepareNifty( final Nifty nifty, final StateBasedGame game ) {
+		this.nifty = nifty;
+
 		nifty.fromXml( "ingame-screen.xml", "start" );
 		// nifty.setDebugOptionPanelColors( true );
 		try {
@@ -33,7 +40,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		renderer = new WorldRenderer( 32, 1024, 768 );
+		renderer = new WorldRenderer( null, 32, 1024, 768 );
 	}
 
 	@Override
@@ -69,9 +76,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState {
 	protected void updateGame( final GameContainer container, final StateBasedGame game, final int paramInt )
 			throws SlickException {
 
-		System.out.println( "Delta: " + paramInt );
-		System.out.println( "t:" + (paramInt / 1000f) );
-
 		if ( container.getInput().isKeyDown( Input.KEY_W ) ) {
 			centerY += 2.0 * (paramInt / 1000f);
 		}
@@ -88,7 +92,33 @@ public class InGameGameState extends NiftyOverlayBasicGameState {
 			centerX += 2.0 * (paramInt / 1000f);
 		}
 
+		if ( container.getInput().isKeyDown( Input.KEY_ESCAPE ) ) {
+			exitPopup = nifty.createPopup( "popupMenu" );
+			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
+		}
+
 		renderer.setViewCenter( centerX, centerY );
 	}
 
+	public void closePopup() {
+		nifty.closePopup( exitPopup.getId() );
+	}
+
+	@Override
+	public void bind( final Nifty paramNifty, final Screen paramScreen ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onStartScreen() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onEndScreen() {
+		// TODO Auto-generated method stub
+
+	}
 }

@@ -1,28 +1,31 @@
 package org.blockout.ui;
 
+import org.blockout.engine.ISpriteManager;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 
 public class WorldRenderer {
 
-	private float		centerX;
-	private float		centerY;
+	private ISpriteManager	spriteManager;
 
-	private final int	width;
-	private final int	height;
+	private float			centerX;
+	private float			centerY;
 
-	private final float	halfWidth;
-	private final float	halfHeight;
+	private final int		width;
+	private final int		height;
 
-	private int			numHorTiles;
-	private int			numVerTiles;
+	private final float		halfWidth;
+	private final float		halfHeight;
 
-	private final int	tileSize;
+	private int				numHorTiles;
+	private int				numVerTiles;
 
-	private int			widthOfset;
-	private int			heightOfset;
+	private final int		tileSize;
 
-	public WorldRenderer(final int tileSize, final int width, final int height) {
+	private int				widthOfset;
+	private int				heightOfset;
+
+	public WorldRenderer(final ISpriteManager spriteManager, final int tileSize, final int width, final int height) {
 		this.tileSize = tileSize;
 
 		this.width = width;
@@ -66,8 +69,6 @@ public class WorldRenderer {
 		}
 		heightOfset = (int) (tmpHeight * tileSize);
 
-		System.out.println( "Ofset = { h:" + heightOfset + ", w:" + widthOfset + " }" );
-
 		int curX;
 		int curY = -heightOfset;
 		for ( int y = 0; y < numVerTiles; y++ ) {
@@ -75,7 +76,8 @@ public class WorldRenderer {
 			for ( int x = 0; x < numHorTiles; x++ ) {
 
 				// Tile tile = World.getTile(startTileX + x, startTileY + y);
-				// Image sprite = SpriteManager.getSprite(tile.getType());
+				// Image sprite = spriteManager.getSprite( /* tile.getType()
+				// */SpriteType.StoneGround );
 				sprite.draw( curX, convertY( curY ) - tileSize );
 
 				curX += tileSize;

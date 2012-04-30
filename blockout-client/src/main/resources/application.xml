@@ -17,4 +17,11 @@
 	<bean class="org.newdawn.slick.AppGameContainer">
 		<constructor-arg ref="game"/>
 	</bean>
+	
+	
+	<bean class ="org.blockout.engine.SpriteSheetImpl">
+		<constructor-arg value=""/>
+		<constructor-arg value="32"/>
+		<constructor-arg value="32"/>
+	</bean>
 </beans>

@@ -2,17 +2,91 @@
 <nifty>
 
     <useStyles filename="nifty-default-styles.xml" />
+
     <useControls filename="nifty-default-controls.xml" />
 
     <screen id="start" >
-       <layer id="layer" backgroundColor="#fff0" childLayout="vertical">
-           <panel height="90%"/>
-           <panel height="11%" backgroundColor="#1A5F" childLayout="horizontal">
-				<control text="Player:"/>
-               	<control id="lblPlayer"/>
-               	<control text="Health:"/>
-               	<control id="lblHealth"/>
-           </panel>
-           </layer>
+
+        <layer
+            id="layer"
+            backgroundColor="#fff0"
+            childLayout="vertical" >
+
+            <panel height="90%" />
+
+            <panel
+                backgroundColor="#1A5F"
+                childLayout="horizontal"
+                height="11%" >
+
+                <control text="Player:" />
+
+                <control id="lblPlayer" />
+
+                <control text="Health:" />
+
+                <control id="lblHealth" />
+            </panel>
+        </layer>
     </screen>
+
+    <popup
+        id="popupMenu"
+        backgroundColor="#0005"
+        childLayout="center"
+        controller="org.blockout.ui.InGameGameState" >
+
+        <effect>
+
+            <onStartScreen
+                name="fade"
+                endColor="#000a"
+                length="250"
+                startColor="#0000" />
+
+            <onEndScreen
+                name="fade"
+                endColor="#0000"
+                length="250"
+                startColor="#000a"
+                startDelay="250" />
+        </effect>
+
+        <panel childLayout="vertical" >
+
+            <control
+                id="closePopup"
+                name="button"
+                align="center"
+                width=""
+                backgroundColor="#0000"
+                label="Return to Game" >
+
+                <interact onClick="closePopup()" />
+            </control>
+
+            <control
+                id="showSettings"
+                name="button"
+                align="center"
+                width=""
+                backgroundColor="#0000"
+                label="Settings" >
+
+                <interact onClick="showSettings()" />
+            </control>
+
+            <control
+                id="stopGame"
+                name="button"
+                align="center"
+                width=""
+                backgroundColor="#0000"
+                label="Stop Game" >
+
+                <interact onClick="stopGame()" />
+            </control>
+        </panel>
+    </popup>
+
 </nifty>
