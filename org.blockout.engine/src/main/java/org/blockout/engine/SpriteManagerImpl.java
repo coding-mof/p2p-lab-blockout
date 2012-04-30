@@ -64,7 +64,9 @@ public class SpriteManagerImpl implements ISpriteManager {
 		
 		if(null == sprite){
 			sprite = spriteSheet.getSprite(spriteId);
-			spriteCache.put(spriteId, sprite);
+			
+			if(null != sprite)
+				spriteCache.put(spriteId, sprite);
 		}
 		
 		return sprite;

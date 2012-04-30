@@ -70,9 +70,10 @@ public class SpriteSheetImpl implements ISpriteSheet {
 		
 		if(img.getHeight() < th)
 			throw new IllegalArgumentException("Tile height is to big");
-	
+		
+		
 		spriteSheet = new SpriteSheet(img, tw, th);
-		numSprites = spriteSheet.getVerticalCount() + spriteSheet.getHorizontalCount();
+		numSprites = spriteSheet.getVerticalCount() * spriteSheet.getHorizontalCount();
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class SpriteSheetImpl implements ISpriteSheet {
 		
 		if (0 < spriteId && numSprites > spriteId) {
 			int sx = spriteId % spriteSheet.getHorizontalCount();
-			int sy = spriteId / spriteSheet.getVerticalCount();
+			int sy = spriteId / spriteSheet.getHorizontalCount();
 			return spriteSheet.getSprite(sx, sy);
 		}
 		

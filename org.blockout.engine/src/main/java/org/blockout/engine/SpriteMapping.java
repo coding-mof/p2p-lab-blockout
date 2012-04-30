@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
  * Mapping between sprite types and sprite ids used by the {@link ISpriteSheet}.
  * 
  * @author Marc-Christian Schulze
+ * @author Florian Müller
  * 
  */
 public class SpriteMapping {
@@ -24,7 +25,21 @@ public class SpriteMapping {
 	public int getSpriteId( final SpriteType type ) {
 		Preconditions.checkNotNull( type );
 		switch ( type ) {
-
+		case Player:
+			return 245;
+		
+		// World
+		case StoneGround:
+			return 848;
+		case Crate:
+			return 586;
+		
+		// Monsters
+		case Zombie:
+			return 249;
+		case Skeleton:
+			return 250;
+		
 			default:
 				throw new IllegalArgumentException( "Unknown sprite type: " + type );
 		}
