@@ -17,9 +17,10 @@ public interface ISpriteSheet {
 	 * @param ref The location of the spritesheet file to load
 	 * @param tw Tile width
 	 * @param th Tile height
-	 * @throws IOException Thrown if there is a problem while loading the spritesheet
+	 * @throws IOException If there is a problem while loading the spritesheet
+	 * @throws IllegalArgumentException If tw or th have wrong values
 	 */
-	public void loadSpriteSheet(String ref, int tw, int th) throws IOException;
+	public void loadSpriteSheet(String ref, int tw, int th) throws IOException, IllegalArgumentException;
 	
 	/**
 	 * Check if there is a spritesheet loaded
@@ -33,7 +34,7 @@ public interface ISpriteSheet {
 	 * 
 	 * @param spriteId Id of the sprite
 	 * @return Image of the requested sprite or null if there is no sprite with this id
-	 * @throws IllegalStateException Thrown if there is no spritesheed loaded
+	 * @throws IllegalStateException If there is no spritesheet loaded
 	 */
 	public Image getSprite(int spriteId) throws IllegalStateException;
 }
