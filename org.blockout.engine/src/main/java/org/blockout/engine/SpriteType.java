@@ -7,6 +7,9 @@ package org.blockout.engine;
  * 
  */
 public enum SpriteType {
-
-	StoneGround, Crate
+	StoneGround, 
+	Crate, 
+	Player,
+	Skeleton,
+	Zombie
 }

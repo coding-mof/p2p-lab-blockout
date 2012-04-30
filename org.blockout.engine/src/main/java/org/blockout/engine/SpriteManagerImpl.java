@@ -65,12 +65,14 @@ public class SpriteManagerImpl implements ISpriteManager {
 			// there was no sprite with this type
 			return null;
 		}
-
-		Image sprite = spriteCache.getIfPresent( spriteId );
-
-		if ( null == sprite ) {
-			sprite = spriteSheet.getSprite( spriteId );
-			spriteCache.put( spriteId, sprite );
+		
+		Image sprite = spriteCache.getIfPresent(spriteId);
+		
+		if(null == sprite){
+			sprite = spriteSheet.getSprite(spriteId);
+			
+			if(null != sprite)
+				spriteCache.put(spriteId, sprite);
 		}
 
 		return sprite;
