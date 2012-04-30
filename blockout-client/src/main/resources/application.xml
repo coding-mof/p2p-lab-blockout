@@ -11,4 +11,10 @@
 	<context:annotation-config/>
 	
 	<hera:list class="de.lessvoid.nifty.screen.ScreenController"/>
+	<hera:list class="org.newdawn.slick.state.GameState"/>
+	
+	<bean name="game" class="org.blockout.ui.BlockOutGame"/>
+	<bean class="org.newdawn.slick.AppGameContainer">
+		<constructor-arg ref="game"/>
+	</bean>
 </beans>

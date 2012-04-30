@@ -4,7 +4,7 @@
     <useStyles filename="nifty-default-styles.xml" />
     <useControls filename="nifty-default-controls.xml" />
 
-    <screen id="start" controller="org.blockout.ui.StartScreenController" >
+    <screen id="start" controller="org.blockout.ui.StartScreenController">
         <layer id="foreground" childLayout="vertical" >
 
             <panel id="panel_top" align="center" backgroundColor="#f008" childLayout="center" height="25%" width="75%" >
@@ -74,9 +74,7 @@
         </layer>
     </screen>
 
-    <screen
-        id="selectProfile"
-        controller="org.blockout.ui.ProfileScreenController" >
+    <screen id="selectProfile" controller="org.blockout.ui.ProfileScreenController" >
 
         <layer childLayout="vertical" >
 
@@ -144,6 +142,101 @@
                 <panel id="panel_bottom_left" backgroundColor="#44f8" childLayout="center" height="50%" valign="center" width="33%" >
                     <control id="startGame" name="button" align="center" backgroundColor="#0000" label="Back" >
                         <interact onClick="goBack()" />
+                    </control>
+                </panel>
+            </panel>
+        </layer>
+    </screen>
+    
+    <screen id="settings" controller="org.blockout.ui.SettingsScreenController" >
+
+        <layer childLayout="vertical" >
+            
+             <panel
+                id="panel_top"
+                align="center"
+                backgroundColor="#f008"
+                childLayout="center"
+                height="25%"
+                width="75%" >
+
+               
+                
+            </panel>
+           
+             <panel
+                id="panel_mid"
+                align="center"
+                backgroundColor="#0f08"
+                childLayout="center"
+                height="50%"
+                width="75%" >
+                
+                 <panel childLayout="vertical" width="100%">
+                     
+                     <panel childLayout="horizontal" width="100%">
+                         <control name="label" text="Display Mode" width="50%" align="left"/>
+                         <control id="resolutions" name="dropDown"/>
+                     </panel>
+                     
+                     <panel childLayout="horizontal" width="100%">
+                         <panel width="50%"/>
+                         <control name="checkbox" align="left"/>
+                         <control name="label" text="Fullscreen" align="left"/>
+                     </panel>
+                     
+                     <panel childLayout="horizontal" width="100%">
+                         <panel width="50%"/>
+                         <control name="checkbox" align="left"/>
+                         <control name="label" text="Show FPS" align="left"/>
+                     </panel>
+                     
+                     <panel childLayout="horizontal" width="100%">
+                         <panel width="50%"/>
+                         <control name="checkbox" align="left"/>
+                         <control name="label" text="VSync" align="left"/>
+                     </panel>
+                     
+                 </panel>
+
+               
+                
+            </panel>
+
+            <panel id="panel_bottom" align="center" backgroundColor="#00f8" childLayout="horizontal" height="25%" width="75%" >
+
+               <panel id="panel_bottom_left" backgroundColor="#44f8" childLayout="center" height="50%" valign="center" width="33%" >
+                    <control name="button" align="center" backgroundColor="#0000" label="Back" >
+                        <interact onClick="goBack()" />
+                    </control>
+                </panel>
+                
+                <panel
+                    id="panel_bottom_center"
+                    backgroundColor="#88f8"
+                    childLayout="center"
+                    height="50%"
+                    valign="center"
+                    width="34%" >
+
+                   
+                </panel>
+                
+               <panel
+                    id="panel_bottom_right"
+                    backgroundColor="#88f8"
+                    childLayout="center"
+                    height="50%"
+                    valign="center"
+                    width="33%" >
+
+                    <control
+                        name="button"
+                        align="center"
+                        backgroundColor="#0000"
+                        label="Apply" >
+
+                        <interact onClick="apply()" />
                     </control>
                 </panel>
             </panel>

@@ -1,7 +1,6 @@
 package org.blockout;
 
 import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.Game;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import org.slf4j.Logger;
@@ -23,14 +22,10 @@ public class Main {
 
 		Logger logger = LoggerFactory.getLogger( Main.class );
 
-		Game game = context.getBean( Game.class );
-
-		logger.info( "Starting game at 800x600 (windowed)" );
-
 		Log.setLogSystem( new SLF4JLogSystem() );
-		AppGameContainer app = new AppGameContainer( game );
+		AppGameContainer app = context.getBean( AppGameContainer.class );
 
-		app.setDisplayMode( 800, 600, false );
+		app.setDisplayMode( 1024, 768, false );
 		app.start();
 	}
 

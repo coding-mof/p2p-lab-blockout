@@ -10,6 +10,10 @@ import javax.inject.Named;
 
 import org.blockout.logic.Player;
 import org.blockout.logic.PlayerManager;
+import org.newdawn.slick.state.GameState;
+import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.state.transition.FadeInTransition;
+import org.newdawn.slick.state.transition.FadeOutTransition;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.NiftyEventSubscriber;
@@ -18,16 +22,16 @@ import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.controls.ListBox;
 import de.lessvoid.nifty.controls.ListBoxSelectionChangedEvent;
 import de.lessvoid.nifty.controls.TextField;
-import de.lessvoid.nifty.screen.DefaultScreenController;
 import de.lessvoid.nifty.screen.Screen;
 
 @Named
-public class ProfileScreenController extends DefaultScreenController {
+public class ProfileScreenController implements StateBasedScreenController {
 
 	private final PlayerManager	playerManager;
 	private Screen				screen;
 	private Nifty				nifty;
 	private Player				currentSelectedPlayer;
+	private StateBasedGame		game;
 
 	@Inject
 	public ProfileScreenController(final PlayerManager playerManager) {
@@ -36,7 +40,6 @@ public class ProfileScreenController extends DefaultScreenController {
 
 	@Override
 	public void bind( final Nifty nifty, final Screen screen ) {
-		super.bind( nifty, screen );
 
 		this.nifty = nifty;
 		this.screen = screen;
@@ -45,7 +48,6 @@ public class ProfileScreenController extends DefaultScreenController {
 
 	@Override
 	public void onStartScreen() {
-		super.onStartScreen();
 		fillProfilesListBox();
 	}
 
@@ -117,5 +119,17 @@ public class ProfileScreenController extends DefaultScreenController {
 
 	private void startGame( final Player p ) {
 		System.out.println( "Starting game with: " + p.getName() );
+		game.enterState( 2, new FadeOutTransition(), new FadeInTransition() );
+	}
+
+	@Override
+	public void onEndScreen() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void bindToGameState( final StateBasedGame game, final GameState state ) {
+		this.game = game;
 	}
 }
