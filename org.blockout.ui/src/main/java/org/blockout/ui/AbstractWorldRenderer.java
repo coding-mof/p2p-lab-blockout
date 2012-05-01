@@ -3,51 +3,74 @@ package org.blockout.ui;
 import org.blockout.world.IWorld;
 import org.blockout.world.Tile;
 import org.newdawn.slick.Graphics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
+/**
+ * Abstract base class for a world renderer which provides a basic algorithm for
+ * computing which tiles to render and at which location of the screen.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public abstract class AbstractWorldRenderer implements IWorldRenderer {
 
-	private static final Logger	logger;
-	static {
-		logger = LoggerFactory.getLogger( AbstractWorldRenderer.class );
-	}
+	private final IWorld	world;
 
-	private final IWorld		world;
+	protected float			centerX;
+	protected float			centerY;
 
-	protected float				centerX;
-	protected float				centerY;
+	protected final int		width;
+	protected final int		height;
 
-	protected final int			width;
-	protected final int			height;
+	private final float		halfWidth;
+	private final float		halfHeight;
 
-	private final float			halfWidth;
-	private final float			halfHeight;
+	protected int			numHorTiles;
+	protected int			numVerTiles;
 
-	protected int				numHorTiles;
-	protected int				numVerTiles;
+	private final int		tileSize;
 
-	private final int			tileSize;
+	private int				widthOfset;
+	private int				heightOfset;
 
-	private int					widthOfset;
-	private int					heightOfset;
+	/**
+	 * Constructs a new instance.
+	 * 
+	 * @param world
+	 *            The world used for obtaining tiles.
+	 * @param tileSize
+	 *            The size of a tile measured in pixels.
+	 * @param displayWidth
+	 *            The width of the display measured in pixels.
+	 * @param displayHeight
+	 *            The height of the display measured in pixels.
+	 * @throws IllegalArgumentException
+	 *             If tileSize, displayWidth or displayHeight or negative.
+	 * @throws NullPointerException
+	 *             If you pass in null as world.
+	 */
+	public AbstractWorldRenderer(final IWorld world, final int tileSize, final int displayWidth, final int displayHeight) {
+		Preconditions.checkNotNull( world );
+		Preconditions.checkArgument( tileSize > 0, "Tile size must be positive." );
+		Preconditions.checkArgument( displayHeight > 0, "Display height must be positive." );
+		Preconditions.checkArgument( displayWidth > 0, "Display width must be positive." );
 
-	public AbstractWorldRenderer(final IWorld world, final int tileSize, final int width, final int height) {
 		this.tileSize = tileSize;
 		this.world = world;
 
-		this.width = width;
-		this.height = height;
+		width = displayWidth;
+		height = displayHeight;
 
-		halfWidth = width / 2f;
-		halfHeight = height / 2f;
+		halfWidth = displayWidth / 2f;
+		halfHeight = displayHeight / 2f;
 
-		numHorTiles = (int) Math.ceil( width / ((double) tileSize) );
-		if ( width % tileSize == 0 ) {
+		numHorTiles = (int) Math.ceil( displayWidth / ((double) tileSize) );
+		if ( displayWidth % tileSize == 0 ) {
 			numHorTiles++;
 		}
-		numVerTiles = (int) Math.ceil( height / ((double) tileSize) );
-		if ( height % tileSize == 0 ) {
+		numVerTiles = (int) Math.ceil( displayHeight / ((double) tileSize) );
+		if ( displayHeight % tileSize == 0 ) {
 			numVerTiles++;
 		}
 	}

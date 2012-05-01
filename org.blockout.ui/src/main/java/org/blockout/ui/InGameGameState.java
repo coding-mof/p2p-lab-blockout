@@ -21,6 +21,12 @@ import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState;
 import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
 
+/**
+ * The main game state which renders the game.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {
 
@@ -85,6 +91,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	protected void updateGame( final GameContainer container, final StateBasedGame game, final int paramInt )
 			throws SlickException {
 
+		// TODO: move this code in separate InputHandler
 		if ( container.getInput().isKeyDown( Input.KEY_UP ) ) {
 			centerY += 2.0 * (paramInt / 1000f);
 		}
