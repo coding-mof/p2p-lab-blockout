@@ -6,6 +6,7 @@ import org.blockout.engine.SpriteType;
 import org.blockout.logic.FogOfWar;
 import org.blockout.world.IWorld;
 import org.blockout.world.Tile;
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 
 public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
@@ -24,6 +25,12 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		this.spriteManager = spriteManager;
 		mapping = new SpriteMapping();
 		fog = new FogOfWar();
+	}
+
+	public void render( final Graphics g, final Image player ) {
+		super.render( g );
+
+		player.drawCentered( width / 2, height / 2 );
 	}
 
 	@Override

@@ -4,9 +4,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.engine.ISpriteManager;
+import org.blockout.engine.SpriteType;
+import org.blockout.engine.Utils;
 import org.blockout.world.IWorld;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
@@ -26,11 +29,15 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	private float						centerX	= 0;
 	private float						centerY	= 0;
 
-	private final IWorldRenderer	worldRenderer;
+	private final FogOfWarWorldRenderer	worldRenderer;
 	private Element						exitPopup;
+	private final ISpriteManager		spriteManager;
+
+	private Image						playerSprite;
 
 	@Inject
 	public InGameGameState(final ISpriteManager spriteManager, final IWorld world) {
+		this.spriteManager = spriteManager;
 		worldRenderer = new FogOfWarWorldRenderer( spriteManager, world, 32, 1024, 768 );
 	}
 
@@ -39,6 +46,10 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 		this.nifty = nifty;
 
 		nifty.fromXml( "ingame-screen.xml", "start" );
+
+		playerSprite = spriteManager.getSprite( SpriteType.Player );
+		Image bgSprite = spriteManager.getSprite( SpriteType.StoneGround );
+		playerSprite = Utils.exclude( bgSprite, playerSprite );
 	}
 
 	@Override
@@ -51,7 +62,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			throws SlickException {
 
 		// TODO: game rendering
-		worldRenderer.render( g );
+		worldRenderer.render( g, playerSprite );
 
 	}
 
