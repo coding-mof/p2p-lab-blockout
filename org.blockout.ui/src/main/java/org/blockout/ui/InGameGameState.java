@@ -7,7 +7,6 @@ import org.blockout.engine.ISpriteManager;
 import org.blockout.world.IWorld;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
@@ -22,18 +21,17 @@ import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
 @Named
 public class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {
 
-	private Nifty				nifty;
-	private Image				tile;
+	private Nifty						nifty;
 
-	private float				centerX	= 0;
-	private float				centerY	= 0;
+	private float						centerX	= 0;
+	private float						centerY	= 0;
 
-	private final WorldRenderer	renderer;
-	private Element				exitPopup;
+	private final AbstractWorldRenderer	worldRenderer;
+	private Element						exitPopup;
 
 	@Inject
 	public InGameGameState(final ISpriteManager spriteManager, final IWorld world) {
-		renderer = new WorldRenderer( spriteManager, world, 32, 1024, 768 );
+		worldRenderer = new FogOfWarWorldRenderer( spriteManager, world, 32, 1024, 768 );
 	}
 
 	@Override
@@ -41,14 +39,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 		this.nifty = nifty;
 
 		nifty.fromXml( "ingame-screen.xml", "start" );
-		// nifty.setDebugOptionPanelColors( true );
-		try {
-			tile = new Image( "tile_white.png" );
-		} catch ( SlickException e ) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 	}
 
 	@Override
@@ -61,7 +51,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			throws SlickException {
 
 		// TODO: game rendering
-		renderer.render( g );
+		worldRenderer.render( g );
 
 	}
 
@@ -84,19 +74,19 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	protected void updateGame( final GameContainer container, final StateBasedGame game, final int paramInt )
 			throws SlickException {
 
-		if ( container.getInput().isKeyDown( Input.KEY_W ) ) {
+		if ( container.getInput().isKeyDown( Input.KEY_UP ) ) {
 			centerY += 2.0 * (paramInt / 1000f);
 		}
 
-		if ( container.getInput().isKeyDown( Input.KEY_S ) ) {
+		if ( container.getInput().isKeyDown( Input.KEY_DOWN ) ) {
 			centerY -= 2.0 * (paramInt / 1000f);
 		}
 
-		if ( container.getInput().isKeyDown( Input.KEY_A ) ) {
+		if ( container.getInput().isKeyDown( Input.KEY_LEFT ) ) {
 			centerX -= 2.0 * (paramInt / 1000f);
 		}
 
-		if ( container.getInput().isKeyDown( Input.KEY_D ) ) {
+		if ( container.getInput().isKeyDown( Input.KEY_RIGHT ) ) {
 			centerX += 2.0 * (paramInt / 1000f);
 		}
 
@@ -105,7 +95,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
 		}
 
-		renderer.setViewCenter( centerX, centerY );
+		worldRenderer.setViewCenter( centerX, centerY );
 	}
 
 	public void closePopup() {
