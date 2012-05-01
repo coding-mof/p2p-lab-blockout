@@ -1,32 +1,46 @@
 package org.blockout.ui;
 
 import org.blockout.engine.ISpriteManager;
+import org.blockout.engine.SpriteMapping;
+import org.blockout.world.IWorld;
+import org.blockout.world.Tile;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WorldRenderer {
 
-	private ISpriteManager	spriteManager;
+	private static final Logger		logger;
+	static {
+		logger = LoggerFactory.getLogger( WorldRenderer.class );
+	}
 
-	private float			centerX;
-	private float			centerY;
+	private final ISpriteManager	spriteManager;
+	private final IWorld			world;
 
-	private final int		width;
-	private final int		height;
+	private float					centerX;
+	private float					centerY;
 
-	private final float		halfWidth;
-	private final float		halfHeight;
+	private final int				width;
+	private final int				height;
 
-	private int				numHorTiles;
-	private int				numVerTiles;
+	private final float				halfWidth;
+	private final float				halfHeight;
 
-	private final int		tileSize;
+	private int						numHorTiles;
+	private int						numVerTiles;
 
-	private int				widthOfset;
-	private int				heightOfset;
+	private final int				tileSize;
 
-	public WorldRenderer(final ISpriteManager spriteManager, final int tileSize, final int width, final int height) {
+	private int						widthOfset;
+	private int						heightOfset;
+
+	public WorldRenderer(final ISpriteManager spriteManager, final IWorld world, final int tileSize, final int width,
+			final int height) {
 		this.tileSize = tileSize;
+		this.spriteManager = spriteManager;
+		this.world = world;
 
 		this.width = width;
 		this.height = height;
@@ -53,7 +67,7 @@ public class WorldRenderer {
 		return height - y;
 	}
 
-	public void render( final Graphics g, final Image sprite ) {
+	public void render( final Graphics g ) {
 
 		int startTileX = (int) (centerX - (halfWidth / tileSize));
 		int startTileY = (int) (centerY - (halfHeight / tileSize));
@@ -75,10 +89,18 @@ public class WorldRenderer {
 			curX = -widthOfset;
 			for ( int x = 0; x < numHorTiles; x++ ) {
 
-				// Tile tile = World.getTile(startTileX + x, startTileY + y);
-				// Image sprite = spriteManager.getSprite( /* tile.getType()
-				// */SpriteType.StoneGround );
-				sprite.draw( curX, convertY( curY ) - tileSize );
+				Tile tile = world.getTile( startTileX + x, startTileY + y );
+				if ( tile != null ) {
+					SpriteMapping mapping = new SpriteMapping();
+					try {
+						Image sprite = spriteManager.getSprite( mapping.getSpriteType( tile.getTileType() - 1 ) );
+						if ( sprite != null ) {
+							sprite.draw( curX, convertY( curY ) - tileSize );
+						}
+					} catch ( IllegalArgumentException e ) {
+					}
+
+				}
 
 				curX += tileSize;
 			}

@@ -1,7 +1,10 @@
 package org.blockout.ui;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.engine.ISpriteManager;
+import org.blockout.world.IWorld;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -19,14 +22,19 @@ import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
 @Named
 public class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {
 
-	private Nifty			nifty;
-	private Image			tile;
+	private Nifty				nifty;
+	private Image				tile;
 
-	private float			centerX	= 0;
-	private float			centerY	= 0;
+	private float				centerX	= 0;
+	private float				centerY	= 0;
 
-	private WorldRenderer	renderer;
-	private Element			exitPopup;
+	private final WorldRenderer	renderer;
+	private Element				exitPopup;
+
+	@Inject
+	public InGameGameState(final ISpriteManager spriteManager, final IWorld world) {
+		renderer = new WorldRenderer( spriteManager, world, 32, 1024, 768 );
+	}
 
 	@Override
 	protected void prepareNifty( final Nifty nifty, final StateBasedGame game ) {
@@ -40,7 +48,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		renderer = new WorldRenderer( null, 32, 1024, 768 );
+
 	}
 
 	@Override
@@ -53,7 +61,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			throws SlickException {
 
 		// TODO: game rendering
-		renderer.render( g, tile );
+		renderer.render( g );
 
 	}
 

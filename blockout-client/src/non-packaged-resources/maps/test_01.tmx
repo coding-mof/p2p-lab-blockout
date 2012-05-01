@@ -4,8 +4,8 @@
   <image source="Net_Hack_Sprite_sheet_v1_1_by_Chubbs_99.jpg" width="1280" height="960"/>
  </tileset>
  <layer name="Kachelebene 1" width="100" height="100">
-  <data encoding="base64" compression="zlib">
-   eJzt2UEOgkAMBVCix3Pl/W+iG7fUaAJDoZP0vaRLSfx/qIrLApzheZ9/OqnOWh9RRl6vweu8N76uk6zMMudx08fM08mW81k9nVyV6ZG910n12ddHdGaO6703+h1MH3PMur9OjuRkX+Wrvg/0EVVnrY+oOmt9ROv3XfHZ8D2/fqd0Up2/+yPKyuzfM5aM55Gd7Mk2c/bsxk6qd5E+otGMrvxfpJPqs68PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgxAfq1CI/
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3ZQQ6CQAwFUKLHc+X9b6Ibt9RoAkOhk/S9pEtJ/H+oissCnOF5n386qc5aH1FGXq/B67w3vq6TrMwy53HTx8zTyZbzWT2dXJXpkb3XSfXZ10d0Zo7rvTf6HUwfc8y6v06O5GRf5au+D/QRVWetj6g6a31E6/dd8dnwPb9+p3RSnb/7I8rK7N8zloznkZ3syTZz9uzGTqp3kT6i0Yyu/F+kk+qzrw8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGDEB4jyhz9AnAAA
   </data>
  </layer>
 </map>

@@ -1,6 +1,5 @@
 package org.blockout.engine;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.newdawn.slick.Image;
@@ -63,9 +62,9 @@ public class SpriteSheetImpl implements ISpriteSheet {
 			throw new IllegalArgumentException( "Tile height has a negative value" );
 		}
 
-		if ( !new File( ref ).exists() ) {
-			throw new IOException( "Resource not found: " + ref );
-		}
+		// if ( !new File( ref ).exists() ) {
+		// throw new IOException( "Resource not found: " + ref );
+		// }
 
 		Image img;
 		try {

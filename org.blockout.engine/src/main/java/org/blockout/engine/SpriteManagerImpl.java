@@ -1,5 +1,6 @@
 package org.blockout.engine;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -39,9 +40,12 @@ public class SpriteManagerImpl implements ISpriteManager {
 	public SpriteManagerImpl(final ISpriteSheet spriteSheet) throws IllegalArgumentException {
 		Preconditions.checkNotNull( spriteSheet );
 
-		if ( !spriteSheet.isSpriteSheetLoaded() ) {
-			throw new IllegalArgumentException( "spriteSheet has an invalid state" );
-		}
+		// if ( !spriteSheet.isSpriteSheetLoaded() ) {
+		// throw new IllegalArgumentException(
+		// "spriteSheet has an invalid state" );
+		// }
+		// currently not possible to check ^^ since the graphics must be loaded
+		// during initialization of LWJGL/Slick.
 
 		this.spriteSheet = spriteSheet;
 		spriteMapping = new SpriteMapping();
@@ -57,6 +61,18 @@ public class SpriteManagerImpl implements ISpriteManager {
 	@Override
 	public Image getSprite( final SpriteType type ) {
 		Preconditions.checkNotNull( type );
+
+		if ( !spriteSheet.isSpriteSheetLoaded() ) {
+			try {
+				spriteSheet.loadSpriteSheet( "nethack_spritesheet.jpg", 32, 32 );
+			} catch ( IllegalArgumentException e ) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch ( IOException e ) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		int spriteId;
 
 		try {
@@ -65,14 +81,15 @@ public class SpriteManagerImpl implements ISpriteManager {
 			// there was no sprite with this type
 			return null;
 		}
-		
-		Image sprite = spriteCache.getIfPresent(spriteId);
-		
-		if(null == sprite){
-			sprite = spriteSheet.getSprite(spriteId);
-			
-			if(null != sprite)
-				spriteCache.put(spriteId, sprite);
+
+		Image sprite = spriteCache.getIfPresent( spriteId );
+
+		if ( null == sprite ) {
+			sprite = spriteSheet.getSprite( spriteId );
+
+			if ( null != sprite ) {
+				spriteCache.put( spriteId, sprite );
+			}
 		}
 
 		return sprite;

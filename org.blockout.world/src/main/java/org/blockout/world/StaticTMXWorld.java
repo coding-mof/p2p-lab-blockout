@@ -9,18 +9,19 @@ public class StaticTMXWorld implements IWorld {
 
 	public StaticTMXWorld(final String tmxFile) {
 		try {
-			map = new TiledMap( tmxFile );
+			map = new TiledMap( tmxFile, false );
 
 		} catch ( SlickException e ) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException( "", e );
 		}
 	}
 
 	@Override
 	public Tile getTile( final int x, final int y ) {
+		if ( x <= 0 || y <= 0 ) {
+			return null;
+		}
 		return new Tile( map.getTileId( x, y, 0 ) );
-
 	}
 
 }

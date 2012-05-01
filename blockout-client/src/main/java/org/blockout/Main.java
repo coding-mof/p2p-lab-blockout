@@ -14,19 +14,23 @@ public class Main {
 	 */
 	public static void main( final String[] args ) throws SlickException {
 
-		java.util.logging.Logger.getAnonymousLogger().getParent().setLevel( java.util.logging.Level.SEVERE );
-		java.util.logging.Logger.getLogger( "de.lessvoid.nifty.*" ).setLevel( java.util.logging.Level.SEVERE );
-
-		ClassPathXmlApplicationContext context;
-		context = new ClassPathXmlApplicationContext( "application.xml" );
-
 		Logger logger = LoggerFactory.getLogger( Main.class );
 
-		Log.setLogSystem( new SLF4JLogSystem() );
-		AppGameContainer app = context.getBean( AppGameContainer.class );
+		try {
+			java.util.logging.Logger.getAnonymousLogger().getParent().setLevel( java.util.logging.Level.SEVERE );
+			java.util.logging.Logger.getLogger( "de.lessvoid.nifty.*" ).setLevel( java.util.logging.Level.SEVERE );
 
-		app.setDisplayMode( 1024, 768, false );
-		app.start();
+			ClassPathXmlApplicationContext context;
+			context = new ClassPathXmlApplicationContext( "application.xml" );
+
+			Log.setLogSystem( new SLF4JLogSystem() );
+			AppGameContainer app = context.getBean( AppGameContainer.class );
+
+			app.setDisplayMode( 1024, 768, false );
+			app.start();
+		} catch ( Exception e ) {
+			logger.error( "Program terminated due to exception.", e );
+		}
 	}
 
 }

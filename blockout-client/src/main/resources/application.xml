@@ -19,9 +19,9 @@
 	</bean>
 	
 	
-	<bean class ="org.blockout.engine.SpriteSheetImpl">
-		<constructor-arg value=""/>
-		<constructor-arg value="32"/>
-		<constructor-arg value="32"/>
+	<bean class ="org.blockout.engine.SpriteSheetImpl"/>
+	
+	<bean class="org.blockout.world.StaticTMXWorld">
+		<constructor-arg value="/maps/test_01.tmx"/>
 	</bean>
 </beans>
