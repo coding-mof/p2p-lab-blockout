@@ -35,4 +35,22 @@ public class TestFogOfWar {
 		assertFalse( fog.isExplored( 1, 1 ) );
 	}
 
+	@Test
+	public void testNegativeIndexBug() {
+		FogOfWar fog = new FogOfWar();
+
+		fog.setExplored( -5, 0, true );
+		assertTrue( fog.isExplored( -5, 0 ) );
+	}
+
+	@Test
+	public void testSetUniquenessExplored() {
+		FogOfWar fog = new FogOfWar();
+
+		fog.setExplored( 10, 10, true );
+		assertTrue( fog.isExplored( 10, 10 ) );
+		assertFalse( fog.isExplored( 10, -10 ) );
+		assertFalse( fog.isExplored( -10, 10 ) );
+		assertFalse( fog.isExplored( -10, -10 ) );
+	}
 }

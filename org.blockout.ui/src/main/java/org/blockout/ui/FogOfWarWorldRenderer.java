@@ -108,6 +108,16 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		super.setViewCenter( x, y );
 
 		// TODO: move this code to the MovementHandler
+		fog.setExplored( (int) x - 1, (int) y - 1, true );
+		fog.setExplored( (int) x, (int) y - 1, true );
+		fog.setExplored( (int) x + 1, (int) y - 1, true );
+
+		fog.setExplored( (int) x - 1, (int) y, true );
 		fog.setExplored( (int) x, (int) y, true );
+		fog.setExplored( (int) x + 1, (int) y, true );
+
+		fog.setExplored( (int) x - 1, (int) y + 1, true );
+		fog.setExplored( (int) x, (int) y + 1, true );
+		fog.setExplored( (int) x + 1, (int) y + 1, true );
 	}
 }
