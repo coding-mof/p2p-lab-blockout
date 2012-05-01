@@ -35,6 +35,7 @@ public class WorldRenderer {
 
 	private int						widthOfset;
 	private int						heightOfset;
+	private final SpriteMapping		mapping;
 
 	public WorldRenderer(final ISpriteManager spriteManager, final IWorld world, final int tileSize, final int width,
 			final int height) {
@@ -47,6 +48,8 @@ public class WorldRenderer {
 
 		halfWidth = width / 2f;
 		halfHeight = height / 2f;
+
+		mapping = new SpriteMapping();
 
 		numHorTiles = (int) Math.ceil( width / ((double) tileSize) );
 		if ( width % tileSize == 0 ) {
@@ -91,7 +94,6 @@ public class WorldRenderer {
 
 				Tile tile = world.getTile( startTileX + x, startTileY + y );
 				if ( tile != null ) {
-					SpriteMapping mapping = new SpriteMapping();
 					try {
 						Image sprite = spriteManager.getSprite( mapping.getSpriteType( tile.getTileType() - 1 ) );
 						if ( sprite != null ) {
