@@ -1,7 +1,7 @@
 package org.blockout.engine;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -9,8 +9,6 @@ import javax.inject.Named;
 import org.newdawn.slick.Image;
 
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 /**
  * Implementation of a SpriteManager that provides access to the sprites of the
@@ -21,12 +19,13 @@ import com.google.common.cache.CacheBuilder;
  */
 @Named
 public class SpriteManagerImpl implements ISpriteManager {
-	private static final int	CACHE_MAXSIZE			= 31;
-	private static final int	CACHE_EXPIRE_TIME_MS	= 1000;
+	// private static final int CACHE_MAXSIZE = 31;
+	// private static final int CACHE_EXPIRE_TIME_MS = 1000;
 
-	ISpriteSheet				spriteSheet;
-	SpriteMapping				spriteMapping;
-	Cache<Integer, Image>		spriteCache;
+	ISpriteSheet							spriteSheet;
+	SpriteMapping							spriteMapping;
+	// Cache<Integer, Image> spriteCache;
+	private final HashMap<Integer, Image>	sprites;
 
 	/**
 	 * Constructor to create a new SpriteManager with an internal cache
@@ -49,10 +48,12 @@ public class SpriteManagerImpl implements ISpriteManager {
 
 		this.spriteSheet = spriteSheet;
 		spriteMapping = new SpriteMapping();
+		sprites = new HashMap<Integer, Image>();
 
 		// Create a new cache for recently loaded sprites
-		spriteCache = CacheBuilder.newBuilder().maximumSize( CACHE_MAXSIZE )
-				.expireAfterAccess( CACHE_EXPIRE_TIME_MS, TimeUnit.MILLISECONDS ).build();
+		// spriteCache = CacheBuilder.newBuilder().maximumSize( CACHE_MAXSIZE )
+		// .expireAfterAccess( CACHE_EXPIRE_TIME_MS, TimeUnit.MILLISECONDS
+		// ).build();
 	}
 
 	/**
@@ -82,13 +83,15 @@ public class SpriteManagerImpl implements ISpriteManager {
 			return null;
 		}
 
-		Image sprite = spriteCache.getIfPresent( spriteId );
+		// Image sprite = spriteCache.getIfPresent( spriteId );
+		Image sprite = sprites.get( spriteId );
 
 		if ( null == sprite ) {
 			sprite = spriteSheet.getSprite( spriteId );
 
 			if ( null != sprite ) {
-				spriteCache.put( spriteId, sprite );
+				// spriteCache.put( spriteId, sprite );
+				sprites.put( spriteId, sprite );
 			}
 		}
 
