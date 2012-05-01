@@ -26,7 +26,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	private float						centerX	= 0;
 	private float						centerY	= 0;
 
-	private final AbstractWorldRenderer	worldRenderer;
+	private final IWorldRenderer	worldRenderer;
 	private Element						exitPopup;
 
 	@Inject

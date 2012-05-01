@@ -67,11 +67,9 @@ public class SpriteManagerImpl implements ISpriteManager {
 			try {
 				spriteSheet.loadSpriteSheet( "nethack_spritesheet.jpg", 32, 32 );
 			} catch ( IllegalArgumentException e ) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException( "Failed to load spritesheet.", e );
 			} catch ( IOException e ) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException( "Failed to load spritesheet.", e );
 			}
 		}
 		int spriteId;

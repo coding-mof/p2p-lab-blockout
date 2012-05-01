@@ -6,7 +6,7 @@ import org.newdawn.slick.Graphics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractWorldRenderer {
+public abstract class AbstractWorldRenderer implements IWorldRenderer {
 
 	private static final Logger	logger;
 	static {
@@ -15,17 +15,17 @@ public abstract class AbstractWorldRenderer {
 
 	private final IWorld		world;
 
-	private float				centerX;
-	private float				centerY;
+	protected float				centerX;
+	protected float				centerY;
 
-	private final int			width;
-	private final int			height;
+	protected final int			width;
+	protected final int			height;
 
 	private final float			halfWidth;
 	private final float			halfHeight;
 
-	private int					numHorTiles;
-	private int					numVerTiles;
+	protected int				numHorTiles;
+	protected int				numVerTiles;
 
 	private final int			tileSize;
 
@@ -52,6 +52,7 @@ public abstract class AbstractWorldRenderer {
 		}
 	}
 
+	@Override
 	public void setViewCenter( final float x, final float y ) {
 		centerX = x;
 		centerY = y;
@@ -61,6 +62,7 @@ public abstract class AbstractWorldRenderer {
 		return height - y;
 	}
 
+	@Override
 	public void render( final Graphics g ) {
 
 		int startTileX = (int) (centerX - (halfWidth / tileSize));
@@ -116,11 +118,20 @@ public abstract class AbstractWorldRenderer {
 	protected abstract void renderTile( Tile tile, int worldX, int worldY, int screenX, int screenY );
 
 	/**
+	 * Invoked for each tile which is currently not available. Overwrite this
+	 * method to implement some custom rendering. The default implementation of
+	 * the method simply does nothing which leaves the tile black.
 	 * 
 	 * @param worldX
+	 *            The x coordinate of the tile relative to the world's origin.
 	 * @param worldY
+	 *            The y coordinate of the tile relative to the world's origin.
 	 * @param screenX
+	 *            The x coordinate where the tile has to be rendered in screen
+	 *            coordinates.
 	 * @param screenY
+	 *            The y coordinate where the tile has to be rendered in screen
+	 *            coordinates.
 	 */
 	protected void renderMissingTile( final int worldX, final int worldY, final int screenX, final int screenY ) {
 		// default implementation is to render nothing and leave the space black
