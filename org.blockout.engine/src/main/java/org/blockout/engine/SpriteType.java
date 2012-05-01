@@ -7,7 +7,6 @@ package org.blockout.engine;
  * 
  */
 public enum SpriteType {
-	StoneGround, 
 	Crate, 
 	Player,
 	Skeleton,
@@ -20,7 +19,7 @@ public enum SpriteType {
 	coyote, werejackal, little_dog, dog, large_dog,		
 	dingo, wolf, werewolf, warg, winter_wolf_cub,
 	winter_wolf, hell_hound_pup, hell_hound, Cerberus, gas_spore,		
-	floating_eye, freezing, sphere, flaming_sphere, shocking_sphere,
+	floating_eye, freezing_sphere, flaming_sphere, shocking_sphere,
 	beholder, kitten, housecat, jaguar, lynx,
 	panther,large_cat,
 	

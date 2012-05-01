@@ -45,60 +45,58 @@ public class SpriteMapping {
 			case fire_ant: 
 				return 3;
 			case giant_beetle:	
-				return 3;	
+				return 4;	
 			case queen_bee: 
-				return 4;
+				return 5;
 			case acid_blob:
-				return 5; 
-			case quivering_blob:
 				return 6; 
+			case quivering_blob:
+				return 7; 
 			case gelatinous_cube:
-				return 7;
+				return 8;
 			case chickatrice:
-				return 8; 
-			case cockatrice:
 				return 9; 
-			case pyrolisk:
+			case cockatrice:
 				return 10; 
+			case pyrolisk:
+				return 11; 
 			case jackal: 
-				return 11;
-			case fox:
 				return 12;
-			case coyote: 
+			case fox:
 				return 13;
+			case coyote: 
+				return 14;
 			case werejackal:
-				return 14; 
-			case little_dog:
 				return 15; 
-			case dog:
+			case little_dog:
 				return 16; 
+			case dog:
+				return 17; 
 			case large_dog:
-				return 17;		
+				return 18;		
 			case dingo: 
-				return 18;
-			case wolf: 
 				return 19;
-			case werewolf: 
+			case wolf: 
 				return 20;
-			case warg: 
+			case werewolf: 
 				return 21;
-			case winter_wolf_cub:
+			case warg: 
 				return 22;
-			case winter_wolf: 
+			case winter_wolf_cub:
 				return 23;
+			case winter_wolf: 
+				return 24;
 			case hell_hound_pup:
-				return 24; 
-			case hell_hound:
 				return 25; 
-			case Cerberus:
+			case hell_hound:
 				return 26; 
+			case Cerberus:
+				return 27; 
 			case gas_spore:
-				return 27;
+				return 28;
 			case floating_eye:
-				return 28; 
-			case freezing: 
-				return 29;
-			case sphere: 
+				return 29; 
+			case freezing_sphere: 
 				return 30;
 			case flaming_sphere:
 				return 31; 
@@ -152,7 +150,6 @@ public class SpriteMapping {
 				return 846;
 			case tree:
 				return 847;
-			case StoneGround:
 			case stoneground:
 				return 848;
 			case stoneground_dark:
@@ -168,29 +165,29 @@ public class SpriteMapping {
 			case ladder_down:
 				return 854;
 			case altar:
-				return 856;
+				return 855;
 			case grave:		
-				return 857;
+				return 856;
 			case opulent_throne:
-				return 858;		
+				return 857;		
 			case sink:
-				return 859;
+				return 858;
 			case fountain:	
-				return 860;	
+				return 859;	
 			case water:	
-				return 861;
+				return 860;
 			case ice:
-				return 862;
+				return 861;
 			case molten_lava:
-				return 863;
+				return 862;
 			case lowered_drawbridge_vertical:
-				return 864;
+				return 863;
 			case lowered_drawbridge_horizontal:	
-				return 865;	
+				return 864;	
 			case raised_drawbridge_vertical:
-				return 866;
+				return 865;
 			case raised_drawbridge_horizontal:
-				return 867;
+				return 866;
 
 			default:
 				throw new IllegalArgumentException( "Unknown sprite type: " + type );
@@ -204,8 +201,6 @@ public class SpriteMapping {
 				return SpriteType.Player;
 
 				// World
-			case 848:
-				return SpriteType.StoneGround;
 			case 586:
 				return SpriteType.Crate;
 
@@ -214,6 +209,156 @@ public class SpriteMapping {
 				return SpriteType.Zombie;
 			case 250:
 				return SpriteType.Skeleton;
+				
+				
+			case 0: 
+				return SpriteType.giant_ant;
+			case 1:
+				return SpriteType.killer_bee; 
+			case 2:
+				return SpriteType.soldier_ant; 
+			case 3: 
+				return SpriteType.fire_ant;
+			case 4:	
+				return SpriteType.giant_beetle;	
+			case 5: 
+				return SpriteType.queen_bee;
+			case 6:
+				return SpriteType.acid_blob; 
+			case 7:
+				return SpriteType.quivering_blob; 
+			case 8:
+				return SpriteType.gelatinous_cube;
+			case 9:
+				return SpriteType.chickatrice; 
+			case 10:
+				return SpriteType.cockatrice; 
+			case 11:
+				return SpriteType.pyrolisk; 
+			case 12: 
+				return SpriteType.jackal;
+			case 13:
+				return SpriteType.fox;
+			case 14: 
+				return SpriteType.coyote;
+			case 15:
+				return SpriteType.werejackal; 
+			case 16:
+				return SpriteType.little_dog; 
+			case 17:
+				return SpriteType.dog; 
+			case 18:
+				return SpriteType.large_dog;		
+			case 19: 
+				return SpriteType.dingo;
+			case 20: 
+				return SpriteType.wolf;
+			case 21: 
+				return SpriteType.werewolf;
+			case 22: 
+				return SpriteType.warg;
+			case 23:
+				return SpriteType.winter_wolf_cub;
+			case 24: 
+				return SpriteType.winter_wolf;
+			case 25:
+				return SpriteType.hell_hound_pup; 
+			case 26:
+				return SpriteType.hell_hound; 
+			case 27:
+				return SpriteType.Cerberus; 
+			case 28:
+				return SpriteType.gas_spore;
+			case 29:
+				return SpriteType.floating_eye;
+			case 30: 
+				return SpriteType.freezing_sphere;
+			case 31:
+				return SpriteType.flaming_sphere; 
+			case 32:
+				return SpriteType.shocking_sphere;
+			case 33: 
+				return SpriteType.beholder;
+			case 34: 
+				return SpriteType.kitten;
+			case 35: 
+				return SpriteType.housecat;
+			case 36: 
+				return SpriteType.jaguar;
+			case 37:
+				return SpriteType.lynx;
+			case 38:
+				return SpriteType.panther;
+			case 39:
+				return SpriteType.large_cat;
+			case 830: 
+				return SpriteType.wallway_vertical;
+			case 831: 
+				return SpriteType.wallway_horizontal;
+			case 832:
+				return SpriteType.wallway_corner_up_tight;
+			case 833: 
+				return SpriteType.wallway_corner_up_left;
+			case 834:
+				return SpriteType.wallway_corner_down_right;
+			case 835: 
+				return SpriteType.wallway_corner_down_left;
+			case 836:
+				return SpriteType.wallway_crossing;
+			case 837: 
+				return SpriteType.wallway_intersection_horizontal_up;
+			case 838:
+				return SpriteType.wallway_intersection_horizontal_down;
+			case 839:
+				return SpriteType.wallway_intersection_vertical_right;
+			case 840:
+				return SpriteType.wallway_intersection_vertical_left;
+			case 843:	
+				return SpriteType.open_door;	
+			case 845:
+				return SpriteType.closed_door;		
+			case 846:	
+				return SpriteType.iron_bars;
+			case 847:
+				return SpriteType.tree;
+			case 848:
+				return SpriteType.stoneground;
+			case 849:
+				return SpriteType.stoneground_dark;
+			case 850:
+				return SpriteType.stoneground_mid;
+			case 851:
+				return SpriteType.staircase_up;		
+			case 852:
+				return SpriteType.staircase_down;		
+			case 853:
+				return SpriteType.ladder_up;
+			case 854:
+				return SpriteType.ladder_down;
+			case 855:
+				return SpriteType.altar;
+			case 856:		
+				return SpriteType.grave;
+			case 857:
+				return SpriteType.opulent_throne;		
+			case 858:
+				return SpriteType.sink;
+			case 859:	
+				return SpriteType.fountain;	
+			case 860:	
+				return SpriteType.water;
+			case 861:
+				return SpriteType.ice;
+			case 862:
+				return SpriteType.molten_lava;
+			case 863:
+				return SpriteType.lowered_drawbridge_vertical;
+			case 864:	
+				return SpriteType.lowered_drawbridge_horizontal;	
+			case 865:
+				return SpriteType.raised_drawbridge_vertical;
+			case 866:
+				return SpriteType.raised_drawbridge_horizontal;
 
 			default:
 				throw new IllegalArgumentException( "Unknown sprite id: " + id );
