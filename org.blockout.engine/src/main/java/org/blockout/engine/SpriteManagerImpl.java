@@ -19,12 +19,10 @@ import com.google.common.base.Preconditions;
  */
 @Named
 public class SpriteManagerImpl implements ISpriteManager {
-	// private static final int CACHE_MAXSIZE = 31;
-	// private static final int CACHE_EXPIRE_TIME_MS = 1000;
 
 	ISpriteSheet							spriteSheet;
 	SpriteMapping							spriteMapping;
-	// Cache<Integer, Image> spriteCache;
+
 	private final HashMap<String, Image>	sprites;
 
 	/**
@@ -39,21 +37,10 @@ public class SpriteManagerImpl implements ISpriteManager {
 	public SpriteManagerImpl(final ISpriteSheet spriteSheet) throws IllegalArgumentException {
 		Preconditions.checkNotNull( spriteSheet );
 
-		// if ( !spriteSheet.isSpriteSheetLoaded() ) {
-		// throw new IllegalArgumentException(
-		// "spriteSheet has an invalid state" );
-		// }
-		// currently not possible to check ^^ since the graphics must be loaded
-		// during initialization of LWJGL/Slick.
-
 		this.spriteSheet = spriteSheet;
 		spriteMapping = new SpriteMapping();
 		sprites = new HashMap<String, Image>();
 
-		// Create a new cache for recently loaded sprites
-		// spriteCache = CacheBuilder.newBuilder().maximumSize( CACHE_MAXSIZE )
-		// .expireAfterAccess( CACHE_EXPIRE_TIME_MS, TimeUnit.MILLISECONDS
-		// ).build();
 	}
 
 	/**
@@ -61,9 +48,9 @@ public class SpriteManagerImpl implements ISpriteManager {
 	 */
 	@Override
 	public Image getSprite( final SpriteType type ) {
-		return getSprite(type, false);
+		return getSprite( type, false );
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -80,8 +67,8 @@ public class SpriteManagerImpl implements ISpriteManager {
 				throw new RuntimeException( "Failed to load spritesheet.", e );
 			}
 		}
-		int spriteId;
 
+		int spriteId;
 		try {
 			spriteId = spriteMapping.getSpriteId( type );
 		} catch ( IllegalArgumentException e ) {
@@ -89,22 +76,17 @@ public class SpriteManagerImpl implements ISpriteManager {
 			return null;
 		}
 
-		// Image sprite = spriteCache.getIfPresent( spriteId );
-		Image sprite = sprites.get( Integer.toString(spriteId) );
+		String spriteKey = (excludeBackground) ? "nobg_" + spriteId : Integer.toString( spriteId );
 
+		Image sprite = sprites.get( spriteKey );
 		if ( null == sprite ) {
 			sprite = spriteSheet.getSprite( spriteId );
-			
 
 			if ( null != sprite ) {
-				// spriteCache.put( spriteId, sprite );
-				if(excludeBackground){
-					sprite = Utils.exclude(getSprite(SpriteType.stoneground), sprite);
-					sprites.put( Integer.toString(spriteId) + "_nogb", sprite );
+				if ( excludeBackground ) {
+					sprite = Utils.exclude( getSprite( SpriteType.stoneground ), sprite );
 				}
-				else{					
-					sprites.put( Integer.toString(spriteId), sprite );
-				}
+				sprites.put( spriteKey, sprite );
 			}
 		}
 

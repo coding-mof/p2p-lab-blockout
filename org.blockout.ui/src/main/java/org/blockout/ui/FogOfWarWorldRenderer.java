@@ -27,9 +27,11 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		fog = new FogOfWar();
 	}
 
-	public void render( final Graphics g, final Image player ) {
+	@Override
+	public void render( final Graphics g /* , final Image player */) {
 		super.render( g );
 
+		Image player = spriteManager.getSprite( SpriteType.Player, true );
 		player.drawCentered( width / 2, height / 2 );
 	}
 
@@ -53,7 +55,7 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 					Object o = tile.getObjectOnTile();
 					if ( o != null ) {
 						spriteType = (SpriteType) o;
-						sprite = spriteManager.getSprite( spriteType );
+						sprite = spriteManager.getSprite( spriteType, true );
 						computeLightning( worldX, worldY, sprite );
 						sprite.draw( screenX, screenY );
 					}

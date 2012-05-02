@@ -4,13 +4,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.engine.ISpriteManager;
-import org.blockout.engine.SpriteType;
-import org.blockout.engine.Utils;
 import org.blockout.world.IWorld;
 import org.bushe.swing.event.EventTopicSubscriber;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
@@ -42,7 +39,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	private Element						exitPopup;
 	private final ISpriteManager		spriteManager;
 
-	private Image						playerSprite;
+	// private Image playerSprite;
 
 	private final InputHandler			inputHandler;
 
@@ -59,9 +56,9 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 		nifty.fromXml( "ingame-screen.xml", "start" );
 
-		playerSprite = spriteManager.getSprite( SpriteType.Player );
-		Image bgSprite = spriteManager.getSprite( SpriteType.stoneground );
-		playerSprite = Utils.exclude( bgSprite, playerSprite );
+		// playerSprite = spriteManager.getSprite( SpriteType.Player );
+		// Image bgSprite = spriteManager.getSprite( SpriteType.stoneground );
+		// playerSprite = Utils.exclude( bgSprite, playerSprite );
 	}
 
 	@Override
@@ -73,7 +70,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	protected void renderGame( final GameContainer container, final StateBasedGame game, final Graphics g )
 			throws SlickException {
 
-		worldRenderer.render( g, playerSprite );
+		worldRenderer.render( g/* , playerSprite */);
 
 		// TODO: render player & movement
 	}
