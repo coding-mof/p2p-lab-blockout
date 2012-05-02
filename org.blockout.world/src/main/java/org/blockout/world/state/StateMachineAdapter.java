@@ -1,4 +1,4 @@
-package org.blockout.world;
+package org.blockout.world.state;
 
 import org.blockout.common.IEvent;
 

@@ -18,10 +18,10 @@ public class StaticTMXWorld implements IWorld {
 
 	@Override
 	public Tile getTile( final int x, final int y ) {
-		if ( x <= 0 || y <= 0 ) {
+		if ( x <= -50 || y <= -50 ) {
 			return null;
 		}
-		return new Tile( map.getTileId( x, y, 0 ) - 1 );
+		return new Tile( map.getTileId( x + 50, y + 50, 0 ) - 1 );
 	}
 
 }

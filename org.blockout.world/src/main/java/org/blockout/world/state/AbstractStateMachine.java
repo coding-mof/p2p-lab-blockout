@@ -1,6 +1,5 @@
-package org.blockout.world;
+package org.blockout.world.state;
 
-import org.blockout.common.IEvent;
 
 /**
  * The state machine is the core component of the event handling. Local and
@@ -9,7 +8,7 @@ import org.blockout.common.IEvent;
  * @author Marc-Christian Schulze
  * 
  */
-public class StateMachine implements IStateMachine {
+public abstract class AbstractStateMachine implements IStateMachine {
 
 	@Override
 	public void addEventValidator( final IEventValidator validator ) {
@@ -24,9 +23,14 @@ public class StateMachine implements IStateMachine {
 	}
 
 	@Override
-	public void pushEvent( final IEvent event ) {
+	public void addIStateMachineListener( final IStateMachineListener l ) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
+	public void removeIStateMachineListener( final IStateMachineListener l ) {
+		// TODO Auto-generated method stub
+
+	}
 }

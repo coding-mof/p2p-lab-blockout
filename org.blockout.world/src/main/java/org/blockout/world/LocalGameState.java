@@ -1,6 +1,7 @@
 package org.blockout.world;
 
 import org.blockout.common.IEvent;
+import org.blockout.world.state.IStateMachineListener;
 
 public class LocalGameState implements IStateMachineListener {
 

@@ -1,9 +1,9 @@
 package org.blockout.logic;
 
 import org.blockout.common.IEvent;
-import org.blockout.world.IEventValidator;
 import org.blockout.world.IWorld;
-import org.blockout.world.ValidationResult;
+import org.blockout.world.state.IEventValidator;
+import org.blockout.world.state.ValidationResult;
 
 /**
  * Implementation for an event validator which checks movement events for
@@ -21,7 +21,7 @@ public class CollisionDetectionEventValidator implements IEventValidator {
 	@Override
 	public ValidationResult validateEvent( final IEvent event ) {
 		// TODO Auto-generated method stub
-		return null;
+		return ValidationResult.Unknown;
 	}
 
 }

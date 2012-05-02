@@ -1,4 +1,4 @@
-package org.blockout.world;
+package org.blockout.world.state;
 
 /**
  * Values of this enumeration represent the result returned by an
