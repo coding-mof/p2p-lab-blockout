@@ -60,7 +60,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 		nifty.fromXml( "ingame-screen.xml", "start" );
 
 		playerSprite = spriteManager.getSprite( SpriteType.Player );
-		Image bgSprite = spriteManager.getSprite( SpriteType.StoneGround );
+		Image bgSprite = spriteManager.getSprite( SpriteType.stoneground );
 		playerSprite = Utils.exclude( bgSprite, playerSprite );
 	}
 

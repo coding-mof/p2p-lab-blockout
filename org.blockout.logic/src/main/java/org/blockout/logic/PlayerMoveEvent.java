@@ -5,8 +5,9 @@ import java.util.UUID;
 
 import org.blockout.common.IEvent;
 
-public class PlayerMoveEvent implements IEvent {
+public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 
+	// TODO: add player id or instance
 	protected int		oldX;
 	protected int		oldY;
 	protected int		newX;
@@ -62,12 +63,13 @@ public class PlayerMoveEvent implements IEvent {
 	}
 
 	@Override
-	public IEvent getInverse() {
+	public PlayerMoveEvent getInverse() {
 		return new PlayerMoveEvent( newX, newY, oldX, oldY, localTime );
 	}
 
 	@Override
-	public boolean isInverseOf( final IEvent event ) {
+	public boolean isInverseOf( final IEvent<PlayerMoveEvent> event ) {
+		// backward compatibility to Java 1.5
 		if ( !(event instanceof PlayerMoveEvent) ) {
 			return false;
 		}

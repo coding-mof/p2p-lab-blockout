@@ -144,12 +144,9 @@ public class PlayerManager {
 	}
 
 	private void configureFieldDetection( final ObjectMapper mapper ) {
-		// auto-detect all member fields
-		// but only public getters
-		// and none of "is-setters"
-		mapper.setVisibility( JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY )
-				.setVisibility( JsonMethod.GETTER, JsonAutoDetect.Visibility.NONE )
-				.setVisibility( JsonMethod.IS_GETTER, JsonAutoDetect.Visibility.NONE );
+		mapper.setVisibility( JsonMethod.FIELD, JsonAutoDetect.Visibility.ANY );
+		mapper.setVisibility( JsonMethod.GETTER, JsonAutoDetect.Visibility.NONE );
+		mapper.setVisibility( JsonMethod.IS_GETTER, JsonAutoDetect.Visibility.NONE );
 	}
 
 	/**

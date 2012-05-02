@@ -10,7 +10,7 @@ import java.util.UUID;
  * @author Marc-Christian Schulze
  * 
  */
-public interface IEvent {
+public interface IEvent<T extends IEvent<T>> {
 	/**
 	 * Returns the unique id of this event.
 	 * 
@@ -25,7 +25,7 @@ public interface IEvent {
 	 */
 	public Calendar getLocalTime();
 
-	public boolean isInverseOf( IEvent event );
+	public boolean isInverseOf( IEvent<T> event );
 
 	/**
 	 * Returns the inverse of this event. This method might return different
@@ -34,7 +34,7 @@ public interface IEvent {
 	 * 
 	 * @return
 	 */
-	public IEvent getInverse();
+	public T getInverse();
 
 	/**
 	 * Returns whether the given object has the same data type and UUID as this
