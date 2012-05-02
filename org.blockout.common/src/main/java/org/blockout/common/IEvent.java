@@ -25,10 +25,33 @@ public interface IEvent {
 	 */
 	public Calendar getLocalTime();
 
+	public boolean isInverseOf( IEvent event );
+
 	/**
-	 * Returns the inverse of this event.
+	 * Returns the inverse of this event. This method might return different
+	 * event instances with an unique UUID on each invocation. To check whether
+	 * a given event is the inverse of another use {@link #isInverseOf(IEvent)}.
 	 * 
 	 * @return
 	 */
 	public IEvent getInverse();
+
+	/**
+	 * Returns whether the given object has the same data type and UUID as this
+	 * instance.
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	@Override
+	public boolean equals( Object obj );
+
+	/**
+	 * Returns the hash code of this event. Implementations commonly use the
+	 * hash code of the UUID of this event.
+	 * 
+	 * @return
+	 */
+	@Override
+	public int hashCode();
 }

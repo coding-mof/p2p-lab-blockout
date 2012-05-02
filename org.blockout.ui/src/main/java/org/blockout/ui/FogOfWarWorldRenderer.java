@@ -138,4 +138,5 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		fog.setExplored( (int) x + 1, (int) y + 2, true );
 		fog.setExplored( (int) x + 2, (int) y + 2, true );
 	}
+
 }

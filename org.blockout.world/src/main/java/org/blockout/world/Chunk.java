@@ -8,9 +8,11 @@ import com.google.common.base.Preconditions;
  */
 public class Chunk {
 
-	private int			x;
-	private int			y;
-	private Tile[][]	tiles;
+	private static final int	CHUNK_SIZE	= 16;
+
+	private int					x;
+	private int					y;
+	private Tile[][]			tiles;
 
 	/**
 	 * 
@@ -71,8 +73,13 @@ public class Chunk {
 	 */
 	public void setTiles( final Tile[][] tiles ) {
 		Preconditions.checkNotNull( tiles );
-		if ( tiles.length == tiles[0].length ) {
+		if ( tiles.length != CHUNK_SIZE ) {
 			throw new IllegalArgumentException( "Tile matrix is not symetric" );
+		}
+		for ( Tile[] tile : tiles ) {
+			if ( tile.length != CHUNK_SIZE ) {
+				throw new IllegalArgumentException( "Tile matrix is not symetric" );
+			}
 		}
 		this.tiles = tiles;
 	}

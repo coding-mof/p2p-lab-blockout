@@ -121,6 +121,18 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 		}
 	}
 
+	@Override
+	public float screenToWorldX( final int x ) {
+		float ofset = x / (float) tileSize;
+		return centerX;
+	}
+
+	@Override
+	public float screenToWorldY( final int x ) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 	/**
 	 * Invoked for each tile which should be rendered by sub-classes. This
 	 * method doesn't get invoked for tiles which are currently not available.

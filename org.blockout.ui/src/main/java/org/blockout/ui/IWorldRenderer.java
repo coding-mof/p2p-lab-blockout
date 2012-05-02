@@ -22,6 +22,10 @@ public interface IWorldRenderer {
 	 */
 	public abstract void setViewCenter( final float x, final float y );
 
+	public abstract float screenToWorldX( int x );
+
+	public abstract float screenToWorldY( int x );
+
 	/**
 	 * Renders the world around the current view center.
 	 * 

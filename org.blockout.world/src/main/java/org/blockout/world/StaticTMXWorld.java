@@ -21,7 +21,8 @@ public class StaticTMXWorld implements IWorld {
 		if ( x <= -50 || y <= -50 ) {
 			return null;
 		}
-		return new Tile( map.getTileId( x + 50, y + 50, 0 ) - 1 );
+		int spriteId = map.getTileId( x + 50, y + 50, 0 ) - 1;
+		return new Tile( spriteId, (spriteId == 848 /* StoneGround */) ? Tile.GROUND_HEIGHT : Tile.WALL_HEIGHT );
 	}
 
 }

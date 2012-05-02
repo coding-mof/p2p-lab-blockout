@@ -34,6 +34,8 @@ public interface IStateMachineListener {
 	 * the given event.
 	 * 
 	 * @param event
+	 *            The inverse of the event to undo. Just apply the event - don't
+	 *            compute the inverse again.
 	 */
 	public void undoEvent( IEvent event );
 }

@@ -25,6 +25,9 @@ public interface IStateMachine {
 
 	public void removeIStateMachineListener( IStateMachineListener l );
 
-	public void pushEvent( IEvent event );
+	public ValidationResult pushEvent( IEvent event );
 
+	public void commitEvent( IEvent event );
+
+	public void denyEvent( IEvent event );
 }

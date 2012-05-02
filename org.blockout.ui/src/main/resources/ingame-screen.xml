@@ -36,6 +36,8 @@
         childLayout="center"
         controller="org.blockout.ui.InGameGameState" >
 
+<!--         <interact onClick="closePopup()" onSecondaryClick="closePopup()" onTertiaryClick="closePopup()" /> -->
+        
         <effect>
 
             <onStartScreen
@@ -52,40 +54,15 @@
                 startDelay="250" />
         </effect>
 
-        <panel childLayout="vertical" >
-
-            <control
-                id="closePopup"
-                name="button"
-                align="center"
-                width=""
-                backgroundColor="#0000"
-                label="Return to Game" >
-
-                <interact onClick="closePopup()" />
-            </control>
-
-            <control
-                id="showSettings"
-                name="button"
-                align="center"
-                width=""
-                backgroundColor="#0000"
-                label="Settings" >
-
-                <interact onClick="showSettings()" />
-            </control>
-
-            <control
-                id="stopGame"
-                name="button"
-                align="center"
-                width=""
-                backgroundColor="#0000"
-                label="Stop Game" >
-
-                <interact onClick="stopGame()" />
-            </control>
+        <panel style="nifty-panel-bright" childLayout="vertical" width="30%" height="30%">
+        
+            <panel height="10%"/>
+            <control id="btnReturnToGame" name="button" label="Return to Game" width="70%" align="center"/>
+            <panel height="10%"/>
+            <control id="btnSettings" name="button" label="Settings" width="70%" align="center"/>
+            <panel height="10%"/>
+            <control id="btnLeaveGame" name="button" label="Leave Game" width="70%" align="center"/>
+            
         </panel>
     </popup>
 
