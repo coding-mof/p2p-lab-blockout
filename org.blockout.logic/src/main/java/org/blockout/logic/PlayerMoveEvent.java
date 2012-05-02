@@ -5,6 +5,13 @@ import java.util.UUID;
 
 import org.blockout.common.IEvent;
 
+/**
+ * Instances of this class represent a movement of a player. Each event
+ * represents only a single step of the movement (between two nearby tiles).
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 
 	// TODO: add player id or instance

@@ -46,60 +46,79 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 			Image sprite = spriteManager.getSprite( spriteType );
 			if ( sprite != null ) {
 
-				computeLightning( worldX, worldY, sprite );
+				float alpha = computeLightning( worldX, worldY, sprite );
 				sprite.draw( screenX, screenY );
 
+				if ( alpha > 0.5f ) {
+					Object o = tile.getObjectOnTile();
+					if ( o != null ) {
+						spriteType = (SpriteType) o;
+						sprite = spriteManager.getSprite( spriteType );
+						computeLightning( worldX, worldY, sprite );
+						sprite.draw( screenX, screenY );
+					}
+				}
 			}
 		} catch ( IllegalArgumentException e ) {
 			// unknown sprite
 		}
 	}
 
-	private void computeLightning( final int worldX, final int worldY, final Image sprite ) {
+	private float computeLightning( final int worldX, final int worldY, final Image sprite ) {
 		double origDistX = Math.pow( worldX - centerX, 2 );
 		double distXP1 = Math.pow( worldX + 1 - centerX, 2 );
 		double origDistY = Math.pow( worldY - centerY, 2 );
 		double distYP1 = Math.pow( worldY + 1 - centerY, 2 );
 
-		computeLightningBottomLeft( sprite, origDistX, origDistY );
-		computeLightningBottomRight( distXP1, worldX, sprite, origDistY );
-		computeLightningTopRight( distYP1, worldY, sprite, distXP1 );
-		computeLightningTopLeft( sprite, origDistX, distYP1 );
+		float overallAlpha = 0;
+		overallAlpha += computeLightningBottomLeft( sprite, origDistX, origDistY );
+		overallAlpha += computeLightningBottomRight( distXP1, worldX, sprite, origDistY );
+		overallAlpha += computeLightningTopRight( distYP1, worldY, sprite, distXP1 );
+		overallAlpha += computeLightningTopLeft( sprite, origDistX, distYP1 );
+		return overallAlpha / 4f;
 	}
 
-	private void computeLightningBottomLeft( final Image sprite, final double origDistX, final double origDistY ) {
+	private float computeLightningBottomLeft( final Image sprite, final double origDistX, final double origDistY ) {
 		if ( origDistX + origDistY < SQUARED_VIEW_DISTANCE ) {
 			sprite.setColor( Image.BOTTOM_LEFT, 1, 1, 1, 1 );
+			return 1;
 		} else {
 			sprite.setColor( Image.BOTTOM_LEFT, 1, 1, 1, 0.5f );
+			return 0.5f;
 		}
 	}
 
-	private void computeLightningBottomRight( final double distXP1, final int worldX, final Image sprite,
+	private float computeLightningBottomRight( final double distXP1, final int worldX, final Image sprite,
 			final double origDistY ) {
 
 		if ( distXP1 + origDistY < SQUARED_VIEW_DISTANCE ) {
 			sprite.setColor( Image.BOTTOM_RIGHT, 1, 1, 1, 1 );
+			return 1;
 		} else {
 			sprite.setColor( Image.BOTTOM_RIGHT, 1, 1, 1, 0.5f );
+			return 0.5f;
 		}
 	}
 
-	private void computeLightningTopRight( final double distYP1, final int worldY, final Image sprite,
+	private float computeLightningTopRight( final double distYP1, final int worldY, final Image sprite,
 			final double distXP1 ) {
 
 		if ( distXP1 + distYP1 < SQUARED_VIEW_DISTANCE ) {
 			sprite.setColor( Image.TOP_RIGHT, 1, 1, 1, 1 );
+			return 1;
 		} else {
 			sprite.setColor( Image.TOP_RIGHT, 1, 1, 1, 0.5f );
+			return 0.5f;
 		}
 	}
 
-	private void computeLightningTopLeft( final Image sprite, final double origDistX, final double distYP1 ) {
+	private float computeLightningTopLeft( final Image sprite, final double origDistX, final double distYP1 ) {
 		if ( origDistX + distYP1 < SQUARED_VIEW_DISTANCE ) {
 			sprite.setColor( Image.TOP_LEFT, 1, 1, 1, 1 );
+			return 1;
 		} else {
 			sprite.setColor( Image.TOP_LEFT, 1, 1, 1, 0.5f );
+			return 0.5f;
 		}
 	}
 

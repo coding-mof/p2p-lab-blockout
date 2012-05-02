@@ -12,6 +12,7 @@ public class Tile {
 
 	protected int			tileType;
 	protected int			height;
+	protected Object		object;
 
 	public Tile(final int type) {
 		tileType = type;
@@ -21,6 +22,12 @@ public class Tile {
 	public Tile(final int type, final int height) {
 		tileType = type;
 		this.height = height;
+	}
+
+	public Tile(final int type, final Object object) {
+		tileType = type;
+		height = GROUND_HEIGHT;
+		this.object = object;
 	}
 
 	public int getTileType() {
@@ -37,7 +44,7 @@ public class Tile {
 	 * @return The object which is on the tile if present; otherwise null.
 	 */
 	public Object getObjectOnTile() {
-		return null;
+		return object;
 	}
 
 	/**

@@ -27,7 +27,7 @@ public class CollisionDetectionEventValidator implements IEventValidator {
 	}
 
 	@Override
-	public ValidationResult validateEvent( final IEvent event ) {
+	public ValidationResult validateEvent( final IEvent<?> event ) {
 		if ( event instanceof PlayerMoveEvent ) {
 			PlayerMoveEvent playerMoveEvent = (PlayerMoveEvent) event;
 			Tile tile = world.getTile( playerMoveEvent.getNewX(), playerMoveEvent.getNewY() );

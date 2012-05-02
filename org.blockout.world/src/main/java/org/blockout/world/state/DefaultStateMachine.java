@@ -8,6 +8,12 @@ import org.blockout.common.IEvent;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * Default implementation of the state machine.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class DefaultStateMachine extends AbstractStateMachine {
 
 	protected final Object			lock	= new Object();
