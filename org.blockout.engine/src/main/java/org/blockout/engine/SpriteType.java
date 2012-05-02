@@ -21,8 +21,28 @@ public enum SpriteType {
 	winter_wolf, hell_hound_pup, hell_hound, Cerberus, gas_spore,		
 	floating_eye, freezing_sphere, flaming_sphere, shocking_sphere,
 	beholder, kitten, housecat, jaguar, lynx,
-	panther,large_cat,
+	panther,large_cat, tiger, gremlin, gargoyle, winged_gargoyle,		
+	hobbit, dwarf, bugbear, dwarf_lord, dwarf_king,	
+	mind_flayer, master_mind_flayer, manes,	homunculus,		
+	imp, lemure, quasit, tengu, blue_jelly, spotted_jelly,		
+	ochre_jelly, kobold, large_kobold, kobold_lord,
+	kobold_shaman, leprechaun, small_mimic, large_mimic,	
+	giant_mimic, wood_nymph, water_nymph, mountain_nymph,		
+	goblin, hobgoblin, orc, hill_orc, Mordor_orc,		
+	Uruk_hai, orc_shaman, orc_captain, rock_piercer,
 	
+			
+	// objects
+	arrow, elven_arrow, orcish_arrow, silver_arrow,		
+	ya, crossbow_bolt, dart, shuriken, boomerang,	
+	spear, elven_spear, orcish_spear, dwarvish_spear,		
+	silver_spear, javelin, trident, dagger, elven_dagger,		
+	orcish_dagger, silver_dagger, athame, scalpel, knife,
+	stiletto, worm_tooth, crysknife, axe, battle_axe,		
+	short_sword, elven_sword, sword, orcish_short_sword,		
+	dwarvish_short, silver_saber, broadsword, elven_broadsword,		
+	long_sword,	two_handed_sword, katana, tsurugi, runesword,
+	partisan, ranseur, spetum, glaive,
 	
 	// Structures
 	wallway_vertical, wallway_horizontal, wallway_corner_up_tight,
