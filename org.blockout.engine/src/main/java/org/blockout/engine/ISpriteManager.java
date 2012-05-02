@@ -20,4 +20,16 @@ public interface ISpriteManager {
 	 * @return The sprite identified by the type or null if sprite is unknown.
 	 */
 	public Image getSprite( SpriteType type );
+	
+	/**
+	 * Returns the sprite of the given type and optionally removes the background. 
+	 * The returned sprite might be cached by this implementation.
+	 * 
+	 * @param type
+	 *            The type of the sprite.
+	 * @param excludeBackground
+	 * 			  True if the background should be removed from the sprite, false otherwise.
+	 * @return The sprite identified by the type or null if sprite is unknown.
+	 */
+	public Image getSprite( SpriteType type, boolean excludeBackground);
 }

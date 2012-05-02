@@ -25,7 +25,7 @@ public class SpriteManagerImpl implements ISpriteManager {
 	ISpriteSheet							spriteSheet;
 	SpriteMapping							spriteMapping;
 	// Cache<Integer, Image> spriteCache;
-	private final HashMap<Integer, Image>	sprites;
+	private final HashMap<String, Image>	sprites;
 
 	/**
 	 * Constructor to create a new SpriteManager with an internal cache
@@ -48,7 +48,7 @@ public class SpriteManagerImpl implements ISpriteManager {
 
 		this.spriteSheet = spriteSheet;
 		spriteMapping = new SpriteMapping();
-		sprites = new HashMap<Integer, Image>();
+		sprites = new HashMap<String, Image>();
 
 		// Create a new cache for recently loaded sprites
 		// spriteCache = CacheBuilder.newBuilder().maximumSize( CACHE_MAXSIZE )
@@ -61,6 +61,14 @@ public class SpriteManagerImpl implements ISpriteManager {
 	 */
 	@Override
 	public Image getSprite( final SpriteType type ) {
+		return getSprite(type, false);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Image getSprite( final SpriteType type, final boolean excludeBackground ) {
 		Preconditions.checkNotNull( type );
 
 		if ( !spriteSheet.isSpriteSheetLoaded() ) {
@@ -82,18 +90,24 @@ public class SpriteManagerImpl implements ISpriteManager {
 		}
 
 		// Image sprite = spriteCache.getIfPresent( spriteId );
-		Image sprite = sprites.get( spriteId );
+		Image sprite = sprites.get( Integer.toString(spriteId) );
 
 		if ( null == sprite ) {
 			sprite = spriteSheet.getSprite( spriteId );
+			
 
 			if ( null != sprite ) {
 				// spriteCache.put( spriteId, sprite );
-				sprites.put( spriteId, sprite );
+				if(excludeBackground){
+					sprite = Utils.exclude(getSprite(SpriteType.stoneground), sprite);
+					sprites.put( Integer.toString(spriteId) + "_nogb", sprite );
+				}
+				else{					
+					sprites.put( Integer.toString(spriteId), sprite );
+				}
 			}
 		}
 
 		return sprite;
 	}
-
 }
