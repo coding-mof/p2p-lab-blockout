@@ -35,13 +35,14 @@ public class TestSpriteManagerImpl {
 	}
 
 	/**
-	 * Tests if caching for normal (images without excluded background) are
-	 * cached correctly.
+	 * Tests if caching for normal images (those without excluded background)
+	 * are cached correctly.
 	 */
 	@Test
 	public void testSpriteCache() {
-		Image spriteMock = Mockito.mock( Image.class );
-		Mockito.doReturn( spriteMock ).when( spriteSheet ).getSprite( mapping.getSpriteId( SpriteType.Player ) );
+		Image spriteMock1 = Mockito.mock( Image.class );
+		Image spriteMock2 = Mockito.mock( Image.class );
+		Mockito.doReturn( spriteMock1 ).doReturn( spriteMock2 ).when( spriteSheet ).getSprite( mapping.getSpriteId( SpriteType.Player ) );
 
 		Image sprite = spriteManager.getSprite( SpriteType.Player );
 		Image cachedSprite = spriteManager.getSprite( SpriteType.Player );
