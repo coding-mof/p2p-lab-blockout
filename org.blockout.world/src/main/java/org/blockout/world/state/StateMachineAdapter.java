@@ -13,15 +13,15 @@ import org.blockout.common.IEvent;
 public class StateMachineAdapter implements IStateMachineListener {
 
 	@Override
-	public void eventCommitted( final IEvent event ) {
+	public void eventCommitted( final IEvent<?> event ) {
 	}
 
 	@Override
-	public void performEvent( final IEvent event ) {
+	public void performEvent( final IEvent<?> event ) {
 	}
 
 	@Override
-	public void undoEvent( final IEvent event ) {
+	public void undoEvent( final IEvent<?> event ) {
 	}
 
 }

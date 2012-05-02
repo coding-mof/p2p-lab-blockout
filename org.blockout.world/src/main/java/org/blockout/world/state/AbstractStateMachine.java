@@ -42,7 +42,7 @@ public abstract class AbstractStateMachine implements IStateMachine {
 		listener.remove( l );
 	}
 
-	protected ValidationResult validateEvent( final IEvent event ) {
+	protected ValidationResult validateEvent( final IEvent<?> event ) {
 		for ( IEventValidator validator : validators ) {
 			if ( validator.validateEvent( event ) == ValidationResult.Invalid ) {
 				return ValidationResult.Invalid;
@@ -51,19 +51,19 @@ public abstract class AbstractStateMachine implements IStateMachine {
 		return ValidationResult.Valid;
 	}
 
-	protected void fireEventCommitted( final IEvent event ) {
+	protected void fireEventCommitted( final IEvent<?> event ) {
 		for ( IStateMachineListener l : listener ) {
 			l.eventCommitted( event );
 		}
 	}
 
-	protected void firePerformEvent( final IEvent event ) {
+	protected void firePerformEvent( final IEvent<?> event ) {
 		for ( IStateMachineListener l : listener ) {
 			l.performEvent( event );
 		}
 	}
 
-	protected void fireUndoEvent( final IEvent event ) {
+	protected void fireUndoEvent( final IEvent<?> event ) {
 		for ( IStateMachineListener l : listener ) {
 			l.undoEvent( event );
 		}

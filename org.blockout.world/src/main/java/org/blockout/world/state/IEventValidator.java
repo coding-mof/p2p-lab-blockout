@@ -21,5 +21,5 @@ public interface IEventValidator {
 	 *         {@link ValidationResult#Unknown} if the implementation can't rate
 	 *         the given event.
 	 */
-	public ValidationResult validateEvent( IEvent event );
+	public ValidationResult validateEvent( IEvent<?> event );
 }

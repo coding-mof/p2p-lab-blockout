@@ -10,15 +10,15 @@ import com.google.common.base.Preconditions;
 
 public class DefaultStateMachine extends AbstractStateMachine {
 
-	protected final Object		lock	= new Object();
-	protected Map<UUID, IEvent>	events;
+	protected final Object			lock	= new Object();
+	protected Map<UUID, IEvent<?>>	events;
 
 	public DefaultStateMachine() {
-		events = new HashMap<UUID, IEvent>();
+		events = new HashMap<UUID, IEvent<?>>();
 	}
 
 	@Override
-	public ValidationResult pushEvent( final IEvent event ) {
+	public ValidationResult pushEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
 		synchronized ( lock ) {
 			if ( events.containsKey( event.getId() ) ) {
@@ -39,7 +39,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	}
 
 	@Override
-	public void commitEvent( final IEvent event ) {
+	public void commitEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
 		synchronized ( lock ) {
 			if ( !events.containsKey( event.getId() ) ) {
@@ -52,14 +52,14 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	}
 
 	@Override
-	public void denyEvent( final IEvent event ) {
+	public void denyEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
 		synchronized ( lock ) {
 			if ( events.containsKey( event.getId() ) ) {
 				events.remove( event.getId() );
+				fireUndoEvent( event.getInverse() );
 			}
 		}
-		fireUndoEvent( event.getInverse() );
 	}
 
 }

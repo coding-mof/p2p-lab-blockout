@@ -16,7 +16,7 @@ public interface IStateMachineListener {
 	 * 
 	 * @param event
 	 */
-	public void eventCommitted( IEvent event );
+	public void eventCommitted( IEvent<?> event );
 
 	/**
 	 * A new event has been pushed into the state machine and no local
@@ -24,7 +24,7 @@ public interface IStateMachineListener {
 	 * 
 	 * @param event
 	 */
-	public void performEvent( IEvent event );
+	public void performEvent( IEvent<?> event );
 
 	/**
 	 * This event has either been revoked by another peer or a server node. If
@@ -37,5 +37,5 @@ public interface IStateMachineListener {
 	 *            The inverse of the event to undo. Just apply the event - don't
 	 *            compute the inverse again.
 	 */
-	public void undoEvent( IEvent event );
+	public void undoEvent( IEvent<?> event );
 }
