@@ -21,7 +21,7 @@ public class StaticTMXWorld implements IWorld {
 		if ( x <= 0 || y <= 0 ) {
 			return null;
 		}
-		return new Tile( map.getTileId( x, y, 0 ) );
+		return new Tile( map.getTileId( x, y, 0 ) - 1 );
 	}
 
 }
