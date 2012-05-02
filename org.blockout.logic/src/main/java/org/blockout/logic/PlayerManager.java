@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.inject.Named;
 
 import org.blockout.common.IOUtils;
+import org.blockout.world.Player;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.ObjectMapper;

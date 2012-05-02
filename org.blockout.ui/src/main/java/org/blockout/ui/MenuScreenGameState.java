@@ -23,11 +23,9 @@ public class MenuScreenGameState extends NiftyBasicGameState {
 
 	@Override
 	protected void prepareNifty( final Nifty nifty, final StateBasedGame game ) {
-		System.out.println( "Prepare Nifty... game= " + game );
 		ScreenController[] controller = new ScreenController[screenControllers.size()];
 		int i = 0;
 		for ( StateBasedScreenController c : screenControllers ) {
-			System.out.println( "Controller: " + c );
 			c.bindToGameState( game, this );
 			controller[i++] = c;
 		}

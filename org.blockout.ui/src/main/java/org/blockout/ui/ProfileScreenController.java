@@ -8,8 +8,9 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.logic.Player;
 import org.blockout.logic.PlayerManager;
+import org.blockout.world.LocalGameState;
+import org.blockout.world.Player;
 import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
@@ -27,15 +28,17 @@ import de.lessvoid.nifty.screen.Screen;
 @Named
 public class ProfileScreenController implements StateBasedScreenController {
 
-	private final PlayerManager	playerManager;
-	private Screen				screen;
-	private Nifty				nifty;
-	private Player				currentSelectedPlayer;
-	private StateBasedGame		game;
+	private final LocalGameState	gameState;
+	private final PlayerManager		playerManager;
+	private Screen					screen;
+	private Nifty					nifty;
+	private Player					currentSelectedPlayer;
+	private StateBasedGame			game;
 
 	@Inject
-	public ProfileScreenController(final PlayerManager playerManager) {
+	public ProfileScreenController(final PlayerManager playerManager, final LocalGameState gameState) {
 		this.playerManager = playerManager;
+		this.gameState = gameState;
 	}
 
 	@Override
@@ -119,6 +122,7 @@ public class ProfileScreenController implements StateBasedScreenController {
 
 	private void startGame( final Player p ) {
 		System.out.println( "Starting game with: " + p.getName() );
+		gameState.setPlayer( p );
 		game.enterState( 2, new FadeOutTransition(), new FadeInTransition() );
 	}
 

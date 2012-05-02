@@ -5,6 +5,7 @@ import javax.inject.Named;
 
 import org.blockout.engine.ISpriteManager;
 import org.blockout.world.IWorld;
+import org.blockout.world.LocalGameState;
 import org.bushe.swing.event.EventTopicSubscriber;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -15,6 +16,7 @@ import org.newdawn.slick.state.StateBasedGame;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.Button;
 import de.lessvoid.nifty.controls.ButtonClickedEvent;
+import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
@@ -39,14 +41,21 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	private Element						exitPopup;
 	private final ISpriteManager		spriteManager;
 
-	// private Image playerSprite;
-
 	private final InputHandler			inputHandler;
 
+	private Label						lblPlayer;
+	private Label						lblHealth;
+	private Label						lblXP;
+	private Label						lblLevel;
+
+	private final LocalGameState		gameState;
+
 	@Inject
-	public InGameGameState(final ISpriteManager spriteManager, final IWorld world, final InputHandler inputHandler) {
+	public InGameGameState(final ISpriteManager spriteManager, final IWorld world, final InputHandler inputHandler,
+			final LocalGameState gameState) {
 		this.spriteManager = spriteManager;
 		this.inputHandler = inputHandler;
+		this.gameState = gameState;
 		worldRenderer = new FogOfWarWorldRenderer( spriteManager, world, 32, 1024, 768 );
 	}
 
@@ -55,10 +64,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 		this.nifty = nifty;
 
 		nifty.fromXml( "ingame-screen.xml", "start" );
-
-		// playerSprite = spriteManager.getSprite( SpriteType.Player );
-		// Image bgSprite = spriteManager.getSprite( SpriteType.stoneground );
-		// playerSprite = Utils.exclude( bgSprite, playerSprite );
 	}
 
 	@Override
@@ -70,7 +75,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	protected void renderGame( final GameContainer container, final StateBasedGame game, final Graphics g )
 			throws SlickException {
 
-		worldRenderer.render( g/* , playerSprite */);
+		worldRenderer.render( g );
 
 		// TODO: render player & movement
 	}
@@ -92,6 +97,18 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	@Override
 	protected void updateGame( final GameContainer container, final StateBasedGame game, final int paramInt )
 			throws SlickException {
+
+		Screen screen = getNifty().getCurrentScreen();
+
+		lblPlayer = screen.findNiftyControl( "lblPlayer", Label.class );
+		lblHealth = screen.findNiftyControl( "lblHealth", Label.class );
+		lblXP = screen.findNiftyControl( "lblXP", Label.class );
+		lblLevel = screen.findNiftyControl( "lblLevel", Label.class );
+
+		lblPlayer.setText( gameState.getPlayer().getName() );
+		lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / " + gameState.getPlayer().getMaxHealth() );
+		lblXP.setText( "" + gameState.getPlayer().getExperience() );
+		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
 
 		// TODO: move this code in separate InputHandler
 		if ( container.getInput().isKeyDown( Input.KEY_UP ) ) {
@@ -132,8 +149,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	}
 
 	@Override
-	public void bind( final Nifty paramNifty, final Screen paramScreen ) {
-		// TODO Auto-generated method stub
+	public void bind( final Nifty paramNifty, final Screen screen ) {
 
 	}
 

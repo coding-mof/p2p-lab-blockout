@@ -1,4 +1,4 @@
-package org.blockout.logic;
+package org.blockout.world;
 
 import com.google.common.base.Preconditions;
 

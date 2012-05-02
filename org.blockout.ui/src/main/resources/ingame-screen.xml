@@ -5,27 +5,33 @@
 
     <useControls filename="nifty-default-controls.xml" />
 
-    <screen id="start" >
+    <screen id="start" controller="org.blockout.ui.InGameGameState">
 
         <layer
             id="layer"
             backgroundColor="#fff0"
             childLayout="vertical" >
 
-            <panel height="90%" />
+            <panel height="88%" />
 
             <panel
-                backgroundColor="#1A5F"
+                backgroundColor="#555A"
                 childLayout="horizontal"
-                height="11%" >
+                height="12%" >
 
-                <control text="Player:" />
-
-                <control id="lblPlayer" />
-
-                <control text="Health:" />
-
-                <control id="lblHealth" />
+                <panel childLayout="vertical" align="left" width="">
+                    <control name="label" text="Player:" textHAlign="left" align="left" width=""/>
+                	<control name="label" text="Health:" textHAlign="left" align="left" width=""/>
+                	<control name="label" text="Experience:" textHAlign="left" align="left" width=""/>
+                	<control name="label" text="Level:" textHAlign="left" align="left" width=""/>
+                </panel>
+                
+				<panel childLayout="vertical" align="left" width="">
+	                <control name="label" id="lblPlayer" textHAlign="left" align="left" width="50%"/>
+	                <control name="label" id="lblHealth" textHAlign="left" align="left" width="50%"/>
+	                <control name="label" id="lblXP" textHAlign="left" align="left" width="50%"/>
+	                <control name="label" id="lblLevel" textHAlign="left" align="left" width="50%"/>
+                </panel>
             </panel>
         </layer>
     </screen>

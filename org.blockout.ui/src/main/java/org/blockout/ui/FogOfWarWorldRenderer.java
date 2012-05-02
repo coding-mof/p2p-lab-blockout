@@ -28,7 +28,7 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 	}
 
 	@Override
-	public void render( final Graphics g /* , final Image player */) {
+	public void render( final Graphics g ) {
 		super.render( g );
 
 		Image player = spriteManager.getSprite( SpriteType.Player, true );
