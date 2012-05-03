@@ -1,5 +1,6 @@
 package org.blockout.world;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -113,4 +114,21 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder buf = new StringBuilder();
+		buf.append( "[" );
+		SimpleDateFormat fmt = new SimpleDateFormat( "dd.MM.yyyy HH:mm:ss.SSS" );
+		buf.append( fmt.format( localTime.getTime() ) );
+		buf.append( "] Player moved from (" );
+		buf.append( oldX );
+		buf.append( "," );
+		buf.append( oldY );
+		buf.append( ") to (" );
+		buf.append( newX );
+		buf.append( "," );
+		buf.append( newY );
+		buf.append( ")." );
+		return buf.toString();
+	}
 }
