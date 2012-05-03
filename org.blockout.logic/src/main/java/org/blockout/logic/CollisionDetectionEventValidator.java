@@ -9,6 +9,8 @@ import org.blockout.world.PlayerMoveEvent;
 import org.blockout.world.Tile;
 import org.blockout.world.state.IEventValidator;
 import org.blockout.world.state.ValidationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation for an event validator which checks {@link PlayerMoveEvent}s
@@ -20,7 +22,12 @@ import org.blockout.world.state.ValidationResult;
 @Named
 public class CollisionDetectionEventValidator implements IEventValidator {
 
-	protected IWorld	world;
+	private static final Logger	logger;
+	static {
+		logger = LoggerFactory.getLogger( CollisionDetectionEventValidator.class );
+	}
+
+	protected IWorld			world;
 
 	@Inject
 	public CollisionDetectionEventValidator(final IWorld world) {
@@ -34,13 +41,17 @@ public class CollisionDetectionEventValidator implements IEventValidator {
 			Tile tile = world.getTile( playerMoveEvent.getNewX(), playerMoveEvent.getNewY() );
 			// Player can't walk on walls
 			if ( tile.getHeight() > Tile.GROUND_HEIGHT ) {
-				System.out.println( "Tile to high: " + tile.getHeight() + ", Id: " + tile.getTileType() );
+				if ( logger.isDebugEnabled() ) {
+					logger.debug( "Tile to high: " + tile.getHeight() + ", Id: " + tile.getTileType() );
+				}
 				return ValidationResult.Invalid;
 			}
 			// Player can't walk over other objects (Players, Monsters, Crates,
 			// etc.)
 			if ( tile.getObjectOnTile() != null ) {
-				System.out.println( "Tile blocked by object: " + tile.getObjectOnTile() );
+				if ( logger.isDebugEnabled() ) {
+					logger.debug( "Tile blocked by object: " + tile.getObjectOnTile() );
+				}
 				return ValidationResult.Invalid;
 			}
 			return ValidationResult.Valid;

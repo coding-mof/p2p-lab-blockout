@@ -109,8 +109,6 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 		}
 		heightOfset = (int) (tmpHeight * tileSize);
 
-		System.out.println( "StartTile X=" + startTileX + ", Y=" + startTileY );
-
 		int curX;
 		int curY = -heightOfset;
 		for ( int y = 0; y < numVerTiles; y++ ) {

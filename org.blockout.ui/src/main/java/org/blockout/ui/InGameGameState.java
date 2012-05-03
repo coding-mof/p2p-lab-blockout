@@ -36,12 +36,15 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 	private Nifty						nifty;
 
-	private float						centerX	= 0;
-	private float						centerY	= 0;
+	// How it takes to move the player to a new position. measured in
+	// milliseconds
+	private static final float			PLAYER_MOVE_TIME	= 500.0f;
+
+	private float						centerX				= 0;
+	private float						centerY				= 0;
 
 	private final FogOfWarWorldRenderer	worldRenderer;
 	private Element						exitPopup;
-	private final ISpriteManager		spriteManager;
 
 	private final InputHandler			inputHandler;
 
@@ -56,7 +59,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	@Inject
 	public InGameGameState(final ISpriteManager spriteManager, final IWorld world, final InputHandler inputHandler,
 			final LocalGameState gameState, final IStateMachine stateMachine) {
-		this.spriteManager = spriteManager;
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
 		this.stateMachine = stateMachine;
@@ -80,8 +82,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			throws SlickException {
 
 		worldRenderer.render( g );
-
-		// TODO: render player & movement
 	}
 
 	@Override
@@ -99,13 +99,30 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	}
 
 	@Override
-	protected void updateGame( final GameContainer container, final StateBasedGame game, final int paramInt )
+	protected void updateGame( final GameContainer container, final StateBasedGame game, final int deltaMillis )
 			throws SlickException {
 
-		Screen screen = getNifty().getCurrentScreen();
+		updateHUD();
 
-		updateHUD( screen );
+		updatePlayerPosition( container, deltaMillis );
 
+		if ( container.getInput().isKeyDown( Input.KEY_ESCAPE ) ) {
+			exitPopup = nifty.createPopup( "popupMenu" );
+			Button btnReturnToGame = exitPopup.findNiftyControl( "btnReturnToGame", Button.class );
+			nifty.subscribe( nifty.getCurrentScreen(), btnReturnToGame.getId(), ButtonClickedEvent.class,
+					new EventTopicSubscriber<ButtonClickedEvent>() {
+
+						@Override
+						public void onEvent( final String arg0, final ButtonClickedEvent arg1 ) {
+							nifty.closePopup( exitPopup.getId() );
+						}
+					} );
+			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
+		}
+
+	}
+
+	private void updatePlayerPosition( final GameContainer container, final int deltaMillis ) {
 		float currentX = gameState.getCurrentPlayerX();
 		float desiredX = gameState.getDesiredPlayerX();
 		float desiredY = gameState.getDesiredPlayerY();
@@ -137,14 +154,14 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 		} else {
 
 			float deltaX = desiredX - currentX;
-			centerX += deltaX * (paramInt / 1000f) * 2f;
+			centerX += deltaX * (deltaMillis / PLAYER_MOVE_TIME);
 			if ( (deltaX > 0 && centerX >= desiredX) || (deltaX < 0 && centerX <= desiredX) ) {
 				centerX = desiredX;
 				gameState.setCurrentPlayerX( gameState.getDesiredPlayerX() );
 			}
 
 			float deltaY = desiredY - currentY;
-			centerY += deltaY * (paramInt / 1000f) * 2f;
+			centerY += deltaY * (deltaMillis / PLAYER_MOVE_TIME);
 			if ( (deltaY > 0 && centerY >= desiredY) || (deltaY < 0 && centerY <= desiredY) ) {
 				centerY = desiredY;
 				gameState.setCurrentPlayerY( gameState.getDesiredPlayerY() );
@@ -152,25 +169,11 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 		}
 		worldRenderer.setViewCenter( centerX + 0.5f, centerY + 0.5f );
-		System.out.println( "Center (" + centerX + ", " + centerY + ")" );
-
-		if ( container.getInput().isKeyDown( Input.KEY_ESCAPE ) ) {
-			exitPopup = nifty.createPopup( "popupMenu" );
-			Button btnReturnToGame = exitPopup.findNiftyControl( "btnReturnToGame", Button.class );
-			nifty.subscribe( nifty.getCurrentScreen(), btnReturnToGame.getId(), ButtonClickedEvent.class,
-					new EventTopicSubscriber<ButtonClickedEvent>() {
-
-						@Override
-						public void onEvent( final String arg0, final ButtonClickedEvent arg1 ) {
-							nifty.closePopup( exitPopup.getId() );
-						}
-					} );
-			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
-		}
-
 	}
 
-	private void updateHUD( final Screen screen ) {
+	private void updateHUD() {
+		Screen screen = getNifty().getCurrentScreen();
+
 		lblPlayer = screen.findNiftyControl( "lblPlayer", Label.class );
 		lblHealth = screen.findNiftyControl( "lblHealth", Label.class );
 		lblXP = screen.findNiftyControl( "lblXP", Label.class );
