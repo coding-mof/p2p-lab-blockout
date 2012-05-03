@@ -6,6 +6,8 @@ import javax.inject.Named;
 import org.blockout.engine.ISpriteManager;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
+import org.blockout.world.PlayerMoveEvent;
+import org.blockout.world.state.IStateMachine;
 import org.bushe.swing.event.EventTopicSubscriber;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -49,13 +51,15 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	private Label						lblLevel;
 
 	private final LocalGameState		gameState;
+	private final IStateMachine			stateMachine;
 
 	@Inject
 	public InGameGameState(final ISpriteManager spriteManager, final IWorld world, final InputHandler inputHandler,
-			final LocalGameState gameState) {
+			final LocalGameState gameState, final IStateMachine stateMachine) {
 		this.spriteManager = spriteManager;
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
+		this.stateMachine = stateMachine;
 		worldRenderer = new FogOfWarWorldRenderer( spriteManager, world, 32, 1024, 768 );
 	}
 
@@ -100,33 +104,55 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 		Screen screen = getNifty().getCurrentScreen();
 
-		lblPlayer = screen.findNiftyControl( "lblPlayer", Label.class );
-		lblHealth = screen.findNiftyControl( "lblHealth", Label.class );
-		lblXP = screen.findNiftyControl( "lblXP", Label.class );
-		lblLevel = screen.findNiftyControl( "lblLevel", Label.class );
+		updateHUD( screen );
 
-		lblPlayer.setText( gameState.getPlayer().getName() );
-		lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / " + gameState.getPlayer().getMaxHealth() );
-		lblXP.setText( "" + gameState.getPlayer().getExperience() );
-		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
+		float currentX = gameState.getCurrentPlayerX();
+		float desiredX = gameState.getDesiredPlayerX();
+		float desiredY = gameState.getDesiredPlayerY();
+		float currentY = gameState.getCurrentPlayerY();
 
-		// TODO: move this code in separate InputHandler
-		if ( container.getInput().isKeyDown( Input.KEY_UP ) ) {
-			centerY += 2.0 * (paramInt / 1000f);
+		// otherwise we would raise an event flood
+		if ( currentX == desiredX && currentY == desiredY ) {
+
+			// TODO: move this code in separate InputHandler
+			int x = 0;
+			int y = 0;
+			if ( container.getInput().isKeyDown( Input.KEY_UP ) ) {
+				y++;
+			}
+			if ( container.getInput().isKeyDown( Input.KEY_DOWN ) ) {
+				y--;
+			}
+			if ( container.getInput().isKeyDown( Input.KEY_LEFT ) ) {
+				x--;
+			}
+			if ( container.getInput().isKeyDown( Input.KEY_RIGHT ) ) {
+				x++;
+			}
+
+			if ( x != 0 || y != 0 ) {
+				stateMachine.pushEvent( new PlayerMoveEvent( (int) currentX, (int) currentY, (int) currentX + x,
+						(int) currentY + y ) );
+			}
+		} else {
+
+			float deltaX = desiredX - currentX;
+			centerX += deltaX * (paramInt / 1000f) * 2f;
+			if ( (deltaX > 0 && centerX >= desiredX) || (deltaX < 0 && centerX <= desiredX) ) {
+				centerX = desiredX;
+				gameState.setCurrentPlayerX( gameState.getDesiredPlayerX() );
+			}
+
+			float deltaY = desiredY - currentY;
+			centerY += deltaY * (paramInt / 1000f) * 2f;
+			if ( (deltaY > 0 && centerY >= desiredY) || (deltaY < 0 && centerY <= desiredY) ) {
+				centerY = desiredY;
+				gameState.setCurrentPlayerY( gameState.getDesiredPlayerY() );
+			}
+
 		}
-
-		if ( container.getInput().isKeyDown( Input.KEY_DOWN ) ) {
-			centerY -= 2.0 * (paramInt / 1000f);
-		}
-
-		if ( container.getInput().isKeyDown( Input.KEY_LEFT ) ) {
-			centerX -= 2.0 * (paramInt / 1000f);
-		}
-
-		if ( container.getInput().isKeyDown( Input.KEY_RIGHT ) ) {
-			centerX += 2.0 * (paramInt / 1000f);
-		}
-		worldRenderer.setViewCenter( centerX, centerY );
+		worldRenderer.setViewCenter( centerX + 0.5f, centerY + 0.5f );
+		System.out.println( "Center (" + centerX + ", " + centerY + ")" );
 
 		if ( container.getInput().isKeyDown( Input.KEY_ESCAPE ) ) {
 			exitPopup = nifty.createPopup( "popupMenu" );
@@ -142,6 +168,18 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
 		}
 
+	}
+
+	private void updateHUD( final Screen screen ) {
+		lblPlayer = screen.findNiftyControl( "lblPlayer", Label.class );
+		lblHealth = screen.findNiftyControl( "lblHealth", Label.class );
+		lblXP = screen.findNiftyControl( "lblXP", Label.class );
+		lblLevel = screen.findNiftyControl( "lblLevel", Label.class );
+
+		lblPlayer.setText( gameState.getPlayer().getName() );
+		lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / " + gameState.getPlayer().getMaxHealth() );
+		lblXP.setText( "" + gameState.getPlayer().getExperience() );
+		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
 	}
 
 	public void closePopup() {

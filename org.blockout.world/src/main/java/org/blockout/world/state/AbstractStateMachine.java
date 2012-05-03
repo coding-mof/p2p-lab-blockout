@@ -2,6 +2,9 @@ package org.blockout.world.state;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.blockout.common.IEvent;
 
@@ -27,6 +30,11 @@ public abstract class AbstractStateMachine implements IStateMachine {
 		validators.add( validator );
 	}
 
+	@Inject
+	public void addEventValidators( final Set<IEventValidator> validator ) {
+		validators.addAll( validator );
+	}
+
 	@Override
 	public void removeEventValidator( final IEventValidator validator ) {
 		validators.remove( validator );
@@ -35,6 +43,11 @@ public abstract class AbstractStateMachine implements IStateMachine {
 	@Override
 	public void addIStateMachineListener( final IStateMachineListener l ) {
 		listener.add( l );
+	}
+
+	@Inject
+	public void addIStateMachineListener( final Set<IStateMachineListener> l ) {
+		listener.addAll( l );
 	}
 
 	@Override

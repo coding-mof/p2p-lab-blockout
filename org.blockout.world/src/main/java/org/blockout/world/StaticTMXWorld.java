@@ -33,7 +33,6 @@ public class StaticTMXWorld implements IWorld {
 		if ( objectId == 250 ) {
 			return new Tile( spriteId, SpriteType.Skeleton );
 		}
-		return new Tile( spriteId, (spriteId == 848 /* StoneGround */) ? Tile.GROUND_HEIGHT : Tile.WALL_HEIGHT );
+		return new Tile( spriteId, (spriteId == 849 /* StoneGround Dark */) ? Tile.WALL_HEIGHT : Tile.GROUND_HEIGHT );
 	}
-
 }

@@ -11,6 +11,43 @@ public class LocalGameState implements IStateMachineListener {
 
 	protected Player	player;
 
+	protected float		currentPlayerX;
+	protected float		currentPlayerY;
+	protected float		desiredPlayerX;
+	protected float		desiredPlayerY;
+
+	public float getCurrentPlayerX() {
+		return currentPlayerX;
+	}
+
+	public void setCurrentPlayerX( final float currentPlayerX ) {
+		this.currentPlayerX = currentPlayerX;
+	}
+
+	public float getCurrentPlayerY() {
+		return currentPlayerY;
+	}
+
+	public void setCurrentPlayerY( final float currentPlayerY ) {
+		this.currentPlayerY = currentPlayerY;
+	}
+
+	public float getDesiredPlayerX() {
+		return desiredPlayerX;
+	}
+
+	public void setDesiredPlayerX( final float desiredPlayerX ) {
+		this.desiredPlayerX = desiredPlayerX;
+	}
+
+	public float getDesiredPlayerY() {
+		return desiredPlayerY;
+	}
+
+	public void setDesiredPlayerY( final float desiredPlayerY ) {
+		this.desiredPlayerY = desiredPlayerY;
+	}
+
 	@Inject
 	public LocalGameState(final IWorld world) {
 
@@ -25,21 +62,29 @@ public class LocalGameState implements IStateMachineListener {
 	}
 
 	@Override
-	public void eventCommitted( final IEvent event ) {
+	public void eventCommitted( final IEvent<?> event ) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void performEvent( final IEvent event ) {
-		// TODO Auto-generated method stub
-
+	public void performEvent( final IEvent<?> event ) {
+		System.out.println( "Event Performed" );
+		if ( event instanceof PlayerMoveEvent ) {
+			PlayerMoveEvent pme = (PlayerMoveEvent) event;
+			desiredPlayerX = pme.getNewX();
+			desiredPlayerY = pme.getNewY();
+		}
 	}
 
 	@Override
-	public void undoEvent( final IEvent event ) {
-		// TODO Auto-generated method stub
-
+	public void undoEvent( final IEvent<?> event ) {
+		System.out.println( "Event Rolled Back" );
+		if ( event instanceof PlayerMoveEvent ) {
+			PlayerMoveEvent pme = (PlayerMoveEvent) event;
+			desiredPlayerX = pme.getNewX();
+			desiredPlayerY = pme.getNewY();
+		}
 	}
 
 }

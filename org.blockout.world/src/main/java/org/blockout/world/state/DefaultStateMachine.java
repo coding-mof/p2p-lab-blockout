@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Named;
+
 import org.blockout.common.IEvent;
 
 import com.google.common.base.Preconditions;
@@ -14,6 +16,7 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * 
  */
+@Named
 public class DefaultStateMachine extends AbstractStateMachine {
 
 	protected final Object			lock	= new Object();

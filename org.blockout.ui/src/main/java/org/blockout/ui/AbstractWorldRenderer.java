@@ -85,11 +85,18 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 		return height - y;
 	}
 
+	protected int worldToTile( final float worldCoordinate ) {
+		if ( worldCoordinate > 0 ) {
+			return (int) worldCoordinate;
+		}
+		return (int) worldCoordinate - 1;
+	}
+
 	@Override
 	public void render( final Graphics g ) {
 
-		int startTileX = (int) (centerX - (halfWidth / tileSize));
-		int startTileY = (int) (centerY - (halfHeight / tileSize));
+		int startTileX = worldToTile( centerX - (halfWidth / tileSize) );
+		int startTileY = worldToTile( centerY - (halfHeight / tileSize) );
 
 		float tmpWidth = (centerX - (halfWidth / tileSize)) % 1;
 		if ( tmpWidth < 0 ) {
@@ -101,6 +108,8 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 			tmpHeight++;
 		}
 		heightOfset = (int) (tmpHeight * tileSize);
+
+		System.out.println( "StartTile X=" + startTileX + ", Y=" + startTileY );
 
 		int curX;
 		int curY = -heightOfset;

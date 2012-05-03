@@ -129,35 +129,35 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		super.setViewCenter( x, y );
 
 		// TODO: move this code to the MovementHandler
-		fog.setExplored( (int) x - 2, (int) y - 2, true );
-		fog.setExplored( (int) x - 1, (int) y - 2, true );
-		fog.setExplored( (int) x, (int) y - 2, true );
-		fog.setExplored( (int) x + 1, (int) y - 2, true );
-		fog.setExplored( (int) x + 2, (int) y - 2, true );
+		fog.setExplored( worldToTile( x - 2 ), worldToTile( y - 2 ), true );
+		fog.setExplored( worldToTile( x - 1 ), worldToTile( y - 2 ), true );
+		fog.setExplored( worldToTile( x ), worldToTile( y - 2 ), true );
+		fog.setExplored( worldToTile( x + 1 ), worldToTile( y - 2 ), true );
+		fog.setExplored( worldToTile( x + 2 ), worldToTile( y - 2 ), true );
 
-		fog.setExplored( (int) x - 2, (int) y - 1, true );
-		fog.setExplored( (int) x - 1, (int) y - 1, true );
-		fog.setExplored( (int) x, (int) y - 1, true );
-		fog.setExplored( (int) x + 1, (int) y - 1, true );
-		fog.setExplored( (int) x + 2, (int) y - 1, true );
+		fog.setExplored( worldToTile( x - 2 ), worldToTile( y - 1 ), true );
+		fog.setExplored( worldToTile( x - 1 ), worldToTile( y - 1 ), true );
+		fog.setExplored( worldToTile( x ), worldToTile( y - 1 ), true );
+		fog.setExplored( worldToTile( x + 1 ), worldToTile( y - 1 ), true );
+		fog.setExplored( worldToTile( x + 2 ), worldToTile( y - 1 ), true );
 
-		fog.setExplored( (int) x - 2, (int) y, true );
-		fog.setExplored( (int) x - 1, (int) y, true );
-		fog.setExplored( (int) x, (int) y, true );
-		fog.setExplored( (int) x + 1, (int) y, true );
-		fog.setExplored( (int) x + 2, (int) y, true );
+		fog.setExplored( worldToTile( x - 2 ), worldToTile( y ), true );
+		fog.setExplored( worldToTile( x - 1 ), worldToTile( y ), true );
+		fog.setExplored( worldToTile( x ), worldToTile( y ), true );
+		fog.setExplored( worldToTile( x + 1 ), worldToTile( y ), true );
+		fog.setExplored( worldToTile( x + 2 ), worldToTile( y ), true );
 
-		fog.setExplored( (int) x - 2, (int) y + 1, true );
-		fog.setExplored( (int) x - 1, (int) y + 1, true );
-		fog.setExplored( (int) x, (int) y + 1, true );
-		fog.setExplored( (int) x + 1, (int) y + 1, true );
-		fog.setExplored( (int) x + 2, (int) y + 1, true );
+		fog.setExplored( worldToTile( x - 2 ), worldToTile( y + 1 ), true );
+		fog.setExplored( worldToTile( x - 1 ), worldToTile( y + 1 ), true );
+		fog.setExplored( worldToTile( x ), worldToTile( y + 1 ), true );
+		fog.setExplored( worldToTile( x + 1 ), worldToTile( y + 1 ), true );
+		fog.setExplored( worldToTile( x + 2 ), worldToTile( y + 1 ), true );
 
-		fog.setExplored( (int) x - 2, (int) y + 2, true );
-		fog.setExplored( (int) x - 1, (int) y + 2, true );
-		fog.setExplored( (int) x, (int) y + 2, true );
-		fog.setExplored( (int) x + 1, (int) y + 2, true );
-		fog.setExplored( (int) x + 2, (int) y + 2, true );
+		fog.setExplored( worldToTile( x - 2 ), worldToTile( y + 2 ), true );
+		fog.setExplored( worldToTile( x - 1 ), worldToTile( y + 2 ), true );
+		fog.setExplored( worldToTile( x ), worldToTile( y + 2 ), true );
+		fog.setExplored( worldToTile( x + 1 ), worldToTile( y + 2 ), true );
+		fog.setExplored( worldToTile( x + 2 ), worldToTile( y + 2 ), true );
 	}
 
 }
