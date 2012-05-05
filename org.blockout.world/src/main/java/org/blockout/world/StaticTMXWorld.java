@@ -1,8 +1,13 @@
 package org.blockout.world;
 
+import java.io.InputStream;
+import java.net.URL;
+
 import org.blockout.engine.SpriteType;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
+import org.newdawn.slick.util.ResourceLoader;
+import org.newdawn.slick.util.ResourceLocation;
 
 public class StaticTMXWorld implements IWorld {
 
@@ -10,6 +15,19 @@ public class StaticTMXWorld implements IWorld {
 
 	public StaticTMXWorld(final String tmxFile) {
 		try {
+
+			ResourceLoader.addResourceLocation( new ResourceLocation() {
+
+				@Override
+				public InputStream getResourceAsStream( final String name ) {
+					return getClass().getResourceAsStream( name );
+				}
+
+				@Override
+				public URL getResource( final String name ) {
+					return getClass().getResource( name );
+				}
+			} );
 			map = new TiledMap( tmxFile, false );
 
 		} catch ( SlickException e ) {

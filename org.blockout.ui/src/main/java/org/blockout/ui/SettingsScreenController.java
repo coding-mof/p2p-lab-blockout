@@ -10,7 +10,6 @@ import javax.inject.Named;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.AppGameContainer;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.slf4j.Logger;
@@ -106,6 +105,7 @@ public class SettingsScreenController implements StateBasedScreenController {
 
 			AppGameContainer container = (AppGameContainer) game.getContainer();
 			container.setDisplayMode( selectedDisplayMode.getWidth(), selectedDisplayMode.getHeight(), false );
+			// Display.setDisplayMode( selectedDisplayMode );
 
 			// GL11.glMatrixMode( GL11.GL_PROJECTION );
 			// GL11.glLoadIdentity();
@@ -115,15 +115,17 @@ public class SettingsScreenController implements StateBasedScreenController {
 			// GL11.glMatrixMode( GL11.GL_MODELVIEW );
 
 			nifty.resolutionChanged();
-			nifty.getRenderEngine().displayResolutionChanged();
+			// nifty.getRenderEngine().displayResolutionChanged();
 		}
 		// catch ( LWJGLException e ) {
 		// logger.error( "Failed to change display mode to " +
 		// selectedDisplayMode, e );
 		// }
-		catch ( SlickException e ) {
-			logger.error( "Failed to change display mode to " + selectedDisplayMode, e );
-		} catch ( Exception e ) {
+		// catch ( SlickException e ) {
+		// logger.error( "Failed to change display mode to " +
+		// selectedDisplayMode, e );
+		// }
+		catch ( Exception e ) {
 			logger.error( "", e );
 		}
 	}
