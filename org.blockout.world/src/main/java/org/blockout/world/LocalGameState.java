@@ -68,7 +68,7 @@ public class LocalGameState implements IStateMachineListener {
 	}
 
 	@Override
-	public void performEvent( final IEvent<?> event ) {
+	public void eventPushed( final IEvent<?> event ) {
 		if ( event instanceof PlayerMoveEvent ) {
 			PlayerMoveEvent pme = (PlayerMoveEvent) event;
 			desiredPlayerX = pme.getNewX();
@@ -77,7 +77,7 @@ public class LocalGameState implements IStateMachineListener {
 	}
 
 	@Override
-	public void undoEvent( final IEvent<?> event ) {
+	public void eventRolledBack( final IEvent<?> event ) {
 		if ( event instanceof PlayerMoveEvent ) {
 			PlayerMoveEvent pme = (PlayerMoveEvent) event;
 			desiredPlayerX = pme.getNewX();

@@ -37,7 +37,7 @@ public class TestDefaultStateMachine {
 
 	@Test(expected = NullPointerException.class)
 	public void testDenyEventNPE() {
-		stateMachine.denyEvent( null );
+		stateMachine.rollbackEvent( null );
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class TestDefaultStateMachine {
 		IEvent<?> event = mock( IEvent.class );
 		stateMachine.pushEvent( event );
 
-		Mockito.verify( listener ).performEvent( event );
+		Mockito.verify( listener ).eventPushed( event );
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class TestDefaultStateMachine {
 
 		stateMachine.pushEvent( event );
 
-		Mockito.verify( listener ).performEvent( event );
+		Mockito.verify( listener ).eventPushed( event );
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class TestDefaultStateMachine {
 
 		stateMachine.pushEvent( event );
 
-		Mockito.verify( listener ).performEvent( event );
+		Mockito.verify( listener ).eventPushed( event );
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class TestDefaultStateMachine {
 
 		stateMachine.commitEvent( event );
 
-		Mockito.verify( listener ).performEvent( event );
+		Mockito.verify( listener ).eventPushed( event );
 		Mockito.verify( listener ).eventCommitted( event );
 	}
 
@@ -148,7 +148,7 @@ public class TestDefaultStateMachine {
 		IEvent<?> event = mock( IEvent.class );
 
 		stateMachine.pushEvent( event );
-		Mockito.verify( listener ).performEvent( event );
+		Mockito.verify( listener ).eventPushed( event );
 
 		stateMachine.commitEvent( event );
 
@@ -160,7 +160,7 @@ public class TestDefaultStateMachine {
 	public void testDenyNonExistingEvent() {
 		IEvent<?> event = mock( IEvent.class );
 
-		stateMachine.denyEvent( event );
+		stateMachine.rollbackEvent( event );
 
 		Mockito.verifyZeroInteractions( listener );
 	}
@@ -170,10 +170,10 @@ public class TestDefaultStateMachine {
 		IEvent<?> event = mock( IEvent.class );
 
 		stateMachine.pushEvent( event );
-		Mockito.verify( listener ).performEvent( event );
+		Mockito.verify( listener ).eventPushed( event );
 
-		stateMachine.denyEvent( event );
-		Mockito.verify( listener ).undoEvent( event.getInverse() );
+		stateMachine.rollbackEvent( event );
+		Mockito.verify( listener ).eventRolledBack( event.getInverse() );
 	}
 
 	@Test
@@ -181,10 +181,10 @@ public class TestDefaultStateMachine {
 		IEvent<?> event = mock( IEvent.class );
 
 		stateMachine.commitEvent( event );
-		Mockito.verify( listener ).performEvent( event );
+		Mockito.verify( listener ).eventPushed( event );
 		Mockito.verify( listener ).eventCommitted( event );
 
-		stateMachine.denyEvent( event );
+		stateMachine.rollbackEvent( event );
 		Mockito.verifyNoMoreInteractions( listener );
 	}
 }

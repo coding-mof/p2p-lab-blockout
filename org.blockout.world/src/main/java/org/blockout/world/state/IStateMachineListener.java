@@ -24,7 +24,7 @@ public interface IStateMachineListener {
 	 * 
 	 * @param event
 	 */
-	public void performEvent( IEvent<?> event );
+	public void eventPushed( IEvent<?> event );
 
 	/**
 	 * This event has either been revoked by another peer or a server node. If
@@ -37,5 +37,5 @@ public interface IStateMachineListener {
 	 *            The inverse of the event to undo. Just apply the event - don't
 	 *            compute the inverse again.
 	 */
-	public void undoEvent( IEvent<?> event );
+	public void eventRolledBack( IEvent<?> event );
 }

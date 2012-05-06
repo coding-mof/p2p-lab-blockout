@@ -62,10 +62,6 @@ public class SpriteSheetImpl implements ISpriteSheet {
 			throw new IllegalArgumentException( "Tile height has a negative value" );
 		}
 
-		// if ( !new File( ref ).exists() ) {
-		// throw new IOException( "Resource not found: " + ref );
-		// }
-
 		Image img;
 		try {
 			img = new Image( ref );
@@ -85,17 +81,11 @@ public class SpriteSheetImpl implements ISpriteSheet {
 		numSprites = spriteSheet.getVerticalCount() * spriteSheet.getHorizontalCount();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean isSpriteSheetLoaded() {
 		return null != spriteSheet;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Image getSprite( final int spriteId ) throws IllegalStateException {
 		if ( null == spriteSheet ) {

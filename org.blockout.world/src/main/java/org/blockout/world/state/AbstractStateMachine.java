@@ -70,15 +70,15 @@ public abstract class AbstractStateMachine implements IStateMachine {
 		}
 	}
 
-	protected void firePerformEvent( final IEvent<?> event ) {
+	protected void fireEventPushed( final IEvent<?> event ) {
 		for ( IStateMachineListener l : listener ) {
-			l.performEvent( event );
+			l.eventPushed( event );
 		}
 	}
 
-	protected void fireUndoEvent( final IEvent<?> event ) {
+	protected void fireEventRolledBack( final IEvent<?> event ) {
 		for ( IStateMachineListener l : listener ) {
-			l.undoEvent( event );
+			l.eventRolledBack( event );
 		}
 	}
 }

@@ -25,9 +25,36 @@ public interface IStateMachine {
 
 	public void removeIStateMachineListener( IStateMachineListener l );
 
+	/**
+	 * Pushes an event into the state machine. The state machine has to discard
+	 * duplicates. All other events are passed to the validators which elect if
+	 * the given event is valid in the context of the local game state. If not
+	 * {@link ValidationResult#Invalid} is returned. Otherwise the event gets
+	 * stored and the listener get notified by
+	 * {@link IStateMachineListener#eventPushed(IEvent)}.
+	 * 
+	 * 
+	 * @param event
+	 * @return
+	 */
 	public ValidationResult pushEvent( IEvent<?> event );
 
+	/**
+	 * Commit a previously pushed event. If the event was not pushed or has been
+	 * rolled back in the past, this method acts as an auto-commit which raises
+	 * first an {@link IStateMachineListener#eventPushed(IEvent)} and then an
+	 * {@link IStateMachineListener#eventCommitted(IEvent)} event.
+	 * 
+	 * @param event
+	 */
 	public void commitEvent( IEvent<?> event );
 
-	public void denyEvent( IEvent<?> event );
+	/**
+	 * Rolls a pushed event back. This method can only roll back uncommitted
+	 * events. Furthermore it ignores rollback events which have never been
+	 * pushed before.
+	 * 
+	 * @param event
+	 */
+	public void rollbackEvent( IEvent<?> event );
 }

@@ -34,5 +34,4 @@ public class BlockOutGame extends StateBasedGame {
 
 		this.enterState( 1 );
 	}
-
 }

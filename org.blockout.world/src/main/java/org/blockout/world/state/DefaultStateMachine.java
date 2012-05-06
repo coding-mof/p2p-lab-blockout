@@ -42,7 +42,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 			synchronized ( lock ) {
 				events.put( event.getId(), event );
 			}
-			firePerformEvent( event );
+			fireEventPushed( event );
 		}
 		return ValidationResult.Valid;
 	}
@@ -52,7 +52,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 		Preconditions.checkNotNull( event );
 		synchronized ( lock ) {
 			if ( !events.containsKey( event.getId() ) ) {
-				firePerformEvent( event );
+				fireEventPushed( event );
 			} else {
 				events.remove( event.getId() );
 			}
@@ -61,12 +61,12 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	}
 
 	@Override
-	public void denyEvent( final IEvent<?> event ) {
+	public void rollbackEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
 		synchronized ( lock ) {
 			if ( events.containsKey( event.getId() ) ) {
 				events.remove( event.getId() );
-				fireUndoEvent( event.getInverse() );
+				fireEventRolledBack( event.getInverse() );
 			}
 		}
 	}

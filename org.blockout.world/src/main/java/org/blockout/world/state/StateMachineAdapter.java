@@ -17,11 +17,11 @@ public class StateMachineAdapter implements IStateMachineListener {
 	}
 
 	@Override
-	public void performEvent( final IEvent<?> event ) {
+	public void eventPushed( final IEvent<?> event ) {
 	}
 
 	@Override
-	public void undoEvent( final IEvent<?> event ) {
+	public void eventRolledBack( final IEvent<?> event ) {
 	}
 
 }
