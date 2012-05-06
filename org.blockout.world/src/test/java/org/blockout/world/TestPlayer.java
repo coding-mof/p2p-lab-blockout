@@ -2,7 +2,7 @@ package org.blockout.world;
 
 import static org.junit.Assert.assertEquals;
 
-import org.blockout.world.Player;
+import org.blockout.world.entity.Player;
 import org.junit.Test;
 
 public class TestPlayer {

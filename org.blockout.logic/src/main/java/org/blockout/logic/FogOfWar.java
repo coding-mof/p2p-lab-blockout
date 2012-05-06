@@ -4,6 +4,9 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Named;
+
+@Named
 public class FogOfWar {
 
 	private static final int		SEGMENT_SIZE	= 48;

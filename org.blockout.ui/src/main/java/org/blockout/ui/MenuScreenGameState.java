@@ -34,7 +34,7 @@ public class MenuScreenGameState extends NiftyBasicGameState {
 
 	@Override
 	public int getID() {
-		return 1;
+		return GameStates.StartMenu.ordinal();
 	}
 
 }

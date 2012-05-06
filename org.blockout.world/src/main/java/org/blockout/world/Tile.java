@@ -1,5 +1,7 @@
 package org.blockout.world;
 
+import org.blockout.world.entity.Entity;
+
 /**
  * A tile represents the smallest unit in the world's coordinate system.
  * 
@@ -12,7 +14,7 @@ public class Tile {
 
 	protected int			tileType;
 	protected int			height;
-	protected Object		object;
+	protected Entity		object;
 
 	public Tile(final int type) {
 		tileType = type;
@@ -24,10 +26,10 @@ public class Tile {
 		this.height = height;
 	}
 
-	public Tile(final int type, final Object object) {
+	public Tile(final int type, final Entity entity) {
 		tileType = type;
 		height = GROUND_HEIGHT;
-		this.object = object;
+		this.object = entity;
 	}
 
 	public int getTileType() {
@@ -43,7 +45,7 @@ public class Tile {
 	 * 
 	 * @return The object which is on the tile if present; otherwise null.
 	 */
-	public Object getObjectOnTile() {
+	public Entity getEntityOnTile() {
 		return object;
 	}
 

@@ -4,6 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.IEvent;
+import org.blockout.world.entity.Player;
+import org.blockout.world.event.PlayerMoveEvent;
 import org.blockout.world.state.IStateMachineListener;
 
 @Named

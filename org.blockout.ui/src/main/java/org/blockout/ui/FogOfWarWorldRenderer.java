@@ -5,7 +5,9 @@ import org.blockout.engine.SpriteMapping;
 import org.blockout.engine.SpriteType;
 import org.blockout.logic.FogOfWar;
 import org.blockout.world.IWorld;
+import org.blockout.world.LocalGameState;
 import org.blockout.world.Tile;
+import org.blockout.world.entity.Entity;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 
@@ -18,21 +20,27 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 	private final SpriteMapping		mapping;
 	private final FogOfWar			fog;
 
-	public FogOfWarWorldRenderer(final ISpriteManager spriteManager, final IWorld world, final int tileSize,
-			final int width, final int height) {
-		super( world, tileSize, width, height );
+	private final LocalGameState	gameState;
+
+	public FogOfWarWorldRenderer(final ISpriteManager spriteManager, final IWorld world, final Camera camera,
+			final LocalGameState gameState, final FogOfWar fog) {
+		super( world, camera );
 
 		this.spriteManager = spriteManager;
 		mapping = new SpriteMapping();
-		fog = new FogOfWar();
+		this.fog = fog;
+		this.gameState = gameState;
 	}
 
 	@Override
 	public void render( final Graphics g ) {
+
+		updateFog( camera.getCenterX(), camera.getCenterY() );
+
 		super.render( g );
 
 		Image player = spriteManager.getSprite( SpriteType.Player, true );
-		player.drawCentered( width / 2, height / 2 );
+		player.drawCentered( camera.getHalfWidth(), camera.getHalfHeight() );
 	}
 
 	@Override
@@ -52,10 +60,12 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 				sprite.draw( screenX, screenY );
 
 				if ( alpha > 0.5f ) {
-					Object o = tile.getObjectOnTile();
-					if ( o != null ) {
-						spriteType = (SpriteType) o;
+					Entity e = tile.getEntityOnTile();
+					if ( e != null && e != gameState.getPlayer() ) {
+
+						spriteType = e.getSpriteType();
 						sprite = spriteManager.getSprite( spriteType, true );
+
 						computeLightning( worldX, worldY, sprite );
 						sprite.draw( screenX, screenY );
 					}
@@ -67,10 +77,10 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 	}
 
 	private float computeLightning( final int worldX, final int worldY, final Image sprite ) {
-		double origDistX = Math.pow( worldX - centerX, 2 );
-		double distXP1 = Math.pow( worldX + 1 - centerX, 2 );
-		double origDistY = Math.pow( worldY - centerY, 2 );
-		double distYP1 = Math.pow( worldY + 1 - centerY, 2 );
+		double origDistX = Math.pow( worldX - camera.getCenterX(), 2 );
+		double distXP1 = Math.pow( worldX + 1 - camera.getCenterX(), 2 );
+		double origDistY = Math.pow( worldY - camera.getCenterY(), 2 );
+		double distYP1 = Math.pow( worldY + 1 - camera.getCenterY(), 2 );
 
 		float overallAlpha = 0;
 		overallAlpha += computeLightningBottomLeft( sprite, origDistX, origDistY );
@@ -124,40 +134,38 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		}
 	}
 
-	@Override
-	public void setViewCenter( final float x, final float y ) {
-		super.setViewCenter( x, y );
+	public void updateFog( final float x, final float y ) {
 
 		// TODO: move this code to the MovementHandler
-		fog.setExplored( worldToTile( x - 2 ), worldToTile( y - 2 ), true );
-		fog.setExplored( worldToTile( x - 1 ), worldToTile( y - 2 ), true );
-		fog.setExplored( worldToTile( x ), worldToTile( y - 2 ), true );
-		fog.setExplored( worldToTile( x + 1 ), worldToTile( y - 2 ), true );
-		fog.setExplored( worldToTile( x + 2 ), worldToTile( y - 2 ), true );
+		fog.setExplored( camera.worldToTile( x - 2 ), camera.worldToTile( y - 2 ), true );
+		fog.setExplored( camera.worldToTile( x - 1 ), camera.worldToTile( y - 2 ), true );
+		fog.setExplored( camera.worldToTile( x ), camera.worldToTile( y - 2 ), true );
+		fog.setExplored( camera.worldToTile( x + 1 ), camera.worldToTile( y - 2 ), true );
+		fog.setExplored( camera.worldToTile( x + 2 ), camera.worldToTile( y - 2 ), true );
 
-		fog.setExplored( worldToTile( x - 2 ), worldToTile( y - 1 ), true );
-		fog.setExplored( worldToTile( x - 1 ), worldToTile( y - 1 ), true );
-		fog.setExplored( worldToTile( x ), worldToTile( y - 1 ), true );
-		fog.setExplored( worldToTile( x + 1 ), worldToTile( y - 1 ), true );
-		fog.setExplored( worldToTile( x + 2 ), worldToTile( y - 1 ), true );
+		fog.setExplored( camera.worldToTile( x - 2 ), camera.worldToTile( y - 1 ), true );
+		fog.setExplored( camera.worldToTile( x - 1 ), camera.worldToTile( y - 1 ), true );
+		fog.setExplored( camera.worldToTile( x ), camera.worldToTile( y - 1 ), true );
+		fog.setExplored( camera.worldToTile( x + 1 ), camera.worldToTile( y - 1 ), true );
+		fog.setExplored( camera.worldToTile( x + 2 ), camera.worldToTile( y - 1 ), true );
 
-		fog.setExplored( worldToTile( x - 2 ), worldToTile( y ), true );
-		fog.setExplored( worldToTile( x - 1 ), worldToTile( y ), true );
-		fog.setExplored( worldToTile( x ), worldToTile( y ), true );
-		fog.setExplored( worldToTile( x + 1 ), worldToTile( y ), true );
-		fog.setExplored( worldToTile( x + 2 ), worldToTile( y ), true );
+		fog.setExplored( camera.worldToTile( x - 2 ), camera.worldToTile( y ), true );
+		fog.setExplored( camera.worldToTile( x - 1 ), camera.worldToTile( y ), true );
+		fog.setExplored( camera.worldToTile( x ), camera.worldToTile( y ), true );
+		fog.setExplored( camera.worldToTile( x + 1 ), camera.worldToTile( y ), true );
+		fog.setExplored( camera.worldToTile( x + 2 ), camera.worldToTile( y ), true );
 
-		fog.setExplored( worldToTile( x - 2 ), worldToTile( y + 1 ), true );
-		fog.setExplored( worldToTile( x - 1 ), worldToTile( y + 1 ), true );
-		fog.setExplored( worldToTile( x ), worldToTile( y + 1 ), true );
-		fog.setExplored( worldToTile( x + 1 ), worldToTile( y + 1 ), true );
-		fog.setExplored( worldToTile( x + 2 ), worldToTile( y + 1 ), true );
+		fog.setExplored( camera.worldToTile( x - 2 ), camera.worldToTile( y + 1 ), true );
+		fog.setExplored( camera.worldToTile( x - 1 ), camera.worldToTile( y + 1 ), true );
+		fog.setExplored( camera.worldToTile( x ), camera.worldToTile( y + 1 ), true );
+		fog.setExplored( camera.worldToTile( x + 1 ), camera.worldToTile( y + 1 ), true );
+		fog.setExplored( camera.worldToTile( x + 2 ), camera.worldToTile( y + 1 ), true );
 
-		fog.setExplored( worldToTile( x - 2 ), worldToTile( y + 2 ), true );
-		fog.setExplored( worldToTile( x - 1 ), worldToTile( y + 2 ), true );
-		fog.setExplored( worldToTile( x ), worldToTile( y + 2 ), true );
-		fog.setExplored( worldToTile( x + 1 ), worldToTile( y + 2 ), true );
-		fog.setExplored( worldToTile( x + 2 ), worldToTile( y + 2 ), true );
+		fog.setExplored( camera.worldToTile( x - 2 ), camera.worldToTile( y + 2 ), true );
+		fog.setExplored( camera.worldToTile( x - 1 ), camera.worldToTile( y + 2 ), true );
+		fog.setExplored( camera.worldToTile( x ), camera.worldToTile( y + 2 ), true );
+		fog.setExplored( camera.worldToTile( x + 1 ), camera.worldToTile( y + 2 ), true );
+		fog.setExplored( camera.worldToTile( x + 2 ), camera.worldToTile( y + 2 ), true );
 	}
 
 }

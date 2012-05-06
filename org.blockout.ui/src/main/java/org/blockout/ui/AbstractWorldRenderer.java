@@ -17,127 +17,52 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 
 	private final IWorld	world;
 
-	protected float			centerX;
-	protected float			centerY;
-
-	protected final int		width;
-	protected final int		height;
-
-	private final float		halfWidth;
-	private final float		halfHeight;
-
-	protected int			numHorTiles;
-	protected int			numVerTiles;
-
-	private final int		tileSize;
-
-	private int				widthOfset;
-	private int				heightOfset;
+	protected Camera		camera;
 
 	/**
 	 * Constructs a new instance.
 	 * 
 	 * @param world
 	 *            The world used for obtaining tiles.
-	 * @param tileSize
-	 *            The size of a tile measured in pixels.
-	 * @param displayWidth
-	 *            The width of the display measured in pixels.
-	 * @param displayHeight
-	 *            The height of the display measured in pixels.
+	 * @param camera
+	 *            The camera.
 	 * @throws IllegalArgumentException
 	 *             If tileSize, displayWidth or displayHeight or negative.
 	 * @throws NullPointerException
-	 *             If you pass in null as world.
+	 *             If you pass in null as world or camera.
 	 */
-	public AbstractWorldRenderer(final IWorld world, final int tileSize, final int displayWidth, final int displayHeight) {
+	public AbstractWorldRenderer(final IWorld world, final Camera camera) {
 		Preconditions.checkNotNull( world );
-		Preconditions.checkArgument( tileSize > 0, "Tile size must be positive." );
-		Preconditions.checkArgument( displayHeight > 0, "Display height must be positive." );
-		Preconditions.checkArgument( displayWidth > 0, "Display width must be positive." );
+		Preconditions.checkNotNull( camera );
 
-		this.tileSize = tileSize;
 		this.world = world;
-
-		width = displayWidth;
-		height = displayHeight;
-
-		halfWidth = displayWidth / 2f;
-		halfHeight = displayHeight / 2f;
-
-		numHorTiles = (int) Math.ceil( displayWidth / ((double) tileSize) );
-		if ( displayWidth % tileSize == 0 ) {
-			numHorTiles++;
-		}
-		numVerTiles = (int) Math.ceil( displayHeight / ((double) tileSize) );
-		if ( displayHeight % tileSize == 0 ) {
-			numVerTiles++;
-		}
-	}
-
-	@Override
-	public void setViewCenter( final float x, final float y ) {
-		centerX = x;
-		centerY = y;
-	}
-
-	private int convertY( final int y ) {
-		return height - y;
-	}
-
-	protected int worldToTile( final float worldCoordinate ) {
-		if ( worldCoordinate > 0 ) {
-			return (int) worldCoordinate;
-		}
-		return (int) worldCoordinate - 1;
+		this.camera = camera;
 	}
 
 	@Override
 	public void render( final Graphics g ) {
 
-		int startTileX = worldToTile( centerX - (halfWidth / tileSize) );
-		int startTileY = worldToTile( centerY - (halfHeight / tileSize) );
-
-		float tmpWidth = (centerX - (halfWidth / tileSize)) % 1;
-		if ( tmpWidth < 0 ) {
-			tmpWidth++;
-		}
-		widthOfset = (int) (tmpWidth * tileSize);
-		float tmpHeight = (centerY - (halfHeight / tileSize)) % 1;
-		if ( tmpHeight < 0 ) {
-			tmpHeight++;
-		}
-		heightOfset = (int) (tmpHeight * tileSize);
+		int tileSize = camera.getTileSize();
+		int startTileX = camera.getStartTileX();
+		int startTileY = camera.getStartTileY();
 
 		int curX;
-		int curY = -heightOfset;
-		for ( int y = 0; y < numVerTiles; y++ ) {
-			curX = -widthOfset;
-			for ( int x = 0; x < numHorTiles; x++ ) {
+		int curY = -camera.getHeightOfset();
+		for ( int y = 0; y < camera.getNumVerTiles(); y++ ) {
+			curX = -camera.getWidthOfset();
+			for ( int x = 0; x < camera.getNumHorTiles(); x++ ) {
 
 				Tile tile = world.getTile( startTileX + x, startTileY + y );
 				if ( tile != null ) {
-					renderTile( tile, startTileX + x, startTileY + y, curX, convertY( curY ) - tileSize );
+					renderTile( tile, startTileX + x, startTileY + y, curX, camera.convertY( curY ) - tileSize );
 				} else {
-					renderMissingTile( startTileX + x, startTileY + y, curX, convertY( curY ) - tileSize );
+					renderMissingTile( startTileX + x, startTileY + y, curX, camera.convertY( curY ) - tileSize );
 				}
 
 				curX += tileSize;
 			}
 			curY += tileSize;
 		}
-	}
-
-	@Override
-	public float screenToWorldX( final int x ) {
-		float ofset = x / (float) tileSize;
-		return centerX;
-	}
-
-	@Override
-	public float screenToWorldY( final int x ) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	/**

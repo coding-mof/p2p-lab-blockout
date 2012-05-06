@@ -1,4 +1,4 @@
-package org.blockout.world;
+package org.blockout.world.event;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

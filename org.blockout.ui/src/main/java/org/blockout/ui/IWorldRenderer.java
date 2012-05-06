@@ -12,21 +12,6 @@ import org.newdawn.slick.Graphics;
 public interface IWorldRenderer {
 
 	/**
-	 * Sets the center of the view that gets rendered by this class.
-	 * 
-	 * @param x
-	 *            The x coordinate of the center relative to the world's origin.
-	 *            E.g. 1.5f is in the mid of the tile with the x coordinate 1.
-	 * @param y
-	 *            The y coordinate of the center relative to the world's origin.
-	 */
-	public abstract void setViewCenter( final float x, final float y );
-
-	public abstract float screenToWorldX( int x );
-
-	public abstract float screenToWorldY( int x );
-
-	/**
 	 * Renders the world around the current view center.
 	 * 
 	 * @param g

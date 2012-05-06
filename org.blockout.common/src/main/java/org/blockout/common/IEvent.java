@@ -32,6 +32,8 @@ public interface IEvent<T extends IEvent<T>> {
 	 * event instances with an unique UUID on each invocation. To check whether
 	 * a given event is the inverse of another use {@link #isInverseOf(IEvent)}.
 	 * 
+	 * Not really meaningful for AttackEvents, etc.
+	 * 
 	 * @return
 	 */
 	public T getInverse();

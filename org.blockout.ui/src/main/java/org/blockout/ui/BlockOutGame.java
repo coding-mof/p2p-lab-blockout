@@ -32,6 +32,6 @@ public class BlockOutGame extends StateBasedGame {
 			addState( state );
 		}
 
-		this.enterState( 1 );
+		this.enterState( GameStates.StartMenu.ordinal() );
 	}
 }

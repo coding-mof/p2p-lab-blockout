@@ -4,9 +4,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.engine.ISpriteManager;
+import org.blockout.logic.FogOfWar;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
-import org.blockout.world.PlayerMoveEvent;
+import org.blockout.world.event.PlayerMoveEvent;
 import org.blockout.world.state.IStateMachine;
 import org.bushe.swing.event.EventTopicSubscriber;
 import org.newdawn.slick.GameContainer;
@@ -36,7 +37,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 	private Nifty						nifty;
 
-	// How it takes to move the player to a new position. measured in
+	// How long it takes to move the player to a new position. measured in
 	// milliseconds
 	private static final float			PLAYER_MOVE_TIME	= 500.0f;
 
@@ -55,14 +56,16 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 	private final LocalGameState		gameState;
 	private final IStateMachine			stateMachine;
+	protected Camera					camera;
 
 	@Inject
 	public InGameGameState(final ISpriteManager spriteManager, final IWorld world, final InputHandler inputHandler,
-			final LocalGameState gameState, final IStateMachine stateMachine) {
+			final LocalGameState gameState, final IStateMachine stateMachine, final Camera camera, final FogOfWar fog) {
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
 		this.stateMachine = stateMachine;
-		worldRenderer = new FogOfWarWorldRenderer( spriteManager, world, 32, 1024, 768 );
+		this.camera = camera;
+		worldRenderer = new FogOfWarWorldRenderer( spriteManager, world, camera, gameState, fog );
 	}
 
 	@Override
@@ -74,7 +77,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 	@Override
 	public int getID() {
-		return 2;
+		return GameStates.InGame.ordinal();
 	}
 
 	@Override
@@ -87,6 +90,9 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	@Override
 	protected void enterState( final GameContainer container, final StateBasedGame game ) throws SlickException {
 		getNifty().gotoScreen( "start" );
+
+		container.getInput().addKeyListener( inputHandler );
+		container.getInput().addMouseListener( inputHandler );
 	}
 
 	@Override
@@ -94,8 +100,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 		initNifty( container, game, new PlainSlickInputSystem() );
 		getNifty().gotoScreen( "start" );
 
-		container.getInput().addKeyListener( inputHandler );
-		container.getInput().addMouseListener( inputHandler );
 	}
 
 	@Override
@@ -119,7 +123,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 					} );
 			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
 		}
-
 	}
 
 	private void updatePlayerPosition( final GameContainer container, final int deltaMillis ) {
@@ -168,7 +171,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 			}
 
 		}
-		worldRenderer.setViewCenter( centerX + 0.5f, centerY + 0.5f );
+		camera.setViewCenter( centerX + 0.5f, centerY + 0.5f );
 	}
 
 	private void updateHUD() {
@@ -207,8 +210,10 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	}
 
 	@Override
-	protected void leaveState( final GameContainer arg0, final StateBasedGame arg1 ) throws SlickException {
+	protected void leaveState( final GameContainer container, final StateBasedGame arg1 ) throws SlickException {
 		// TODO Auto-generated method stub
 
+		container.getInput().removeKeyListener( inputHandler );
+		container.getInput().removeMouseListener( inputHandler );
 	}
 }

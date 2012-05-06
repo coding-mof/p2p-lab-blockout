@@ -10,7 +10,7 @@ import javax.inject.Named;
 
 import org.blockout.logic.PlayerManager;
 import org.blockout.world.LocalGameState;
-import org.blockout.world.Player;
+import org.blockout.world.entity.Player;
 import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
@@ -123,7 +123,7 @@ public class ProfileScreenController implements StateBasedScreenController {
 	private void startGame( final Player p ) {
 		System.out.println( "Starting game with: " + p.getName() );
 		gameState.setPlayer( p );
-		game.enterState( 2, new FadeOutTransition(), new FadeInTransition() );
+		game.enterState( GameStates.InGame.ordinal(), new FadeOutTransition(), new FadeInTransition() );
 	}
 
 	@Override

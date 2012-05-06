@@ -1,13 +1,29 @@
 package org.blockout.ui;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.world.LocalGameState;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
+import org.newdawn.slick.util.pathfinding.Path;
+import org.newdawn.slick.util.pathfinding.Path.Step;
+import org.newdawn.slick.util.pathfinding.PathFinder;
 
 @Named
 public class InputHandler implements MouseListener, KeyListener {
+
+	protected Camera			camera;
+	protected PathFinder		pathFinder;
+	protected LocalGameState	gameState;
+
+	@Inject
+	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState) {
+		this.camera = camera;
+		this.pathFinder = pathFinder;
+		this.gameState = gameState;
+	}
 
 	@Override
 	public void inputEnded() {
@@ -23,8 +39,7 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Override
 	public boolean isAcceptingInput() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -47,8 +62,6 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Override
 	public void mouseClicked( final int button, final int x, final int y, final int clickCount ) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -65,14 +78,33 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Override
 	public void mousePressed( final int button, final int x, final int y ) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void mouseReleased( final int button, final int x, final int y ) {
-		// TODO Auto-generated method stub
+		int tileX = camera.worldToTile( camera.screenToWorldX( x ) );
+		int tileY = camera.worldToTile( camera.screenToWorldY( y ) );
+		int centerX = camera.worldToTile( camera.getCenterX() );
+		int centerY = camera.worldToTile( camera.getCenterY() );
 
+		int fromX = centerX - camera.getStartTileX();
+		int fromY = centerY - camera.getStartTileY();
+		int toX = tileX - camera.getStartTileX();
+		int toY = tileY - camera.getStartTileY();
+
+		Path path = pathFinder.findPath( gameState.getPlayer(), fromX, fromY, toX, toY );
+
+		if ( path == null ) {
+			System.out.println( "No path available." );
+			return;
+		}
+		System.out.println( "Path: " + path );
+		for ( int i = 0; i < path.getLength(); i++ ) {
+			Step step = path.getStep( i );
+			System.out.println( "  Tile: (" + (step.getX() + camera.getStartTileX()) + ","
+					+ (step.getY() + camera.getStartTileY()) + ")" );
+		}
 	}
 
 	@Override

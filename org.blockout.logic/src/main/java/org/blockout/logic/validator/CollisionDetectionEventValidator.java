@@ -1,12 +1,12 @@
-package org.blockout.logic;
+package org.blockout.logic.validator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.IEvent;
 import org.blockout.world.IWorld;
-import org.blockout.world.PlayerMoveEvent;
 import org.blockout.world.Tile;
+import org.blockout.world.event.PlayerMoveEvent;
 import org.blockout.world.state.IEventValidator;
 import org.blockout.world.state.ValidationResult;
 import org.slf4j.Logger;
@@ -48,9 +48,9 @@ public class CollisionDetectionEventValidator implements IEventValidator {
 			}
 			// Player can't walk over other objects (Players, Monsters, Crates,
 			// etc.)
-			if ( tile.getObjectOnTile() != null ) {
+			if ( tile.getEntityOnTile() != null ) {
 				if ( logger.isDebugEnabled() ) {
-					logger.debug( "Tile blocked by object: " + tile.getObjectOnTile() );
+					logger.debug( "Tile blocked by object: " + tile.getEntityOnTile() );
 				}
 				return ValidationResult.Invalid;
 			}

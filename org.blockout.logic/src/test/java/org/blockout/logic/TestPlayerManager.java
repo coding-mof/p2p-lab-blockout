@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.blockout.common.IOUtils;
-import org.blockout.world.Player;
+import org.blockout.world.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
 
