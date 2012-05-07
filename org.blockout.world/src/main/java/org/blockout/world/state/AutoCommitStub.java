@@ -1,10 +1,8 @@
 package org.blockout.world.state;
 
-import javax.inject.Named;
-
 import org.blockout.common.IEvent;
 
-@Named
+//@Named
 public class AutoCommitStub implements IStateMachineListener {
 
 	private IStateMachine	stateMachine;
