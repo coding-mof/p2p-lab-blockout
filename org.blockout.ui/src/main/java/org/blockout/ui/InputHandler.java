@@ -9,7 +9,9 @@ import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.Tile;
 import org.blockout.world.entity.Actor;
+import org.blockout.world.entity.Crate;
 import org.blockout.world.event.AttackEvent;
+import org.blockout.world.event.CrateOpenedEvent;
 import org.blockout.world.state.IStateMachine;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;
@@ -133,17 +135,25 @@ public class InputHandler implements MouseListener, KeyListener {
 		int tileY = camera.worldToTile( camera.screenToWorldY( y ) );
 		int centerX = camera.worldToTile( camera.getCenterX() );
 		int centerY = camera.worldToTile( camera.getCenterY() );
+
+		// Handle Attacks
 		Tile tile = world.getTile( tileX, tileY );
 		if ( tile != null && tile.getEntityOnTile() instanceof Actor && areNeighbours( tileX, tileY, centerX, centerY ) ) {
 			stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile() ) );
 			return;
 		}
 
+		// Handle Crates
+		if ( tile != null && tile.getEntityOnTile() instanceof Crate && areNeighbours( tileX, tileY, centerX, centerY ) ) {
+			stateMachine.pushEvent( new CrateOpenedEvent( gameState.getPlayer(), (Crate) tile.getEntityOnTile() ) );
+			return;
+		}
+
+		// Handle Movements
 		int fromX = centerX - camera.getStartTileX();
 		int fromY = centerY - camera.getStartTileY();
 		int toX = tileX - camera.getStartTileX();
 		int toY = tileY - camera.getStartTileY();
-
 		Path path = pathFinder.findPath( gameState.getPlayer(), fromX, fromY, toX, toY );
 		Path worldPath = new Path();
 		if ( path != null ) {

@@ -34,6 +34,7 @@ public class AttackHandler implements IEventHandler {
 
 		int damage = ae.getAggressor().getStrength() - ae.getVictim().getArmor();
 		if ( damage > 0 ) {
+			logger.debug( "Doing " + damage + " damage to victim." );
 			int healthLeft = ae.getVictim().getCurrentHealth() - damage;
 			if ( healthLeft <= 0 ) {
 				logger.info( "Actor (Victim) died: " + ae.getVictim() );
@@ -45,6 +46,7 @@ public class AttackHandler implements IEventHandler {
 
 		damage = ae.getVictim().getStrength() - ae.getAggressor().getArmor();
 		if ( damage > 0 ) {
+			logger.debug( "Doing " + damage + " aggressor to victim." );
 			int healthLeft = ae.getAggressor().getCurrentHealth() - damage;
 			if ( healthLeft <= 0 ) {
 				logger.info( "Actor (Aggressor) died: " + ae.getAggressor() );

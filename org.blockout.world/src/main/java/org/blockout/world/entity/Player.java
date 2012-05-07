@@ -66,4 +66,9 @@ public class Player extends Actor {
 	public int getArmor() {
 		return 30 + getLevel() * 10;
 	}
+
+	@Override
+	public String toString() {
+		return "Player[name='" + getName() + "']";
+	}
 }
