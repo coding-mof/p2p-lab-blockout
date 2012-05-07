@@ -26,6 +26,7 @@ import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
  * 
  * @author Marc-Christian Schulze
  * 
+ * @see GameStates#InGame
  */
 @Named
 public final class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {

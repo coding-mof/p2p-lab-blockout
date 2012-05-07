@@ -12,6 +12,13 @@ import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class implements the logic for handling attacks between {@link Actor}s.
+ * 
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class AttackHandler implements IEventHandler {
 

@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.blockout.common.Tupel;
+import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Monster;
@@ -67,7 +67,7 @@ public class StaticTMXWorld implements IWorld {
 	}
 
 	@Override
-	public Tupel findTile(Entity entity) {
+	public TileCoordinate findTile(Entity entity) {
 		// TODO Auto-generated method stub
 		return null;
 	}

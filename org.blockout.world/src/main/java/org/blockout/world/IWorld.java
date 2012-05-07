@@ -1,6 +1,6 @@
 package org.blockout.world;
 
-import org.blockout.common.Tupel;
+import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 
 /**
@@ -32,5 +32,5 @@ public interface IWorld {
 	 * @return Tupel with the coordinates of the tile in the world containing the entity
 	 * 			null if the current Chunk doesn't contain such an entity
 	 */
-	public Tupel findTile(Entity entity);
+	public TileCoordinate findTile(Entity entity);
 }

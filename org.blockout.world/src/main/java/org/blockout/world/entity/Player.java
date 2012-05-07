@@ -48,7 +48,7 @@ public class Player extends Actor {
 	 */
 	public void setExperience( final int experience ) {
 		Preconditions.checkArgument( experience >= 0,
-				"Player's experience can only be greater or equal to zero. Got %d.", experience );
+				"Player's experience can only be greater or equal to zero. Got %s.", experience );
 		this.experience = experience;
 	}
 

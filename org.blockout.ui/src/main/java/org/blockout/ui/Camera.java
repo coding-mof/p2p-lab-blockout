@@ -4,6 +4,17 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * This class is responsible for computing the view frustum, visible tiles,
+ * rendering ofsets, etc. Since this class is heavily used during rendering
+ * synchronization might lead to performance decrease. Therefore this class is
+ * not itself synchronized but allows the using code to lock the camera settings
+ * using a lightweight locking mechanism using {@link Camera#lock()} and
+ * {@link Camera#unlock()}.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class Camera {
 
 	protected float				centerX;
@@ -60,25 +71,18 @@ public class Camera {
 
 	public float getCenterX() {
 		return centerX;
-
 	}
 
 	public float getCenterY() {
-
 		return centerY;
-
 	}
 
 	public int getWidth() {
-
 		return width;
-
 	}
 
 	public int getHeight() {
-
 		return height;
-
 	}
 
 	public float getHalfWidth() {

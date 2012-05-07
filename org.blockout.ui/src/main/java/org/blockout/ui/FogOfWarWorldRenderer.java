@@ -10,8 +10,8 @@ import org.blockout.logic.FogOfWar;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.Tile;
-import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Entity;
+import org.blockout.world.entity.Monster;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.geom.Rectangle;
@@ -200,9 +200,9 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 					Entity e = tile.getEntityOnTile();
 					if ( e != null && e != gameState.getPlayer() ) {
 
-						if ( e instanceof Actor ) {
+						if ( e instanceof Monster ) {
 
-							Actor actor = (Actor) e;
+							Monster actor = (Monster) e;
 							if ( actor.getCurrentHealth() < actor.getMaxHealth() ) {
 								int width = (int) (20f * actor.getCurrentHealth() / actor.getMaxHealth());
 

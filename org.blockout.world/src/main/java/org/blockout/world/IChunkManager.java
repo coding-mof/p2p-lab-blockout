@@ -1,6 +1,6 @@
 package org.blockout.world;
 
-import org.blockout.common.Tupel;
+import org.blockout.common.TileCoordinate;
 import org.blockout.world.state.IStateMachineListener;
 
 /**
@@ -17,5 +17,5 @@ public interface IChunkManager extends IStateMachineListener {
 	 * @param position position if the requested Chunk
 	 * @return Chunk at the requested position
 	 */
-	public Chunk getChunk(Tupel position);
+	public Chunk getChunk(TileCoordinate position);
 }

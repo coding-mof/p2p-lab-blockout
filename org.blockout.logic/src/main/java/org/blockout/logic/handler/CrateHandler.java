@@ -8,6 +8,14 @@ import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class implements the logic for handling {@link CrateOpenedEvent}s. It's
+ * responsible for triggering a sound and dropping the items which are in the
+ * crate.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class CrateHandler implements IEventHandler {
 
@@ -31,5 +39,4 @@ public class CrateHandler implements IEventHandler {
 
 		logger.info( "Crate " + coa.getCrate() + " opened by " + coa.getPlayer() );
 	}
-
 }

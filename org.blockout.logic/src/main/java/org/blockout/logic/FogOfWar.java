@@ -6,6 +6,14 @@ import java.util.Map;
 
 import javax.inject.Named;
 
+/**
+ * This class is a data structure for storing the Fog Of War information. It
+ * allows to store fog information for all 2D coordinates in the range from
+ * {@link Integer#MIN_VALUE}+1 up to {@link Integer#MAX_VALUE}.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class FogOfWar {
 

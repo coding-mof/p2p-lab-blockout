@@ -18,6 +18,15 @@ import org.blockout.world.state.IStateMachineListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class caches commit events until there duration has been expired. The
+ * cached events are then forwarded through the {@link IEventHandler} interface.
+ * This enables the events to take some time until completion, e.g. walking from
+ * tile to tile.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class DelayedEventDispatcher implements IStateMachineListener {
 

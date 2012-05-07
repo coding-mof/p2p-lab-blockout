@@ -1,6 +1,6 @@
 package org.blockout.world;
 
-import org.blockout.common.Tupel;
+import org.blockout.common.TileCoordinate;
 
 import com.google.common.base.Preconditions;
 
@@ -10,10 +10,10 @@ import com.google.common.base.Preconditions;
  */
 public class Chunk {
 
-	public static final int CHUNK_SIZE = 48;
+	public static final int			CHUNK_SIZE	= 48;
 
-	private Tupel pos;
-	private Tile[][] tiles;
+	private final TileCoordinate	pos;
+	private Tile[][]				tiles;
 
 	/**
 	 * 
@@ -26,28 +26,24 @@ public class Chunk {
 	 * @throws IllegalArgumentException
 	 *             if tiles is not a NxN matrix or null
 	 */
-	public Chunk(final int x, final int y, final Tile[][] tiles)
-			throws IllegalArgumentException {
-		setTiles(tiles);
-		pos = new Tupel(x, y);
+	public Chunk(final int x, final int y, final Tile[][] tiles) throws IllegalArgumentException {
+		setTiles( tiles );
+		pos = new TileCoordinate( x, y );
 	}
-	
+
 	/**
 	 * 
 	 * @param position
-	 * 				position  of the Chunk in the World
+	 *            position of the Chunk in the World
 	 * @param tiles
-	 *            	tiles contained by the chunk should be an NxN matrix or null
+	 *            tiles contained by the chunk should be an NxN matrix or null
 	 * @throws IllegalArgumentException
-	 *             	if tiles is not a NxN matrix or null
+	 *             if tiles is not a NxN matrix or null
 	 */
-	public Chunk(final Tupel position, final Tile[][] tiles)
-			throws IllegalArgumentException {
-		setTiles(tiles);
+	public Chunk(final TileCoordinate position, final Tile[][] tiles) throws IllegalArgumentException {
+		setTiles( tiles );
 		pos = position;
 	}
-
-	
 
 	/**
 	 * @param x
@@ -64,11 +60,11 @@ public class Chunk {
 	public int getY() {
 		return pos.getY();
 	}
-	
+
 	/**
 	 * @return the position of the Chunk in the world
 	 */
-	public Tupel getPosition() {
+	public TileCoordinate getPosition() {
 		return pos;
 	}
 
@@ -80,15 +76,14 @@ public class Chunk {
 	 * @throws IllegalArgumentException
 	 *             If the given array/matrix is not symmetric.
 	 */
-	public void setTiles(final Tile[][] tiles) {
-		Preconditions.checkNotNull(tiles);
-		if (tiles.length != CHUNK_SIZE) {
-			throw new IllegalArgumentException("Tile matrix is not symetric");
+	public void setTiles( final Tile[][] tiles ) {
+		Preconditions.checkNotNull( tiles );
+		if ( tiles.length != CHUNK_SIZE ) {
+			throw new IllegalArgumentException( "Tile matrix is not symetric" );
 		}
-		for (Tile[] tile : tiles) {
-			if (tile.length != CHUNK_SIZE) {
-				throw new IllegalArgumentException(
-						"Tile matrix is not symetric");
+		for ( Tile[] tile : tiles ) {
+			if ( tile.length != CHUNK_SIZE ) {
+				throw new IllegalArgumentException( "Tile matrix is not symetric" );
 			}
 		}
 		this.tiles = tiles;
@@ -104,9 +99,9 @@ public class Chunk {
 	 * @throws NullPointerException
 	 *             if tiles are still null
 	 */
-	public Tile getTile(final int x, final int y) {
-		int x2= (x<0)? CHUNK_SIZE+x:x;
-		int y2= (x<0)? CHUNK_SIZE+y:y;
+	public Tile getTile( final int x, final int y ) {
+		int x2 = (x < 0) ? CHUNK_SIZE + x : x;
+		int y2 = (x < 0) ? CHUNK_SIZE + y : y;
 		return tiles[x2][y2];
 	}
 

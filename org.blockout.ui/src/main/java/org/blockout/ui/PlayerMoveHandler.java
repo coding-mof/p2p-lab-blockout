@@ -12,6 +12,15 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.util.pathfinding.Path;
 import org.newdawn.slick.util.pathfinding.Path.Step;
 
+/**
+ * This class is responsible for handling {@link PlayerMoveEvent}s. It moves the
+ * player object using floating values between the tiles. Furthermore it allows
+ * the {@link InputHandler} to set a desired {@link Path} which then gets
+ * translated into several {@link PlayerMoveEvent}s and processed sequentially.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class PlayerMoveHandler implements IEventHandler {
 

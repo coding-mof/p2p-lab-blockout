@@ -3,6 +3,7 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.common.IEvent;
 import org.blockout.engine.ISpriteManager;
 import org.blockout.engine.SpriteType;
 import org.blockout.world.IWorld;
@@ -24,6 +25,13 @@ import org.newdawn.slick.util.pathfinding.PathFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is responsible for converting user interactions to {@link IEvent}s
+ * for the underlying {@link IStateMachine}.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class InputHandler implements MouseListener, KeyListener {
 

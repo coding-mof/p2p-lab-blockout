@@ -1,6 +1,6 @@
 package org.blockout.world;
 
-import org.blockout.common.Tupel;
+import org.blockout.common.TileCoordinate;
 
 /**
  * 
@@ -15,7 +15,7 @@ public class ChunkGenerator {
 	 * @param size size of the Tilematrix
 	 * @return an Chunk with the given coordinates an a Tilematrix sizeXsize
 	 */
-	public static Chunk generateBasicChunk( Tupel pos, int size ){
+	public static Chunk generateBasicChunk( TileCoordinate pos, int size ){
 		Tile[][] tiles = new Tile[size][size];
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {

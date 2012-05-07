@@ -5,9 +5,8 @@ import java.util.Hashtable;
 import javax.inject.Named;
 
 import org.blockout.common.IEvent;
-import org.blockout.common.Tupel;
+import org.blockout.common.TileCoordinate;
 import org.blockout.world.state.IStateMachine;
-import org.blockout.world.state.IStateMachineListener;
 
 /**
  * 
@@ -15,14 +14,13 @@ import org.blockout.world.state.IStateMachineListener;
  */
 @Named
 public class DefaultChunkManager implements IChunkManager {
-	
-	private IStateMachine stateMachine;
-	
-	private Hashtable<Tupel, Chunk> chunks;
-	
+
+	private IStateMachine						stateMachine;
+
+	private Hashtable<TileCoordinate, Chunk>	chunks;
 
 	@Override
-	public void init(IStateMachine stateMachine) {
+	public void init( final IStateMachine stateMachine ) {
 		this.stateMachine = stateMachine;
 	}
 
@@ -30,17 +28,17 @@ public class DefaultChunkManager implements IChunkManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void eventCommitted(IEvent<?> event) {
+	public void eventCommitted( final IEvent<?> event ) {
 		// TODO commitedEvent
-		
+
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void eventPushed(IEvent<?> event) {
-		stateMachine.commitEvent(event);
+	public void eventPushed( final IEvent<?> event ) {
+		stateMachine.commitEvent( event );
 		// TODO pushedEvent
 	}
 
@@ -48,17 +46,17 @@ public class DefaultChunkManager implements IChunkManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void eventRolledBack(IEvent<?> event) {
-		// TODO roledBack		
+	public void eventRolledBack( final IEvent<?> event ) {
+		// TODO roledBack
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Chunk getChunk(Tupel position) {
-		Chunk chunk = ChunkGenerator.generateBasicChunk(position, Chunk.CHUNK_SIZE);
-		chunks.put(chunk.getPosition(), chunk);
+	public Chunk getChunk( final TileCoordinate position ) {
+		Chunk chunk = ChunkGenerator.generateBasicChunk( position, Chunk.CHUNK_SIZE );
+		chunks.put( chunk.getPosition(), chunk );
 		return chunk;
 	}
 
