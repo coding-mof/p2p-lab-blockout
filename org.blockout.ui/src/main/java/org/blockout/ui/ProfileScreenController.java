@@ -15,6 +15,8 @@ import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.state.transition.FadeOutTransition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.NiftyEventSubscriber;
@@ -27,6 +29,11 @@ import de.lessvoid.nifty.screen.Screen;
 
 @Named
 public class ProfileScreenController implements StateBasedScreenController {
+
+	private static final Logger		logger;
+	static {
+		logger = LoggerFactory.getLogger( ProfileScreenController.class );
+	}
 
 	private final LocalGameState	gameState;
 	private final PlayerManager		playerManager;
@@ -121,7 +128,7 @@ public class ProfileScreenController implements StateBasedScreenController {
 	}
 
 	private void startGame( final Player p ) {
-		System.out.println( "Starting game with: " + p.getName() );
+		logger.info( "Starting game as: " + p.getName() );
 		gameState.setPlayer( p );
 		game.enterState( GameStates.InGame.ordinal(), new FadeOutTransition(), new FadeInTransition() );
 	}

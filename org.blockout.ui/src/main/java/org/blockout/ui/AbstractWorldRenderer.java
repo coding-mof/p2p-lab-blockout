@@ -42,42 +42,49 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 	@Override
 	public void render( final Graphics g ) {
 
-		int tileSize = camera.getTileSize();
-		int startTileX = camera.getStartTileX();
-		int startTileY = camera.getStartTileY();
+		camera.lock();
+		try {
 
-		int curX;
-		int curY = -camera.getHeightOfset();
-		for ( int y = 0; y < camera.getNumVerTiles(); y++ ) {
-			curX = -camera.getWidthOfset();
-			for ( int x = 0; x < camera.getNumHorTiles(); x++ ) {
+			int tileSize = camera.getTileSize();
+			int startTileX = camera.getStartTileX();
+			int startTileY = camera.getStartTileY();
 
-				Tile tile = world.getTile( startTileX + x, startTileY + y );
-				if ( tile != null ) {
-					renderTile( g, tile, startTileX + x, startTileY + y, curX, camera.convertY( curY ) - tileSize );
-				} else {
-					renderMissingTile( g, startTileX + x, startTileY + y, curX, camera.convertY( curY ) - tileSize );
+			int curX;
+			int curY = -camera.getHeightOfset();
+			for ( int y = 0; y < camera.getNumVerTiles(); y++ ) {
+				curX = -camera.getWidthOfset();
+				for ( int x = 0; x < camera.getNumHorTiles(); x++ ) {
+
+					Tile tile = world.getTile( startTileX + x, startTileY + y );
+					if ( tile != null ) {
+						renderTile( g, tile, startTileX + x, startTileY + y, curX, camera.convertY( curY ) - tileSize );
+					} else {
+						renderMissingTile( g, startTileX + x, startTileY + y, curX, camera.convertY( curY ) - tileSize );
+					}
+
+					curX += tileSize;
 				}
-
-				curX += tileSize;
+				curY += tileSize;
 			}
-			curY += tileSize;
-		}
 
-		curY = -camera.getHeightOfset();
-		for ( int y = 0; y < camera.getNumVerTiles(); y++ ) {
-			curX = -camera.getWidthOfset();
-			for ( int x = 0; x < camera.getNumHorTiles(); x++ ) {
+			curY = -camera.getHeightOfset();
+			for ( int y = 0; y < camera.getNumVerTiles(); y++ ) {
+				curX = -camera.getWidthOfset();
+				for ( int x = 0; x < camera.getNumHorTiles(); x++ ) {
 
-				Tile tile = world.getTile( startTileX + x, startTileY + y );
-				if ( tile != null ) {
-					renderTileOverlay( g, tile, startTileX + x, startTileY + y, curX, camera.convertY( curY )
-							- tileSize );
+					Tile tile = world.getTile( startTileX + x, startTileY + y );
+					if ( tile != null ) {
+						renderTileOverlay( g, tile, startTileX + x, startTileY + y, curX, camera.convertY( curY )
+								- tileSize );
+					}
+
+					curX += tileSize;
 				}
+				curY += tileSize;
 
-				curX += tileSize;
 			}
-			curY += tileSize;
+		} finally {
+			camera.unlock();
 		}
 	}
 

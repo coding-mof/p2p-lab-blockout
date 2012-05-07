@@ -197,11 +197,13 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 						if ( e instanceof Actor ) {
 
 							Actor actor = (Actor) e;
-							int width = (int) (20f * actor.getCurrentHealth() / actor.getMaxHealth());
+							if ( actor.getCurrentHealth() < actor.getMaxHealth() ) {
+								int width = (int) (20f * actor.getCurrentHealth() / actor.getMaxHealth());
 
-							g.setColor( org.newdawn.slick.Color.green );
-							g.fill( new Rectangle( screenX + 6, screenY - 2, width, 4 ) );
-							g.drawRect( screenX + 6, screenY - 2, 20, 4 );
+								g.setColor( org.newdawn.slick.Color.green );
+								g.fill( new Rectangle( screenX + 6, screenY - 2, width, 4 ) );
+								g.drawRect( screenX + 6, screenY - 2, 20, 4 );
+							}
 						}
 					}
 				}

@@ -32,7 +32,7 @@ public class InputHandler implements MouseListener, KeyListener {
 	protected Camera			camera;
 	protected PathFinder		pathFinder;
 	protected LocalGameState	gameState;
-	protected PlayerController	playerController;
+	protected PlayerMoveHandler	playerController;
 	protected IStateMachine		stateMachine;
 	protected IWorld			world;
 	protected GameContainer		container;
@@ -40,7 +40,7 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Inject
 	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
-			final PlayerController playerController, final IStateMachine stateMachine, final IWorld world,
+			final PlayerMoveHandler playerController, final IStateMachine stateMachine, final IWorld world,
 			final ISpriteManager spriteManager) {
 		this.camera = camera;
 		this.pathFinder = pathFinder;

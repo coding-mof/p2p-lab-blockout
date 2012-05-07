@@ -1,27 +1,31 @@
 package org.blockout.ui;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.google.common.base.Preconditions;
 
 public class Camera {
 
-	protected float	centerX;
-	protected float	centerY;
+	protected float				centerX;
+	protected float				centerY;
 
-	protected int	width;
-	protected int	height;
+	protected int				width;
+	protected int				height;
 
-	protected float	halfWidth;
-	protected float	halfHeight;
+	protected float				halfWidth;
+	protected float				halfHeight;
 
-	protected int	numHorTiles;
-	protected int	numVerTiles;
+	protected int				numHorTiles;
+	protected int				numVerTiles;
 
-	protected int	tileSize;
+	protected int				tileSize;
 
-	protected int	widthOfset;
-	protected int	heightOfset;
-	private int		startTileX;
-	private int		startTileY;
+	protected int				widthOfset;
+	protected int				heightOfset;
+	private int					startTileX;
+	private int					startTileY;
+
+	private final ReentrantLock	lock	= new ReentrantLock();
 
 	public Camera(final int tileSize, final int displayWidth, final int displayHeight) {
 		Preconditions.checkArgument( tileSize > 0, "Tile size must be positive." );
@@ -46,20 +50,35 @@ public class Camera {
 		}
 	}
 
+	public void lock() {
+		lock.lock();
+	}
+
+	public void unlock() {
+		lock.unlock();
+	}
+
 	public float getCenterX() {
 		return centerX;
+
 	}
 
 	public float getCenterY() {
+
 		return centerY;
+
 	}
 
 	public int getWidth() {
+
 		return width;
+
 	}
 
 	public int getHeight() {
+
 		return height;
+
 	}
 
 	public float getHalfWidth() {

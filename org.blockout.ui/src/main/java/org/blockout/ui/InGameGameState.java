@@ -43,11 +43,11 @@ public final class InGameGameState extends NiftyOverlayBasicGameState implements
 	protected final LocalGameState		gameState;
 	protected final InputHandler		inputHandler;
 	protected final Camera				camera;
-	protected final PlayerController	playerController;
+	protected final PlayerMoveHandler	playerController;
 
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
-			final LocalGameState gameState, final Camera camera, final PlayerController playerController) {
+			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController) {
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
 		this.camera = camera;
