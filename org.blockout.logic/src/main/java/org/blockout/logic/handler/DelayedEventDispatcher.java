@@ -26,7 +26,7 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 		logger = LoggerFactory.getLogger( DelayedEventDispatcher.class );
 	}
 
-	private static final int				THREAD_POOL_SIZE	= 3;
+	private static final int				THREAD_POOL_SIZE	= Runtime.getRuntime().availableProcessors();
 	protected ScheduledThreadPoolExecutor	executor;
 	protected List<IEventHandler>			eventHandler;
 	protected Map<IEvent<?>, Long>			activeEvents;
@@ -35,6 +35,7 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 	public DelayedEventDispatcher() {
 		eventHandler = new CopyOnWriteArrayList<IEventHandler>();
 		activeEvents = Collections.synchronizedMap( new HashMap<IEvent<?>, Long>() );
+		logger.info( "Starting " + getClass().getName() + " with " + THREAD_POOL_SIZE + " threads." );
 		executor = new ScheduledThreadPoolExecutor( THREAD_POOL_SIZE );
 	}
 

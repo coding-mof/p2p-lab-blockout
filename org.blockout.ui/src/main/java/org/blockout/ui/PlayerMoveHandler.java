@@ -64,8 +64,10 @@ public class PlayerMoveHandler implements IEventHandler {
 			this.path = path;
 			nextStep = 0;
 			Step step0 = getNextStep();
+			int oldX = step0 == null ? 0 : step0.getX();
+			int oldY = step0 == null ? 0 : step0.getY();
 			nextStep++;
-			raiseEvent( stateMachine, getNextStep(), step0.getX(), step0.getY() );
+			raiseEvent( stateMachine, getNextStep(), oldX, oldY );
 		}
 	}
 

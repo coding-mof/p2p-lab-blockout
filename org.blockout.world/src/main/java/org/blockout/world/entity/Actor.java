@@ -81,4 +81,7 @@ public abstract class Actor implements Entity, Mover {
 		return 100 + (getLevel() * 50);
 	}
 
+	public abstract int getStrength();
+
+	public abstract int getArmor();
 }

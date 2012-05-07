@@ -42,12 +42,18 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 	@Override
 	public void render( final Graphics g ) {
 
-		updateFog( camera.getCenterX(), camera.getCenterY() );
+		camera.lock();
+		try {
+			updateFog( camera.getCenterX(), camera.getCenterY() );
 
-		super.render( g );
+			super.render( g );
 
-		Image player = spriteManager.getSprite( SpriteType.Player, true );
-		player.drawCentered( camera.getHalfWidth(), camera.getHalfHeight() );
+			Image player = spriteManager.getSprite( SpriteType.Player, true );
+			player.drawCentered( camera.getHalfWidth(), camera.getHalfHeight() );
+
+		} finally {
+			camera.unlock();
+		}
 	}
 
 	@Override
@@ -142,7 +148,7 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		}
 	}
 
-	public void updateFog( final float x, final float y ) {
+	private void updateFog( final float x, final float y ) {
 
 		// TODO: move this code to the MovementHandler
 		fog.setExplored( camera.worldToTile( x - 2 ), camera.worldToTile( y - 2 ), true );

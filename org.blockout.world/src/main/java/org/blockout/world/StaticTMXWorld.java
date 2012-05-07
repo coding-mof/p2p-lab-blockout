@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 
+import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Monster;
 import org.blockout.world.entity.Zombie;
 import org.newdawn.slick.SlickException;
@@ -50,7 +51,7 @@ public class StaticTMXWorld implements IWorld {
 			int spriteId = map.getTileId( x + 50, y + 50, 0 ) - 1;
 			int objectId = map.getTileId( x + 50, y + 50, 1 ) - 1;
 			if ( objectId == 586 ) {
-				t = new Tile( spriteId, new Zombie( 1 ) ); // SpriteType.Crate
+				t = new Tile( spriteId, new Crate() );
 			} else if ( objectId == 249 ) {
 				t = new Tile( spriteId, new Zombie( 1 ) ); // SpriteType.Zombie
 			} else if ( objectId == 250 ) {

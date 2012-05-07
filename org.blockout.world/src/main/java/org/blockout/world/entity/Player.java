@@ -56,4 +56,14 @@ public class Player extends Actor {
 	public SpriteType getSpriteType() {
 		return SpriteType.Player;
 	}
+
+	@Override
+	public int getStrength() {
+		return 20 + getLevel() * 5;
+	}
+
+	@Override
+	public int getArmor() {
+		return 30 + getLevel() * 10;
+	}
 }
