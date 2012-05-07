@@ -7,7 +7,7 @@ import com.google.common.base.Preconditions;
 /**
  * Common base class for all kinds of monsters.
  * 
- * @author azrael
+ * @author Marc-Christian Schulze
  * 
  */
 public class Monster extends Actor {

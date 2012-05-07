@@ -78,6 +78,7 @@ public final class InGameGameState extends NiftyOverlayBasicGameState implements
 	protected void enterState( final GameContainer container, final StateBasedGame game ) throws SlickException {
 		getNifty().gotoScreen( "start" );
 
+		inputHandler.setGameContainer( container );
 		container.getInput().addKeyListener( inputHandler );
 		container.getInput().addMouseListener( inputHandler );
 	}
@@ -121,7 +122,8 @@ public final class InGameGameState extends NiftyOverlayBasicGameState implements
 
 		lblPlayer.setText( gameState.getPlayer().getName() );
 		lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / " + gameState.getPlayer().getMaxHealth() );
-		lblXP.setText( "" + gameState.getPlayer().getExperience() );
+		lblXP.setText( "" + gameState.getPlayer().getExperience() + " / "
+				+ gameState.getPlayer().getRequiredExperience() );
 		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
 	}
 

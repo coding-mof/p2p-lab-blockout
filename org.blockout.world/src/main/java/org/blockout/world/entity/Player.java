@@ -35,6 +35,10 @@ public class Player extends Actor {
 		return experience;
 	}
 
+	public int getRequiredExperience() {
+		return 100 * getLevel();
+	}
+
 	/**
 	 * Sets the experience of the player.
 	 * 

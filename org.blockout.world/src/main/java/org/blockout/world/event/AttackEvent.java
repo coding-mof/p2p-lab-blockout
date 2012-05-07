@@ -49,6 +49,6 @@ public class AttackEvent implements IEvent<AttackEvent> {
 
 	@Override
 	public long getDuration() {
-		return 0;
+		return 200;
 	}
 }

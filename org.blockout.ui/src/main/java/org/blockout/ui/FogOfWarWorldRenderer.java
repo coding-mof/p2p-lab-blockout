@@ -10,9 +10,11 @@ import org.blockout.logic.FogOfWar;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.Tile;
+import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Entity;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.geom.Rectangle;
 
 @Named
 public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
@@ -49,7 +51,8 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 	}
 
 	@Override
-	protected void renderTile( final Tile tile, final int worldX, final int worldY, final int screenX, final int screenY ) {
+	protected void renderTile( final Graphics g, final Tile tile, final int worldX, final int worldY,
+			final int screenX, final int screenY ) {
 
 		// only render explored tiles
 		if ( !fog.isExplored( worldX, worldY ) ) {
@@ -171,6 +174,41 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		fog.setExplored( camera.worldToTile( x ), camera.worldToTile( y + 2 ), true );
 		fog.setExplored( camera.worldToTile( x + 1 ), camera.worldToTile( y + 2 ), true );
 		fog.setExplored( camera.worldToTile( x + 2 ), camera.worldToTile( y + 2 ), true );
+	}
+
+	@Override
+	protected void renderTileOverlay( final Graphics g, final Tile tile, final int worldX, final int worldY,
+			final int screenX, final int screenY ) {
+		// only render explored tiles
+		if ( !fog.isExplored( worldX, worldY ) ) {
+			return;
+		}
+
+		try {
+			SpriteType spriteType = mapping.getSpriteType( tile.getTileType() );
+			Image sprite = spriteManager.getSprite( spriteType );
+			if ( sprite != null ) {
+
+				float alpha = computeLightning( worldX, worldY, sprite );
+				if ( alpha > 0.5f ) {
+					Entity e = tile.getEntityOnTile();
+					if ( e != null && e != gameState.getPlayer() ) {
+
+						if ( e instanceof Actor ) {
+
+							Actor actor = (Actor) e;
+							int width = (int) (20f * actor.getCurrentHealth() / actor.getMaxHealth());
+
+							g.setColor( org.newdawn.slick.Color.green );
+							g.fill( new Rectangle( screenX + 6, screenY - 2, width, 4 ) );
+							g.drawRect( screenX + 6, screenY - 2, 20, 4 );
+						}
+					}
+				}
+			}
+		} catch ( IllegalArgumentException e ) {
+			// unknown sprite
+		}
 	}
 
 }

@@ -3,32 +3,56 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.engine.ISpriteManager;
+import org.blockout.engine.SpriteType;
+import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
+import org.blockout.world.Tile;
+import org.blockout.world.entity.Actor;
+import org.blockout.world.event.AttackEvent;
 import org.blockout.world.state.IStateMachine;
+import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
+import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.pathfinding.Path;
 import org.newdawn.slick.util.pathfinding.Path.Step;
 import org.newdawn.slick.util.pathfinding.PathFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Named
 public class InputHandler implements MouseListener, KeyListener {
 
+	private static final Logger	logger;
+	static {
+		logger = LoggerFactory.getLogger( InputHandler.class );
+	}
 	protected Camera			camera;
 	protected PathFinder		pathFinder;
 	protected LocalGameState	gameState;
 	protected PlayerController	playerController;
 	protected IStateMachine		stateMachine;
+	protected IWorld			world;
+	protected GameContainer		container;
+	protected ISpriteManager	spriteManager;
 
 	@Inject
 	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
-			final PlayerController playerController, final IStateMachine stateMachine) {
+			final PlayerController playerController, final IStateMachine stateMachine, final IWorld world,
+			final ISpriteManager spriteManager) {
 		this.camera = camera;
 		this.pathFinder = pathFinder;
 		this.gameState = gameState;
 		this.playerController = playerController;
 		this.stateMachine = stateMachine;
+		this.world = world;
+		this.spriteManager = spriteManager;
+	}
+
+	public void setGameContainer( final GameContainer container ) {
+		this.container = container;
 	}
 
 	@Override
@@ -64,12 +88,43 @@ public class InputHandler implements MouseListener, KeyListener {
 	public void mouseDragged( final int oldx, final int oldy, final int newx, final int newy ) {
 	}
 
+	private static enum MouseCursor {
+		Move, Attack
+	}
+
+	private MouseCursor	cursor;
+
 	@Override
 	public void mouseMoved( final int oldx, final int oldy, final int newx, final int newy ) {
+		try {
+
+			Tile tile = world.getTile( camera.worldToTile( camera.screenToWorldX( newx ) ),
+					camera.worldToTile( camera.screenToWorldY( newy ) ) );
+			if ( cursor != MouseCursor.Attack && tile != null && tile.getEntityOnTile() instanceof Actor
+					&& tile.getEntityOnTile() != gameState.getPlayer() ) {
+				container.setMouseCursor( spriteManager.getSprite( SpriteType.sword, true ), 31, 0 );
+				cursor = MouseCursor.Attack;
+			} else if ( cursor != MouseCursor.Move && tile != null && !(tile.getEntityOnTile() instanceof Actor) ) {
+				container.setMouseCursor( spriteManager.getSprite( SpriteType.arrow, true ), 31, 0 );
+				cursor = MouseCursor.Move;
+			}
+		} catch ( SlickException e ) {
+			logger.error( "Couldn't set mouse cursor.", e );
+		}
 	}
 
 	@Override
 	public void mousePressed( final int button, final int x, final int y ) {
+	}
+
+	private boolean areNeighbours( final int x1, final int y1, final int x2, final int y2 ) {
+		if ( Math.abs( x1 - x2 ) > 1 ) {
+			return false;
+		}
+		if ( Math.abs( y1 - y2 ) > 1 ) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -78,6 +133,11 @@ public class InputHandler implements MouseListener, KeyListener {
 		int tileY = camera.worldToTile( camera.screenToWorldY( y ) );
 		int centerX = camera.worldToTile( camera.getCenterX() );
 		int centerY = camera.worldToTile( camera.getCenterY() );
+		Tile tile = world.getTile( tileX, tileY );
+		if ( tile != null && tile.getEntityOnTile() instanceof Actor && areNeighbours( tileX, tileY, centerX, centerY ) ) {
+			stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile() ) );
+			return;
+		}
 
 		int fromX = centerX - camera.getStartTileX();
 		int fromY = centerY - camera.getStartTileY();

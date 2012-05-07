@@ -31,7 +31,7 @@ public class AttackValidator implements IEventValidator {
 		}
 
 		// TODO Auto-generated method stub
-		return null;
+		return ValidationResult.Valid;
 	}
 
 }

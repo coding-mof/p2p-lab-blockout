@@ -51,7 +51,7 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 	@Override
 	public void eventCommitted( final IEvent<?> event ) {
 		if ( event.getDuration() == 0 ) {
-			logger.info( "Direct event finished." );
+			logger.debug( "Direct event finished." );
 			activeEvents.remove( event );
 			fireEventFinished( event );
 			return;
@@ -60,13 +60,13 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 		Long startTime = activeEvents.get( event );
 		final long remainingMillis = (startTime + event.getDuration()) - System.currentTimeMillis();
 		if ( remainingMillis <= 0 ) {
-			logger.info( "Delayed event finished. Deviance: " + (-remainingMillis) + " ms" );
+			logger.debug( "Delayed event finished. Deviance: " + (-remainingMillis) + " ms" );
 			activeEvents.remove( event );
 			fireEventFinished( event );
 			return;
 		}
 
-		logger.info( "Rescheduled event in: " + remainingMillis + " ms" );
+		logger.debug( "Rescheduled event in: " + remainingMillis + " ms" );
 		executor.schedule( new Runnable() {
 
 			@Override
