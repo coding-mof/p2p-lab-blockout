@@ -4,7 +4,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 
+import org.blockout.common.Tupel;
 import org.blockout.world.entity.Crate;
+import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Monster;
 import org.blockout.world.entity.Zombie;
 import org.newdawn.slick.SlickException;
@@ -62,5 +64,11 @@ public class StaticTMXWorld implements IWorld {
 		}
 		tileCache.put( key, t );
 		return t;
+	}
+
+	@Override
+	public Tupel findTile(Entity entity) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

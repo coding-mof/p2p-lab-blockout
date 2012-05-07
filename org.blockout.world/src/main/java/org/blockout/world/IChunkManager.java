@@ -1,37 +1,21 @@
 package org.blockout.world;
 
+import org.blockout.common.Tupel;
+import org.blockout.world.state.IStateMachineListener;
+
 /**
+ * Interface for the core component for managing the world. A chunk manager
+ * can manage multiple {@link Chunk}s which are the partitions of the world
  * 
  * @author Konstantin Ramig
  */
-public interface IChunkManager {
-	
-	/**
-	 * Method adds the given Chunk to the list of Chunks this ChunkManager is
-	 * responsible for
-	 * 
-	 * @param c the IChunk this Manager should start managing 
-	 */
-	public void manageChunk(Chunk c);
-	
-	/**
-	 * Getting one certain Chunk this ChunkManager is responsible for
-	 * 
-	 * @param x coordinate of the Chunk
-	 * @param y coordinate of the Chunk
-	 * @return the Chunk with the given coordinates, 
-	 * 			null if ChunkManager doesn't contain he Chunk yet
-	 */
-	public Chunk getChunk(int x, int y);
-	
-	/**
-	 * Updating a Chunk this ChunkManager is responsible for
-	 * 
-	 * @param c the Chunk that should be updated
-	 * @return true if update was successful
-	 * 			false if the ChunkManager doesn't know the Chunk
-	 * 			false if any other error occurred
-	 */
-	public boolean updateChunk(Chunk c);
+public interface IChunkManager extends IStateMachineListener {
 
+	/**
+	 * Returns the Chunk at the requested position
+	 * 
+	 * @param position position if the requested Chunk
+	 * @return Chunk at the requested position
+	 */
+	public Chunk getChunk(Tupel position);
 }
