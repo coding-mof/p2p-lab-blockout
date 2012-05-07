@@ -4,15 +4,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.IEvent;
+import org.blockout.logic.handler.IEventHandler;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.event.PlayerMoveEvent;
 import org.blockout.world.state.IStateMachine;
-import org.blockout.world.state.IStateMachineListener;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.util.pathfinding.Path;
 
 @Named
-public class PlayerController {
+public class PlayerController implements IEventHandler {
 
 	// How long it takes to move the player to a new position. measured in
 	// milliseconds
@@ -21,28 +21,18 @@ public class PlayerController {
 	private float					playerPosX			= 0;
 	private float					playerPosY			= 0;
 
-	protected final IStateMachine	stateMachine;
 	protected final Camera			camera;
 	protected final LocalGameState	gameState;
-	private final Listener			listener;
 
 	private final Object			pathLock			= new Object();
 	private Path					path;
 	private int						nextStep;
+	private IEvent<?>				lastEvent;
 
 	@Inject
-	public PlayerController(final Camera camera, final LocalGameState gameState, final IStateMachine stateMachine) {
+	public PlayerController(final Camera camera, final LocalGameState gameState) {
 		this.camera = camera;
 		this.gameState = gameState;
-		this.stateMachine = stateMachine;
-		listener = new Listener();
-		stateMachine.addIStateMachineListener( listener );
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		super.finalize();
-		stateMachine.removeIStateMachineListener( listener );
 	}
 
 	public void update( final GameContainer container, final int deltaMillis ) {
@@ -72,19 +62,19 @@ public class PlayerController {
 		camera.setViewCenter( playerPosX + 0.5f, playerPosY + 0.5f );
 	}
 
-	public void setPath( final Path path ) {
+	public void setPath( final IStateMachine stateMachine, final Path path ) {
 		synchronized ( pathLock ) {
 			this.path = path;
 			nextStep = 1;
 
-			raiseEvent( getNextStep() );
+			raiseEvent( stateMachine, getNextStep() );
 		}
 	}
 
-	private void raiseEvent( final Path.Step step ) {
+	private void raiseEvent( final IStateMachine stateMachine, final Path.Step step ) {
 		if ( step != null ) {
-			stateMachine
-					.pushEvent( new PlayerMoveEvent( (int) playerPosX, (int) playerPosY, step.getX(), step.getY() ) );
+			lastEvent = new PlayerMoveEvent( (int) playerPosX, (int) playerPosY, step.getX(), step.getY() );
+			stateMachine.pushEvent( lastEvent );
 		}
 	}
 
@@ -98,27 +88,18 @@ public class PlayerController {
 		return path.getStep( nextStep );
 	}
 
-	private class Listener implements IStateMachineListener {
-
-		@Override
-		public void eventCommitted( final IEvent<?> event ) {
-			synchronized ( pathLock ) {
-				nextStep++;
-				raiseEvent( getNextStep() );
-			}
-		}
-
-		@Override
-		public void eventPushed( final IEvent<?> event ) {
-		}
-
-		@Override
-		public void eventRolledBack( final IEvent<?> event ) {
-		}
-
-		@Override
-		public void init( final IStateMachine stateMachine ) {
-		}
+	@Override
+	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
 	}
 
+	@Override
+	public void eventFinished( final IStateMachine stateMachine, final IEvent<?> event ) {
+		if ( !event.equals( lastEvent ) ) {
+			return;
+		}
+		synchronized ( pathLock ) {
+			nextStep++;
+			raiseEvent( stateMachine, getNextStep() );
+		}
+	}
 }

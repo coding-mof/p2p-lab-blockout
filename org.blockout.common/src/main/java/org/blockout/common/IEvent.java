@@ -39,6 +39,15 @@ public interface IEvent<T extends IEvent<T>> {
 	public T getInverse();
 
 	/**
+	 * Returns how long it takes until the event is finished. The duration is
+	 * measured in milliseconds.
+	 * 
+	 * @return The duration of this event in milliseconds or 0 if no duration
+	 *         configured.
+	 */
+	public long getDuration();
+
+	/**
 	 * Returns whether the given object has the same data type and UUID as this
 	 * instance.
 	 * 

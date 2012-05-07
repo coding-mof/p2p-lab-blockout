@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.world.LocalGameState;
+import org.blockout.world.state.IStateMachine;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.KeyListener;
 import org.newdawn.slick.MouseListener;
@@ -18,14 +19,16 @@ public class InputHandler implements MouseListener, KeyListener {
 	protected PathFinder		pathFinder;
 	protected LocalGameState	gameState;
 	protected PlayerController	playerController;
+	protected IStateMachine		stateMachine;
 
 	@Inject
 	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
-			final PlayerController playerController) {
+			final PlayerController playerController, final IStateMachine stateMachine) {
 		this.camera = camera;
 		this.pathFinder = pathFinder;
 		this.gameState = gameState;
 		this.playerController = playerController;
+		this.stateMachine = stateMachine;
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class InputHandler implements MouseListener, KeyListener {
 				worldPath.appendStep( step.getX() + camera.getStartTileX(), step.getY() + camera.getStartTileY() );
 			}
 		}
-		playerController.setPath( worldPath );
+		playerController.setPath( stateMachine, worldPath );
 	}
 
 	@Override

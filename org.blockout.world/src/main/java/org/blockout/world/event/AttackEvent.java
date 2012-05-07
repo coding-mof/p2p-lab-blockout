@@ -46,4 +46,9 @@ public class AttackEvent implements IEvent<AttackEvent> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public long getDuration() {
+		return 0;
+	}
 }

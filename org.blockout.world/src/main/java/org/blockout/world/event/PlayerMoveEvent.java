@@ -131,4 +131,9 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 		buf.append( ")." );
 		return buf.toString();
 	}
+
+	@Override
+	public long getDuration() {
+		return 500;
+	}
 }

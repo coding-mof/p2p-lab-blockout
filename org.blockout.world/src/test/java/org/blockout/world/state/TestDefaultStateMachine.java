@@ -67,7 +67,7 @@ public class TestDefaultStateMachine {
 
 		stateMachine.pushEvent( event );
 
-		Mockito.verifyZeroInteractions( listener );
+		Mockito.verify( listener, Mockito.never() ).eventPushed( event );
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class TestDefaultStateMachine {
 
 		stateMachine.pushEvent( event );
 
-		Mockito.verifyZeroInteractions( listener );
+		Mockito.verify( listener, Mockito.never() ).eventPushed( event );
 	}
 
 	/**
@@ -132,6 +132,7 @@ public class TestDefaultStateMachine {
 	@Test
 	public void testAutoCommitEvent() {
 		IEvent<?> event = mock( IEvent.class );
+		Mockito.doReturn( (long) 0 ).when( event ).getDuration();
 
 		stateMachine.commitEvent( event );
 
@@ -153,7 +154,7 @@ public class TestDefaultStateMachine {
 		stateMachine.commitEvent( event );
 
 		Mockito.verify( listener ).eventCommitted( event );
-		Mockito.verifyNoMoreInteractions( listener );
+		Mockito.verify( listener, Mockito.times( 1 ) ).eventPushed( event );
 	}
 
 	@Test
@@ -162,7 +163,7 @@ public class TestDefaultStateMachine {
 
 		stateMachine.rollbackEvent( event );
 
-		Mockito.verifyZeroInteractions( listener );
+		Mockito.verify( listener, Mockito.never() ).eventRolledBack( event );
 	}
 
 	@Test
@@ -185,6 +186,6 @@ public class TestDefaultStateMachine {
 		Mockito.verify( listener ).eventCommitted( event );
 
 		stateMachine.rollbackEvent( event );
-		Mockito.verifyNoMoreInteractions( listener );
+		Mockito.verify( listener, Mockito.never() ).eventRolledBack( event );
 	}
 }
