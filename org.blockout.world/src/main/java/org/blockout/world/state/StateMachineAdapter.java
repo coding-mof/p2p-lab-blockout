@@ -24,4 +24,7 @@ public class StateMachineAdapter implements IStateMachineListener {
 	public void eventRolledBack( final IEvent<?> event ) {
 	}
 
+	@Override
+	public void init( final IStateMachine stateMachine ) {
+	}
 }

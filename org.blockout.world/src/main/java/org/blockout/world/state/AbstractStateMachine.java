@@ -43,11 +43,15 @@ public abstract class AbstractStateMachine implements IStateMachine {
 	@Override
 	public void addIStateMachineListener( final IStateMachineListener l ) {
 		listener.add( l );
+		l.init( this );
 	}
 
 	@Inject
 	public void addIStateMachineListener( final Set<IStateMachineListener> l ) {
 		listener.addAll( l );
+		for ( IStateMachineListener x : l ) {
+			x.init( this );
+		}
 	}
 
 	@Override

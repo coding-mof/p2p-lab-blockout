@@ -3,12 +3,7 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.engine.ISpriteManager;
-import org.blockout.logic.FogOfWar;
-import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
-import org.blockout.world.event.PlayerMoveEvent;
-import org.blockout.world.state.IStateMachine;
 import org.bushe.swing.event.EventTopicSubscriber;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -33,39 +28,31 @@ import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
  * 
  */
 @Named
-public class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {
+public final class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {
 
 	private Nifty						nifty;
 
-	// How long it takes to move the player to a new position. measured in
-	// milliseconds
-	private static final float			PLAYER_MOVE_TIME	= 500.0f;
-
-	private float						centerX				= 0;
-	private float						centerY				= 0;
-
-	private final FogOfWarWorldRenderer	worldRenderer;
 	private Element						exitPopup;
-
-	private final InputHandler			inputHandler;
 
 	private Label						lblPlayer;
 	private Label						lblHealth;
 	private Label						lblXP;
 	private Label						lblLevel;
 
-	private final LocalGameState		gameState;
-	private final IStateMachine			stateMachine;
-	protected Camera					camera;
+	protected final IWorldRenderer		worldRenderer;
+	protected final LocalGameState		gameState;
+	protected final InputHandler		inputHandler;
+	protected final Camera				camera;
+	protected final PlayerController	playerController;
 
 	@Inject
-	public InGameGameState(final ISpriteManager spriteManager, final IWorld world, final InputHandler inputHandler,
-			final LocalGameState gameState, final IStateMachine stateMachine, final Camera camera, final FogOfWar fog) {
+	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
+			final LocalGameState gameState, final Camera camera, final PlayerController playerController) {
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
-		this.stateMachine = stateMachine;
 		this.camera = camera;
-		worldRenderer = new FogOfWarWorldRenderer( spriteManager, world, camera, gameState, fog );
+		this.worldRenderer = worldRenderer;
+		this.playerController = playerController;
 	}
 
 	@Override
@@ -99,7 +86,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 	protected void initGameAndGUI( final GameContainer container, final StateBasedGame game ) throws SlickException {
 		initNifty( container, game, new PlainSlickInputSystem() );
 		getNifty().gotoScreen( "start" );
-
 	}
 
 	@Override
@@ -108,7 +94,7 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 		updateHUD();
 
-		updatePlayerPosition( container, deltaMillis );
+		playerController.update( container, deltaMillis );
 
 		if ( container.getInput().isKeyDown( Input.KEY_ESCAPE ) ) {
 			exitPopup = nifty.createPopup( "popupMenu" );
@@ -123,55 +109,6 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 					} );
 			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
 		}
-	}
-
-	private void updatePlayerPosition( final GameContainer container, final int deltaMillis ) {
-		float currentX = gameState.getCurrentPlayerX();
-		float desiredX = gameState.getDesiredPlayerX();
-		float desiredY = gameState.getDesiredPlayerY();
-		float currentY = gameState.getCurrentPlayerY();
-
-		// otherwise we would raise an event flood
-		if ( currentX == desiredX && currentY == desiredY ) {
-
-			// TODO: move this code in separate InputHandler
-			int x = 0;
-			int y = 0;
-			if ( container.getInput().isKeyDown( Input.KEY_UP ) ) {
-				y++;
-			}
-			if ( container.getInput().isKeyDown( Input.KEY_DOWN ) ) {
-				y--;
-			}
-			if ( container.getInput().isKeyDown( Input.KEY_LEFT ) ) {
-				x--;
-			}
-			if ( container.getInput().isKeyDown( Input.KEY_RIGHT ) ) {
-				x++;
-			}
-
-			if ( x != 0 || y != 0 ) {
-				stateMachine.pushEvent( new PlayerMoveEvent( (int) currentX, (int) currentY, (int) currentX + x,
-						(int) currentY + y ) );
-			}
-		} else {
-
-			float deltaX = desiredX - currentX;
-			centerX += deltaX * (deltaMillis / PLAYER_MOVE_TIME);
-			if ( (deltaX > 0 && centerX >= desiredX) || (deltaX < 0 && centerX <= desiredX) ) {
-				centerX = desiredX;
-				gameState.setCurrentPlayerX( gameState.getDesiredPlayerX() );
-			}
-
-			float deltaY = desiredY - currentY;
-			centerY += deltaY * (deltaMillis / PLAYER_MOVE_TIME);
-			if ( (deltaY > 0 && centerY >= desiredY) || (deltaY < 0 && centerY <= desiredY) ) {
-				centerY = desiredY;
-				gameState.setCurrentPlayerY( gameState.getDesiredPlayerY() );
-			}
-
-		}
-		camera.setViewCenter( centerX + 0.5f, centerY + 0.5f );
 	}
 
 	private void updateHUD() {
@@ -194,25 +131,18 @@ public class InGameGameState extends NiftyOverlayBasicGameState implements Scree
 
 	@Override
 	public void bind( final Nifty paramNifty, final Screen screen ) {
-
 	}
 
 	@Override
 	public void onStartScreen() {
-		System.out.println( "Current Screen: " + nifty.getCurrentScreen().getScreenId() );
-
 	}
 
 	@Override
 	public void onEndScreen() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	protected void leaveState( final GameContainer container, final StateBasedGame arg1 ) throws SlickException {
-		// TODO Auto-generated method stub
-
 		container.getInput().removeKeyListener( inputHandler );
 		container.getInput().removeMouseListener( inputHandler );
 	}

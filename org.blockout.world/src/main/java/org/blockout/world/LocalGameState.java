@@ -3,13 +3,10 @@ package org.blockout.world;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
 import org.blockout.world.entity.Player;
-import org.blockout.world.event.PlayerMoveEvent;
-import org.blockout.world.state.IStateMachineListener;
 
 @Named
-public class LocalGameState implements IStateMachineListener {
+public class LocalGameState {
 
 	protected Player	player;
 
@@ -17,6 +14,11 @@ public class LocalGameState implements IStateMachineListener {
 	protected float		currentPlayerY;
 	protected float		desiredPlayerX;
 	protected float		desiredPlayerY;
+
+	@Inject
+	public LocalGameState(final IWorld world) {
+
+	}
 
 	public float getCurrentPlayerX() {
 		return currentPlayerX;
@@ -50,11 +52,6 @@ public class LocalGameState implements IStateMachineListener {
 		this.desiredPlayerY = desiredPlayerY;
 	}
 
-	@Inject
-	public LocalGameState(final IWorld world) {
-
-	}
-
 	public Player getPlayer() {
 		return player;
 	}
@@ -62,29 +59,4 @@ public class LocalGameState implements IStateMachineListener {
 	public void setPlayer( final Player player ) {
 		this.player = player;
 	}
-
-	@Override
-	public void eventCommitted( final IEvent<?> event ) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void eventPushed( final IEvent<?> event ) {
-		if ( event instanceof PlayerMoveEvent ) {
-			PlayerMoveEvent pme = (PlayerMoveEvent) event;
-			desiredPlayerX = pme.getNewX();
-			desiredPlayerY = pme.getNewY();
-		}
-	}
-
-	@Override
-	public void eventRolledBack( final IEvent<?> event ) {
-		if ( event instanceof PlayerMoveEvent ) {
-			PlayerMoveEvent pme = (PlayerMoveEvent) event;
-			desiredPlayerX = pme.getNewX();
-			desiredPlayerY = pme.getNewY();
-		}
-	}
-
 }

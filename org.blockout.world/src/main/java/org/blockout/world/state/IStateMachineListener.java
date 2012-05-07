@@ -10,6 +10,9 @@ import org.blockout.common.IEvent;
  * 
  */
 public interface IStateMachineListener {
+
+	public void init( IStateMachine stateMachine );
+
 	/**
 	 * An event has been committed by the responsible server node. Committed
 	 * events can't be undone.

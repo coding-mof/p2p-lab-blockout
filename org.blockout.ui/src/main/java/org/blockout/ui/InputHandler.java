@@ -17,24 +17,23 @@ public class InputHandler implements MouseListener, KeyListener {
 	protected Camera			camera;
 	protected PathFinder		pathFinder;
 	protected LocalGameState	gameState;
+	protected PlayerController	playerController;
 
 	@Inject
-	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState) {
+	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
+			final PlayerController playerController) {
 		this.camera = camera;
 		this.pathFinder = pathFinder;
 		this.gameState = gameState;
+		this.playerController = playerController;
 	}
 
 	@Override
 	public void inputEnded() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void inputStarted() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -44,20 +43,14 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Override
 	public void setInput( final Input input ) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyPressed( final int arg0, final char arg1 ) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void keyReleased( final int arg0, final char arg1 ) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -66,19 +59,14 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Override
 	public void mouseDragged( final int oldx, final int oldy, final int newx, final int newy ) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void mouseMoved( final int oldx, final int oldy, final int newx, final int newy ) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void mousePressed( final int button, final int x, final int y ) {
-
 	}
 
 	@Override
@@ -94,23 +82,17 @@ public class InputHandler implements MouseListener, KeyListener {
 		int toY = tileY - camera.getStartTileY();
 
 		Path path = pathFinder.findPath( gameState.getPlayer(), fromX, fromY, toX, toY );
-
-		if ( path == null ) {
-			System.out.println( "No path available." );
-			return;
+		Path worldPath = new Path();
+		if ( path != null ) {
+			for ( int i = 0; i < path.getLength(); i++ ) {
+				Step step = path.getStep( i );
+				worldPath.appendStep( step.getX() + camera.getStartTileX(), step.getY() + camera.getStartTileY() );
+			}
 		}
-		System.out.println( "Path: " + path );
-		for ( int i = 0; i < path.getLength(); i++ ) {
-			Step step = path.getStep( i );
-			System.out.println( "  Tile: (" + (step.getX() + camera.getStartTileX()) + ","
-					+ (step.getY() + camera.getStartTileY()) + ")" );
-		}
+		playerController.setPath( worldPath );
 	}
 
 	@Override
 	public void mouseWheelMoved( final int change ) {
-		// TODO Auto-generated method stub
-
 	}
-
 }

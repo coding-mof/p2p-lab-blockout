@@ -39,6 +39,9 @@ public class CollisionDetectionEventValidator implements IEventValidator {
 		if ( event instanceof PlayerMoveEvent ) {
 			PlayerMoveEvent playerMoveEvent = (PlayerMoveEvent) event;
 			Tile tile = world.getTile( playerMoveEvent.getNewX(), playerMoveEvent.getNewY() );
+			if ( tile == null ) {
+				return ValidationResult.Invalid;
+			}
 			// Player can't walk on walls
 			if ( tile.getHeight() > Tile.GROUND_HEIGHT ) {
 				if ( logger.isDebugEnabled() ) {

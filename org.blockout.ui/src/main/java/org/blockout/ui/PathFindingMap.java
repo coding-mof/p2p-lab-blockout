@@ -8,6 +8,16 @@ import org.blockout.world.Tile;
 import org.newdawn.slick.util.pathfinding.PathFindingContext;
 import org.newdawn.slick.util.pathfinding.TileBasedMap;
 
+/**
+ * Adapter class for slick's path finding API. The path finding is only
+ * performed for tiles which are in the view frustum. Furthermore all unexplored
+ * tiles are treated as traverseable. This avoids that the player can use the
+ * path finding algorithm to discover paths to hidden areas. The actual path
+ * processing gets then validated by the common collision detection.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class PathFindingMap implements TileBasedMap {
 
 	protected Camera	camera;
@@ -29,6 +39,9 @@ public class PathFindingMap implements TileBasedMap {
 			return false;
 		}
 		Tile tile = world.getTile( x, y );
+		if ( tile == null ) {
+			return true;
+		}
 		return (tile.getEntityOnTile() != null) || (tile.getHeight() > Tile.GROUND_HEIGHT);
 	}
 
@@ -52,7 +65,5 @@ public class PathFindingMap implements TileBasedMap {
 
 	@Override
 	public void pathFinderVisited( final int x, final int y ) {
-		// TODO Auto-generated method stub
-
 	}
 }

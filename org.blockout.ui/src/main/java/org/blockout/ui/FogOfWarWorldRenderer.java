@@ -1,5 +1,8 @@
 package org.blockout.ui;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.blockout.engine.ISpriteManager;
 import org.blockout.engine.SpriteMapping;
 import org.blockout.engine.SpriteType;
@@ -11,6 +14,7 @@ import org.blockout.world.entity.Entity;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 
+@Named
 public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 
 	private static final float		VIEW_DISTANCE			= 5f;
@@ -22,6 +26,7 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 
 	private final LocalGameState	gameState;
 
+	@Inject
 	public FogOfWarWorldRenderer(final ISpriteManager spriteManager, final IWorld world, final Camera camera,
 			final LocalGameState gameState, final FogOfWar fog) {
 		super( world, camera );

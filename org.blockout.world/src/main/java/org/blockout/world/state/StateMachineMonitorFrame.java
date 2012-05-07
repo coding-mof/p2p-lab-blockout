@@ -60,4 +60,8 @@ public class StateMachineMonitorFrame extends JFrame implements IStateMachineLis
 	@Override
 	public void eventRolledBack( final IEvent<?> event ) {
 	}
+
+	@Override
+	public void init( final IStateMachine stateMachine ) {
+	}
 }

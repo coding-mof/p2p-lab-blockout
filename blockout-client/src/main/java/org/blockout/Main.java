@@ -27,6 +27,7 @@ public class Main {
 			AppGameContainer app = context.getBean( AppGameContainer.class );
 
 			app.setDisplayMode( 1024, 768, false );
+			app.setAlwaysRender( true );
 			app.start();
 		} catch ( Exception e ) {
 			logger.error( "Program terminated due to exception.", e );
