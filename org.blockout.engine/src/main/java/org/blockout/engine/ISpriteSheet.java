@@ -40,8 +40,27 @@ public interface ISpriteSheet {
 	 *            Id of the sprite
 	 * @return Image of the requested sprite or null if there is no sprite with
 	 *         this id
-	 * @throws IllegalStateException
-	 *             If there is no spritesheet loaded
 	 */
-	public Image getSprite( int spriteId ) throws IllegalStateException;
+	public Image getSprite( int spriteId );
+	
+	/**
+	 * Start internal batch mode to speedup rendering
+	 */
+	public void startUse();
+	
+	/**
+	 * Stop internal batch mode
+	 */
+	public void endUse();
+	
+	/**
+	 * 
+	 * @param spriteId
+	 * 		Id of the sprite
+	 * @param x
+	 * 		x position where to render the sprite
+	 * @param y
+	 * 		y position where to render the sprite
+	 */
+	public void renderInUse( int spriteId, int x, int y );
 }

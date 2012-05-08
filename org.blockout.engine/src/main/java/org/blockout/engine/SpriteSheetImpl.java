@@ -40,57 +40,56 @@ public class SpriteSheetImpl implements ISpriteSheet {
 	 * @throws IOException
 	 *             If there is a problem while loading the spritesheet
 	 * @throws IllegalArgumentException
-	 *             If <i>tw</i> or <i>th</i> are negative.
+	 *             If <i>tw</i> or <i>th</i> are negative or greater as the image size.
 	 */
 	public SpriteSheetImpl(final String ref, final int tw, final int th) throws IOException, IllegalArgumentException {
 		loadSpriteSheet( ref, tw, th );
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @see ISpriteSheet#loadSpriteSheet(String, int, int)
+	 * 
+	 * @throws IllegalArgumentException
+	 *             If <i>tw</i> or <i>th</i> are negative or greater as the image size.
+	 * 
+	 * @throws IllegalStateException
+	 *             If there is no spritesheet loaded
 	 */
 	@Override
-	public void loadSpriteSheet( final String ref, final int tw, final int th ) throws IOException,
-			IllegalArgumentException {
+	public void loadSpriteSheet( final String ref, final int tw, final int th ) throws IOException{
 		Preconditions.checkNotNull( ref );
-
-		if ( tw < 0 ) {
-			throw new IllegalArgumentException( "Tile width has a negative value" );
-		}
-
-		if ( th < 0 ) {
-			throw new IllegalArgumentException( "Tile height has a negative value" );
-		}
+		Preconditions.checkArgument( tw > 0, "Tile width has a negative value" );
+		Preconditions.checkArgument( th > 0, "Tile height has a negative value" );
 
 		Image img;
 		try {
 			img = new Image( ref );
-		} catch ( SlickException e ) {
-			throw new IOException( e );
+		} catch ( Throwable t ) {
+			throw new IOException( "Failed to load spritesheet: " + ref, t );
 		}
 
-		if ( img.getWidth() < tw ) {
-			throw new IllegalArgumentException( "Tile width is to big" );
-		}
-
-		if ( img.getHeight() < th ) {
-			throw new IllegalArgumentException( "Tile height is to big" );
-		}
+		Preconditions.checkArgument( img.getWidth() > tw, "Tile width is to big" );
+		Preconditions.checkArgument( img.getHeight() > th, "Tile height is to big" );
 
 		spriteSheet = new SpriteSheet( img, tw, th );
 		numSprites = spriteSheet.getVerticalCount() * spriteSheet.getHorizontalCount();
 	}
 
+	/**
+	 * @see ISpriteSheet#isSpriteSheetLoaded()
+	 */
 	@Override
 	public boolean isSpriteSheetLoaded() {
 		return null != spriteSheet;
 	}
 
+	
+	/**
+	 * @see ISpriteSheet#getSprite(int)
+	 */
 	@Override
 	public Image getSprite( final int spriteId ) throws IllegalStateException {
-		if ( null == spriteSheet ) {
-			throw new IllegalStateException( "No spritesheet loaded" );
-		}
+		Preconditions.checkState(isSpriteSheetLoaded(), "No spritesheet loaded" );
 
 		if ( 0 < spriteId && numSprites > spriteId ) {
 			int sx = spriteId % spriteSheet.getHorizontalCount();
@@ -99,5 +98,48 @@ public class SpriteSheetImpl implements ISpriteSheet {
 		}
 
 		return null;
+	}
+
+	/**
+	 * @see ISpriteSheet#startUse()
+	 * 
+	 * @throws IllegalStateException
+	 * 		If there is no spritesheet loaded
+	 */
+	@Override
+	public void startUse() {
+		Preconditions.checkState(isSpriteSheetLoaded(), "No spritesheet loaded" );
+		
+		spriteSheet.startUse();
+	}
+
+	/**
+	 * @see ISpriteSheet#endUse()
+	 * 
+	 * @throws IllegalStateException
+	 *      If there is no spritesheet loaded
+	 */
+	@Override
+	public void endUse() {
+		Preconditions.checkState(isSpriteSheetLoaded(), "No spritesheet loaded" );
+		
+		spriteSheet.endUse();
+	}
+
+	/**
+	 * @see ISpriteSheet#renderInUse(int, int, int)
+	 * 
+	 * @throws IllegalStateException
+	 *      If there is no spritesheet loaded
+	 */
+	@Override
+	public void renderInUse(int spriteId, int x, int y) {
+		Preconditions.checkState(isSpriteSheetLoaded(), "No spritesheet loaded" );
+
+		if ( 0 < spriteId && numSprites > spriteId ) {
+			int sx = spriteId % spriteSheet.getHorizontalCount();
+			int sy = spriteId / spriteSheet.getHorizontalCount();
+			spriteSheet.renderInUse(x, y, sx, sy);
+		}
 	}
 }

@@ -32,4 +32,25 @@ public interface ISpriteManager {
 	 * @return The sprite identified by the type or null if sprite is unknown.
 	 */
 	public Image getSprite( SpriteType type, boolean excludeBackground);
+	
+	/**
+	 * Start internal batch mode to speedup rendering
+	 */
+	public void startUse();
+	
+	/**
+	 * Stop internal batch mode
+	 */
+	public void endUse();
+	
+	/**
+	 * 
+	 * @param spriteId
+	 * 		Id of the sprite
+	 * @param x
+	 * 		x position where to render the sprite
+	 * @param y
+	 * 		y position where to render the sprite
+	 */
+	public void renderInUse( SpriteType type, int x, int y );
 }

@@ -59,13 +59,7 @@ public class SpriteManagerImpl implements ISpriteManager {
 		Preconditions.checkNotNull( type );
 
 		if ( !spriteSheet.isSpriteSheetLoaded() ) {
-			try {
-				spriteSheet.loadSpriteSheet( "nethack_spritesheet.jpg", 32, 32 );
-			} catch ( IllegalArgumentException e ) {
-				throw new RuntimeException( "Failed to load spritesheet.", e );
-			} catch ( IOException e ) {
-				throw new RuntimeException( "Failed to load spritesheet.", e );
-			}
+			loadDefaultSpriteSheet();
 		}
 
 		int spriteId;
@@ -91,5 +85,49 @@ public class SpriteManagerImpl implements ISpriteManager {
 		}
 
 		return sprite;
+	}
+	
+	/**
+	 * @see ISpriteManager#startUse()
+	 */
+	@Override
+	public void startUse() {
+		if ( !spriteSheet.isSpriteSheetLoaded() ) {
+			loadDefaultSpriteSheet();
+		}
+		
+		spriteSheet.startUse();
+	}
+
+	/**
+	 * @see ISpriteManager#endUse()
+	 */
+	@Override
+	public void endUse() {
+		spriteSheet.endUse();
+	}
+
+	/**
+	 * @see ISpriteManager#renderInUse(SpriteType, int, int)
+	 */
+	@Override
+	public void renderInUse( SpriteType type, int x, int y ) {
+		Preconditions.checkNotNull(type);
+		
+		if ( !spriteSheet.isSpriteSheetLoaded() ) {
+			loadDefaultSpriteSheet();
+		}
+		
+		spriteSheet.renderInUse(spriteMapping.getSpriteId(type), x, y);
+	}
+	
+	private void loadDefaultSpriteSheet(){
+		try {
+			spriteSheet.loadSpriteSheet( "nethack_spritesheet.jpg", 32, 32 );
+		} catch ( IllegalArgumentException e ) {
+			throw new RuntimeException( "Failed to load spritesheet.", e );
+		} catch ( IOException e ) {
+			throw new RuntimeException( "Failed to load spritesheet.", e );
+		}
 	}
 }
