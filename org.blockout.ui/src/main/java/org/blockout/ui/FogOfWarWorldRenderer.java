@@ -45,9 +45,9 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		camera.lock();
 		try {
 			updateFog( camera.getCenterX(), camera.getCenterY() );
-			spriteManager.startUse();
+			// spriteManager.startUse();
 			super.render( g );
-			spriteManager.endUse();
+			// spriteManager.endUse();
 
 			Image player = spriteManager.getSprite( SpriteType.Player, true );
 			player.drawCentered( camera.getHalfWidth(), camera.getHalfHeight() );
@@ -72,8 +72,8 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 			if ( sprite != null ) {
 
 				float alpha = computeLightning( worldX, worldY, sprite );
-				spriteManager.renderInUse(spriteType, screenX, screenY);
-				//sprite.draw( screenX, screenY );
+				// spriteManager.renderInUse(spriteType, screenX, screenY);
+				sprite.draw( screenX, screenY );
 
 				if ( alpha > 0.5f ) {
 					Entity e = tile.getEntityOnTile();
