@@ -1,5 +1,6 @@
 
 /.metadata
+/blockout-client/profiles
 /blockout-client/target
 /org.blockout.ai/target
 /org.blockout.common/target
