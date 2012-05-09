@@ -4,17 +4,16 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.engine.ISpriteManager;
+import org.blockout.engine.Shader;
 import org.blockout.engine.SpriteMapping;
 import org.blockout.engine.SpriteType;
 import org.blockout.logic.FogOfWar;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.Tile;
-import org.blockout.world.entity.Entity;
-import org.blockout.world.entity.Monster;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
-import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.SlickException;
 
 @Named
 public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
@@ -28,6 +27,8 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 
 	private final LocalGameState	gameState;
 
+	private Shader					shader;
+
 	@Inject
 	public FogOfWarWorldRenderer(final ISpriteManager spriteManager, final IWorld world, final Camera camera,
 			final LocalGameState gameState, final FogOfWar fog) {
@@ -37,60 +38,119 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		mapping = new SpriteMapping();
 		this.fog = fog;
 		this.gameState = gameState;
+
+		addRenderingPass( new LightningComputationPass() );
+
 	}
 
 	@Override
 	public void render( final Graphics g ) {
-
-		camera.lock();
-		try {
-			updateFog( camera.getCenterX(), camera.getCenterY() );
-			// spriteManager.startUse();
-			super.render( g );
-			// spriteManager.endUse();
-
-			Image player = spriteManager.getSprite( SpriteType.Player, true );
-			player.drawCentered( camera.getHalfWidth(), camera.getHalfHeight() );
-
-		} finally {
-			camera.unlock();
-		}
-	}
-
-	@Override
-	protected void renderTile( final Graphics g, final Tile tile, final int worldX, final int worldY,
-			final int screenX, final int screenY ) {
-
-		// only render explored tiles
-		if ( !fog.isExplored( worldX, worldY ) ) {
-			return;
-		}
-
-		try {
-			SpriteType spriteType = mapping.getSpriteType( tile.getTileType() );
-			Image sprite = spriteManager.getSprite( spriteType );
-			if ( sprite != null ) {
-
-				float alpha = computeLightning( worldX, worldY, sprite );
-				// spriteManager.renderInUse(spriteType, screenX, screenY);
-				sprite.draw( screenX, screenY );
-
-				if ( alpha > 0.5f ) {
-					Entity e = tile.getEntityOnTile();
-					if ( e != null && e != gameState.getPlayer() ) {
-
-						spriteType = e.getSpriteType();
-						sprite = spriteManager.getSprite( spriteType, true );
-
-						computeLightning( worldX, worldY, sprite );
-						sprite.draw( screenX, screenY );
-					}
-				}
+		if ( shader == null ) {
+			try {
+				shader = Shader.makeShader( "plain.vs", "light.fs" );
+			} catch ( SlickException e ) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch ( IllegalArgumentException e ) {
-			// unknown sprite
+		}
+
+		updateFog( camera.getCenterX(), camera.getCenterY() );
+		shader.setUniform2FVariable( "PlayerPos", camera.getHalfWidth(), camera.getHalfHeight() );
+		shader.setUniformFVariable( "OuterSquaredDistance", 64 * 32 * 32 );
+		shader.setUniformFVariable( "InnerSquaredDistance", 36 * 32 * 32 );
+		shader.startShader();
+		// spriteManager.startUse();
+		super.render( g );
+		// spriteManager.endUse();
+		Shader.forceFixedShader();
+
+		Image player = spriteManager.getSprite( SpriteType.Player, true );
+		player.drawCentered( camera.getHalfWidth(), camera.getHalfHeight() );
+
+	}
+
+	private class LightningComputationPass implements IRenderingPass {
+
+		@Override
+		public void beginPass() {
+			spriteManager.startUse();
+		}
+
+		@Override
+		public void renderTile( final Graphics g, final Tile tile, final int worldX, final int worldY,
+				final int screenX, final int screenY ) {
+			try {
+				SpriteType spriteType = mapping.getSpriteType( tile.getTileType() );
+				Image sprite = spriteManager.getSprite( spriteType );
+				if ( sprite != null ) {
+
+					// float alpha = computeLightning( worldX, worldY, sprite );
+					spriteManager.renderInUse( spriteType, screenX, screenY );
+					// sprite.draw( screenX, screenY );
+
+					// if ( alpha > 0.5f ) {
+					// Entity e = tile.getEntityOnTile();
+					// if ( e != null && e != gameState.getPlayer() ) {
+					//
+					// spriteType = e.getSpriteType();
+					// sprite = spriteManager.getSprite( spriteType, true );
+					//
+					// computeLightning( worldX, worldY, sprite );
+					// sprite.draw( screenX, screenY );
+					// }
+					// }
+				}
+			} catch ( IllegalArgumentException e ) {
+				// unknown sprite
+			}
+		}
+
+		@Override
+		public void renderMissingTile( final Graphics g, final int worldX, final int worldY, final int screenX,
+				final int screenY ) {
+		}
+
+		@Override
+		public void endPass() {
+			spriteManager.endUse();
 		}
 	}
+
+	// @Override
+	// protected void renderTile( final Graphics g, final Tile tile, final int
+	// worldX, final int worldY,
+	// final int screenX, final int screenY ) {
+	//
+	// // only render explored tiles
+	// if ( !fog.isExplored( worldX, worldY ) ) {
+	// return;
+	// }
+	//
+	// try {
+	// SpriteType spriteType = mapping.getSpriteType( tile.getTileType() );
+	// Image sprite = spriteManager.getSprite( spriteType );
+	// if ( sprite != null ) {
+	//
+	// float alpha = computeLightning( worldX, worldY, sprite );
+	// // spriteManager.renderInUse(spriteType, screenX, screenY);
+	// sprite.draw( screenX, screenY );
+	//
+	// if ( alpha > 0.5f ) {
+	// Entity e = tile.getEntityOnTile();
+	// if ( e != null && e != gameState.getPlayer() ) {
+	//
+	// spriteType = e.getSpriteType();
+	// sprite = spriteManager.getSprite( spriteType, true );
+	//
+	// computeLightning( worldX, worldY, sprite );
+	// sprite.draw( screenX, screenY );
+	// }
+	// }
+	// }
+	// } catch ( IllegalArgumentException e ) {
+	// // unknown sprite
+	// }
+	// }
 
 	private float computeLightning( final int worldX, final int worldY, final Image sprite ) {
 		double origDistX = Math.pow( worldX - camera.getCenterX(), 2 );
@@ -184,41 +244,43 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		fog.setExplored( camera.worldToTile( x + 2 ), camera.worldToTile( y + 2 ), true );
 	}
 
-	@Override
-	protected void renderTileOverlay( final Graphics g, final Tile tile, final int worldX, final int worldY,
-			final int screenX, final int screenY ) {
-		// only render explored tiles
-		if ( !fog.isExplored( worldX, worldY ) ) {
-			return;
-		}
-
-		try {
-			SpriteType spriteType = mapping.getSpriteType( tile.getTileType() );
-			Image sprite = spriteManager.getSprite( spriteType );
-			if ( sprite != null ) {
-
-				float alpha = computeLightning( worldX, worldY, sprite );
-				if ( alpha > 0.5f ) {
-					Entity e = tile.getEntityOnTile();
-					if ( e != null && e != gameState.getPlayer() ) {
-
-						if ( e instanceof Monster ) {
-
-							Monster actor = (Monster) e;
-							if ( actor.getCurrentHealth() < actor.getMaxHealth() ) {
-								int width = (int) (20f * actor.getCurrentHealth() / actor.getMaxHealth());
-
-								g.setColor( org.newdawn.slick.Color.green );
-								g.fill( new Rectangle( screenX + 6, screenY - 2, width, 4 ) );
-								g.drawRect( screenX + 6, screenY - 2, 20, 4 );
-							}
-						}
-					}
-				}
-			}
-		} catch ( IllegalArgumentException e ) {
-			// unknown sprite
-		}
-	}
+	// @Override
+	// protected void renderTileOverlay( final Graphics g, final Tile tile,
+	// final int worldX, final int worldY,
+	// final int screenX, final int screenY ) {
+	// // only render explored tiles
+	// if ( !fog.isExplored( worldX, worldY ) ) {
+	// return;
+	// }
+	//
+	// try {
+	// SpriteType spriteType = mapping.getSpriteType( tile.getTileType() );
+	// Image sprite = spriteManager.getSprite( spriteType );
+	// if ( sprite != null ) {
+	//
+	// float alpha = computeLightning( worldX, worldY, sprite );
+	// if ( alpha > 0.5f ) {
+	// Entity e = tile.getEntityOnTile();
+	// if ( e != null && e != gameState.getPlayer() ) {
+	//
+	// if ( e instanceof Monster ) {
+	//
+	// Monster actor = (Monster) e;
+	// if ( actor.getCurrentHealth() < actor.getMaxHealth() ) {
+	// int width = (int) (20f * actor.getCurrentHealth() /
+	// actor.getMaxHealth());
+	//
+	// g.setColor( org.newdawn.slick.Color.green );
+	// g.fill( new Rectangle( screenX + 6, screenY - 2, width, 4 ) );
+	// g.drawRect( screenX + 6, screenY - 2, 20, 4 );
+	// }
+	// }
+	// }
+	// }
+	// }
+	// } catch ( IllegalArgumentException e ) {
+	// // unknown sprite
+	// }
+	// }
 
 }
