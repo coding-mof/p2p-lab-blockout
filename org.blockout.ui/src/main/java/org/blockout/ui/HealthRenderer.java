@@ -5,15 +5,24 @@ import org.blockout.world.LocalGameState;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
+/**
+ * This class is responsible for rendering the current health of the own player.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class HealthRenderer {
 
 	private final static int	MIN_FILL_DISTANCE	= 145 * 145;
 	private final static int	MAX_FILL_DISTANCE	= 245 * 245;
 
-	protected Image				healthSphere;
-	protected Shader			shader;
+	// Dependencies
 	protected Camera			camera;
 	protected LocalGameState	gameState;
+
+	// Own state
+	protected Image				healthSphere;
+	protected Shader			shader;
 
 	private float				currentDistance;
 	private float				currentRadians;

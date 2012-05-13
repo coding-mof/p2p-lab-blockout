@@ -16,14 +16,23 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 
+/**
+ * The main rendering component which draws the world, the fog of war and the
+ * entities in the world.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 
+	// Dependencies
 	private final ISpriteManager	spriteManager;
 	private final SpriteMapping		mapping;
 	private final FogOfWar			fog;
 	protected LocalGameState		gameState;
 
+	// Own state
 	private Shader					shader;
 
 	@Inject

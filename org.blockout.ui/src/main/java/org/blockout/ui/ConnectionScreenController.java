@@ -10,9 +10,18 @@ import org.newdawn.slick.state.transition.FadeOutTransition;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 
+/**
+ * Screen controller implementation for the connection screen. On the connection
+ * screen you can either directly connect to a peer by it's ip address or select
+ * one from auto-discovery.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class ConnectionScreenController implements StateBasedScreenController {
 
+	// Own state
 	protected Nifty				nifty;
 	protected StateBasedGame	game;
 

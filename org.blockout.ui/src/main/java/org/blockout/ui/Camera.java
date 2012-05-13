@@ -17,25 +17,61 @@ import com.google.common.base.Preconditions;
  */
 public class Camera {
 
+	/**
+	 * The view center in world coordinates.
+	 */
 	protected float				centerX;
+	/**
+	 * The view center in world coordinates.
+	 */
 	protected float				centerY;
-
+	/**
+	 * The width of the viewport in pixel.
+	 */
 	protected int				width;
+	/**
+	 * The height of the viewport in pixel.
+	 */
 	protected int				height;
-
+	/**
+	 * Half of the width of the viewport in pixel.
+	 */
 	protected float				halfWidth;
+	/**
+	 * Half of the height of the viewport in pixel.
+	 */
 	protected float				halfHeight;
-
+	/**
+	 * Number of horizontal tiles that are visible in the viewport.
+	 */
 	protected int				numHorTiles;
+	/**
+	 * Number of vertical tiles that are visible in the viewport.
+	 */
 	protected int				numVerTiles;
-
+	/**
+	 * Size of a tile in pixel. Tiles are assumed to be squares.
+	 */
 	protected int				tileSize;
-
+	/**
+	 * The ofset between the viewport and the first tile to render (in pixel).
+	 */
 	protected int				widthOfset;
+	/**
+	 * The ofset between the viewport and the first tile to render (in pixel).
+	 */
 	protected int				heightOfset;
-	private int					startTileX;
-	private int					startTileY;
-
+	/**
+	 * The id of the first horizontal tile to render.
+	 */
+	protected int				startTileX;
+	/**
+	 * The id of the first vertical tile to render.
+	 */
+	protected int				startTileY;
+	/**
+	 * Lock for synchronizing access to the camera.
+	 */
 	private final ReentrantLock	lock	= new ReentrantLock();
 
 	public Camera(final int tileSize, final int displayWidth, final int displayHeight) {
@@ -66,10 +102,21 @@ public class Camera {
 		adjustOfsets();
 	}
 
+	/**
+	 * Locks the camera. Synchronization does only work if all threads are
+	 * locking the camera before they are going to read or modify it's state.
+	 * 
+	 * @see ReentrantLock
+	 */
 	public void lock() {
 		lock.lock();
 	}
 
+	/**
+	 * Unlocks the camera to let other threads access it's state.
+	 * 
+	 * @see ReentrantLock
+	 */
 	public void unlock() {
 		lock.unlock();
 	}

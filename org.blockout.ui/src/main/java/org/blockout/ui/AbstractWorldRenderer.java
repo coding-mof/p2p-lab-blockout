@@ -17,9 +17,11 @@ import com.google.common.base.Preconditions;
  */
 public abstract class AbstractWorldRenderer implements IWorldRenderer {
 
-	private final IWorld				world;
-
+	// Dependencies
+	protected final IWorld				world;
 	protected Camera					camera;
+
+	// Own state
 	protected Vector<IRenderingPass>	renderingPass;
 
 	/**
