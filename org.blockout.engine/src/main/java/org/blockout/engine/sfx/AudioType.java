@@ -1,4 +1,4 @@
-package org.blockout.engine;
+package org.blockout.engine.sfx;
 
 /**
  * Convenient enumeration for specifying the type of an audio file.
