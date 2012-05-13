@@ -13,8 +13,6 @@ import org.blockout.world.LocalGameState;
 import org.blockout.world.entity.Player;
 import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.state.transition.FadeInTransition;
-import org.newdawn.slick.state.transition.FadeOutTransition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +51,6 @@ public class ProfileScreenController implements StateBasedScreenController {
 
 		this.nifty = nifty;
 		this.screen = screen;
-
 	}
 
 	@Override
@@ -130,7 +127,7 @@ public class ProfileScreenController implements StateBasedScreenController {
 	private void startGame( final Player p ) {
 		logger.info( "Starting game as: " + p.getName() );
 		gameState.setPlayer( p );
-		game.enterState( GameStates.InGame.ordinal(), new FadeOutTransition(), new FadeInTransition() );
+		nifty.gotoScreen( "connection" );
 	}
 
 	@Override
