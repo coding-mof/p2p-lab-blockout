@@ -200,7 +200,7 @@ public class Camera {
 	}
 
 	public int worldToTile( final float worldCoordinate ) {
-		if ( worldCoordinate > 0 ) {
+		if ( worldCoordinate >= 0 ) {
 			return (int) worldCoordinate;
 		}
 		return (int) worldCoordinate - 1;

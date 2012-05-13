@@ -128,7 +128,7 @@ public class InputHandler implements MouseListener, KeyListener {
 	@Override
 	public void mouseMoved( final int oldx, final int oldy, final int newx, final int newy ) {
 		try {
-
+			camera.lock();
 			Tile tile = world.getTile( camera.worldToTile( camera.screenToWorldX( newx ) ),
 					camera.worldToTile( camera.screenToWorldY( newy ) ) );
 			if ( cursor != MouseCursor.Attack && tile != null && tile.getEntityOnTile() instanceof Actor
@@ -141,6 +141,8 @@ public class InputHandler implements MouseListener, KeyListener {
 			}
 		} catch ( SlickException e ) {
 			logger.error( "Couldn't set mouse cursor.", e );
+		} finally {
+			camera.unlock();
 		}
 	}
 
@@ -160,39 +162,45 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Override
 	public void mouseReleased( final int button, final int x, final int y ) {
-		int tileX = camera.worldToTile( camera.screenToWorldX( x ) );
-		int tileY = camera.worldToTile( camera.screenToWorldY( y ) );
-		int centerX = camera.worldToTile( camera.getCenterX() );
-		int centerY = camera.worldToTile( camera.getCenterY() );
+		try {
+			camera.lock();
+			int tileX = camera.worldToTile( camera.screenToWorldX( x ) );
+			int tileY = camera.worldToTile( camera.screenToWorldY( y ) );
+			int centerX = camera.worldToTile( camera.getCenterX() );
+			int centerY = camera.worldToTile( camera.getCenterY() );
 
-		// Handle Attacks
-		Tile tile = world.getTile( tileX, tileY );
-		// && areNeighbours( tileX, tileY, centerX, centerY )
-		if ( tile != null && tile.getEntityOnTile() instanceof Actor ) {
-			stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile() ) );
-			return;
-		}
-
-		// Handle Crates
-		if ( tile != null && tile.getEntityOnTile() instanceof Crate && areNeighbours( tileX, tileY, centerX, centerY ) ) {
-			stateMachine.pushEvent( new CrateOpenedEvent( gameState.getPlayer(), (Crate) tile.getEntityOnTile() ) );
-			return;
-		}
-
-		// Handle Movements
-		int fromX = centerX - camera.getStartTileX();
-		int fromY = centerY - camera.getStartTileY();
-		int toX = tileX - camera.getStartTileX();
-		int toY = tileY - camera.getStartTileY();
-		Path path = pathFinder.findPath( gameState.getPlayer(), fromX, fromY, toX, toY );
-		Path worldPath = new Path();
-		if ( path != null ) {
-			for ( int i = 0; i < path.getLength(); i++ ) {
-				Step step = path.getStep( i );
-				worldPath.appendStep( step.getX() + camera.getStartTileX(), step.getY() + camera.getStartTileY() );
+			// Handle Attacks
+			Tile tile = world.getTile( tileX, tileY );
+			// && areNeighbours( tileX, tileY, centerX, centerY )
+			if ( tile != null && tile.getEntityOnTile() instanceof Actor ) {
+				stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile() ) );
+				return;
 			}
+
+			// Handle Crates
+			if ( tile != null && tile.getEntityOnTile() instanceof Crate
+					&& areNeighbours( tileX, tileY, centerX, centerY ) ) {
+				stateMachine.pushEvent( new CrateOpenedEvent( gameState.getPlayer(), (Crate) tile.getEntityOnTile() ) );
+				return;
+			}
+
+			// Handle Movements
+			int fromX = centerX - camera.getStartTileX();
+			int fromY = centerY - camera.getStartTileY();
+			int toX = tileX - camera.getStartTileX();
+			int toY = tileY - camera.getStartTileY();
+			Path path = pathFinder.findPath( gameState.getPlayer(), fromX, fromY, toX, toY );
+			Path worldPath = new Path();
+			if ( path != null ) {
+				for ( int i = 0; i < path.getLength(); i++ ) {
+					Step step = path.getStep( i );
+					worldPath.appendStep( step.getX() + camera.getStartTileX(), step.getY() + camera.getStartTileY() );
+				}
+			}
+			playerController.setPath( stateMachine, worldPath );
+		} finally {
+			camera.unlock();
 		}
-		playerController.setPath( stateMachine, worldPath );
 	}
 
 	@Override
