@@ -1,6 +1,6 @@
 package org.blockout.world.state;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 
 /**
  * Interface for the core component of the event system. A state machine can

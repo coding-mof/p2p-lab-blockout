@@ -1,6 +1,6 @@
 package org.blockout.world.state;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 
 /**
  * Implement this interface to take part in the event validation process of a

@@ -8,7 +8,7 @@
     <screen id="start" controller="org.blockout.ui.InGameGameState">
 
         <layer
-            id="layer"
+            id="hud_layer"
             backgroundColor="#fff0"
             childLayout="vertical" >
 
@@ -17,7 +17,8 @@
             <panel
                 backgroundColor="#555A"
                 childLayout="horizontal"
-                height="12%" >
+                height="12%"
+                width="50%" >
 
                 <panel childLayout="vertical" align="left" width="">
                     <control name="label" text="Player:" textHAlign="left" align="left" width=""/>
@@ -33,6 +34,13 @@
 	                <control name="label" id="lblLevel" textHAlign="left" align="left" width="50%"/>
                 </panel>
             </panel>
+        </layer>
+        <layer visible="false" id="inventory_layer" childLayout="vertical">
+            <panel backgroundColor="#0F0F" align="right" valign="bottom">
+                
+                
+            </panel>
+            
         </layer>
     </screen>
 

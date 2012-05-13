@@ -4,7 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.UUID;
 
-import org.blockout.common.IEvent;
+import org.blockout.common.TileCoordinate;
+import org.blockout.world.entity.Player;
 
 /**
  * Instances of this class represent a movement of a player. Each event
@@ -15,7 +16,7 @@ import org.blockout.common.IEvent;
  */
 public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 
-	// TODO: add player id or instance
+	protected Player	player;
 	protected int		oldX;
 	protected int		oldY;
 	protected int		newX;
@@ -24,23 +25,14 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 	protected Calendar	localTime;
 	protected UUID		id;
 
-	public PlayerMoveEvent(final int oldX, final int oldY, final int newX, final int newY) {
+	public PlayerMoveEvent(final Player player, final int oldX, final int oldY, final int newX, final int newY) {
+		this.player = player;
 		this.oldX = oldX;
 		this.oldY = oldY;
 		this.newX = newX;
 		this.newY = newY;
 
 		localTime = Calendar.getInstance();
-		id = UUID.randomUUID();
-	}
-
-	private PlayerMoveEvent(final int oldX, final int oldY, final int newX, final int newY, final Calendar localTime) {
-		this.oldX = oldX;
-		this.oldY = oldY;
-		this.newX = newX;
-		this.newY = newY;
-
-		this.localTime = localTime;
 		id = UUID.randomUUID();
 	}
 
@@ -68,23 +60,6 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 	@Override
 	public Calendar getLocalTime() {
 		return localTime;
-	}
-
-	@Override
-	public PlayerMoveEvent getInverse() {
-		return new PlayerMoveEvent( newX, newY, oldX, oldY, localTime );
-	}
-
-	@Override
-	public boolean isInverseOf( final IEvent<PlayerMoveEvent> event ) {
-		// backward compatibility to Java 1.5
-		if ( !(event instanceof PlayerMoveEvent) ) {
-			return false;
-		}
-
-		PlayerMoveEvent pme = (PlayerMoveEvent) event;
-		return (pme.getNewX() == getOldX() && pme.getNewY() == getOldY() && pme.getOldX() == getNewX()
-				&& pme.getOldY() == getNewY() && pme.getLocalTime().equals( getLocalTime() ));
 	}
 
 	@Override
@@ -135,5 +110,10 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 	@Override
 	public long getDuration() {
 		return 500;
+	}
+
+	@Override
+	public TileCoordinate getResponsibleTile() {
+		return new TileCoordinate( newX, newY );
 	}
 }

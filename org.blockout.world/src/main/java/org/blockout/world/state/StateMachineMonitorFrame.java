@@ -10,7 +10,7 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 
 /**
  * Monitoring frame for debugging the

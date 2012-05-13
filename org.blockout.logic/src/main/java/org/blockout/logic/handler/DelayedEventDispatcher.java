@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 import org.blockout.world.state.IStateMachineListener;
 import org.slf4j.Logger;

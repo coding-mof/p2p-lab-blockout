@@ -1,6 +1,6 @@
 package org.blockout.world.state;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 
 /**
  * Adapter for convenience use of the {@link IStateMachineListener} interface.

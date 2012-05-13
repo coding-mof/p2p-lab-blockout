@@ -6,7 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 
 /**
  * Abstract base class for all state machine implementations which provides

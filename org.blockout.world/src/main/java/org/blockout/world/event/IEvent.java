@@ -1,7 +1,9 @@
-package org.blockout.common;
+package org.blockout.world.event;
 
 import java.util.Calendar;
 import java.util.UUID;
+
+import org.blockout.common.TileCoordinate;
 
 /**
  * Common interface for all game logic events like player movements, attacks,
@@ -25,19 +27,6 @@ public interface IEvent<T extends IEvent<T>> {
 	 */
 	public Calendar getLocalTime();
 
-	public boolean isInverseOf( IEvent<T> event );
-
-	/**
-	 * Returns the inverse of this event. This method might return different
-	 * event instances with an unique UUID on each invocation. To check whether
-	 * a given event is the inverse of another use {@link #isInverseOf(IEvent)}.
-	 * 
-	 * Not really meaningful for AttackEvents, etc.
-	 * 
-	 * @return
-	 */
-	public T getInverse();
-
 	/**
 	 * Returns how long it takes until the event is finished. The duration is
 	 * measured in milliseconds.
@@ -56,6 +45,15 @@ public interface IEvent<T extends IEvent<T>> {
 	 */
 	@Override
 	public boolean equals( Object obj );
+
+	/**
+	 * Returns the tile that is responsible for managing this event. This tile
+	 * is used in the network adapter to distinguish between events that have to
+	 * be committed by us and those where other peers are responsible for.
+	 * 
+	 * @return
+	 */
+	public TileCoordinate getResponsibleTile();
 
 	/**
 	 * Returns the hash code of this event. Implementations commonly use the

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 
 import com.google.common.base.Preconditions;
 
@@ -66,7 +66,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 		synchronized ( lock ) {
 			if ( events.containsKey( event.getId() ) ) {
 				events.remove( event.getId() );
-				fireEventRolledBack( event.getInverse() );
+				fireEventRolledBack( event );
 			}
 		}
 	}

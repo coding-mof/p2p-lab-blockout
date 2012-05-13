@@ -4,8 +4,8 @@ import java.util.Hashtable;
 
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
 import org.blockout.common.TileCoordinate;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 
 /**

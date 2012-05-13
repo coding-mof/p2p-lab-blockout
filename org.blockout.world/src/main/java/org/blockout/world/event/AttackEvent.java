@@ -3,7 +3,7 @@ package org.blockout.world.event;
 import java.util.Calendar;
 import java.util.UUID;
 
-import org.blockout.common.IEvent;
+import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Actor;
 
 public class AttackEvent implements IEvent<AttackEvent> {
@@ -36,19 +36,13 @@ public class AttackEvent implements IEvent<AttackEvent> {
 	}
 
 	@Override
-	public boolean isInverseOf( final IEvent<AttackEvent> event ) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public AttackEvent getInverse() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public long getDuration() {
 		return 200;
+	}
+
+	@Override
+	public TileCoordinate getResponsibleTile() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -1,6 +1,6 @@
 package org.blockout.logic.handler;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 
 public interface IEventHandler {

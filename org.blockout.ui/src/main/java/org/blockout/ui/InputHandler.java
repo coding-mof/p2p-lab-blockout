@@ -3,7 +3,6 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
 import org.blockout.engine.ISpriteManager;
 import org.blockout.engine.SpriteType;
 import org.blockout.world.IWorld;
@@ -13,6 +12,7 @@ import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Crate;
 import org.blockout.world.event.AttackEvent;
 import org.blockout.world.event.CrateOpenedEvent;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;

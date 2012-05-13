@@ -18,7 +18,6 @@ import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
-import de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState;
 import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
 
 /**
@@ -29,7 +28,7 @@ import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
  * @see GameStates#InGame
  */
 @Named
-public final class InGameGameState extends NiftyOverlayBasicGameState implements ScreenController {
+public final class InGameGameState extends HUDOverlayGameState implements ScreenController {
 
 	private Nifty						nifty;
 
@@ -46,6 +45,8 @@ public final class InGameGameState extends NiftyOverlayBasicGameState implements
 	protected final Camera				camera;
 	protected final PlayerMoveHandler	playerController;
 
+	private final HealthRenderer		healthRenderer;
+
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
 			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController) {
@@ -54,6 +55,7 @@ public final class InGameGameState extends NiftyOverlayBasicGameState implements
 		this.camera = camera;
 		this.worldRenderer = worldRenderer;
 		this.playerController = playerController;
+		healthRenderer = new HealthRenderer( camera, gameState );
 	}
 
 	@Override
@@ -73,6 +75,14 @@ public final class InGameGameState extends NiftyOverlayBasicGameState implements
 			throws SlickException {
 
 		worldRenderer.render( g );
+
+	}
+
+	@Override
+	protected void renderHUDOverlay( final GameContainer paramGameContainer, final StateBasedGame paramStateBasedGame,
+			final Graphics paramGraphics ) throws SlickException {
+
+		healthRenderer.render();
 	}
 
 	@Override
@@ -93,6 +103,8 @@ public final class InGameGameState extends NiftyOverlayBasicGameState implements
 	@Override
 	protected void updateGame( final GameContainer container, final StateBasedGame game, final int deltaMillis )
 			throws SlickException {
+
+		healthRenderer.update( deltaMillis );
 
 		updateHUD();
 

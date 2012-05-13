@@ -2,11 +2,11 @@ package org.blockout.logic.handler;
 
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
 import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Monster;
 import org.blockout.world.entity.Player;
 import org.blockout.world.event.AttackEvent;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.event.PlayerDiedEvent;
 import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;

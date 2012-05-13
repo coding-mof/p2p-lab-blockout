@@ -2,8 +2,8 @@ package org.blockout.logic.handler;
 
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
 import org.blockout.world.event.CrateOpenedEvent;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

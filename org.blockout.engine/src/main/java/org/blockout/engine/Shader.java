@@ -174,6 +174,24 @@ public class Shader {
 		GL20.glUseProgram( 0 );
 	}
 
+	public void setUniform4FVariable( final String name, final float x, final float y, final float z, final float w ) {
+		CharSequence param = new StringBuffer( name );
+		int location = GL20.glGetUniformLocation( programID, param );
+
+		GL20.glUseProgram( programID );
+		GL20.glUniform4f( location, x, y, z, w );
+		GL20.glUseProgram( 0 );
+	}
+
+	public void setUniform3FVariable( final String name, final float x, final float y, final float z ) {
+		CharSequence param = new StringBuffer( name );
+		int location = GL20.glGetUniformLocation( programID, param );
+
+		GL20.glUseProgram( programID );
+		GL20.glUniform3f( location, x, y, z );
+		GL20.glUseProgram( 0 );
+	}
+
 	/**
 	 * Returns true if the shader compiled successfully.</br>
 	 * 

@@ -3,9 +3,9 @@ package org.blockout.logic.validator;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
 import org.blockout.world.IWorld;
 import org.blockout.world.Tile;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.event.PlayerMoveEvent;
 import org.blockout.world.state.IEventValidator;
 import org.blockout.world.state.ValidationResult;

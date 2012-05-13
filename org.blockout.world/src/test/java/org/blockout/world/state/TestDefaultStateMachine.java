@@ -2,7 +2,7 @@ package org.blockout.world.state;
 
 import static org.mockito.Mockito.mock;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -174,7 +174,7 @@ public class TestDefaultStateMachine {
 		Mockito.verify( listener ).eventPushed( event );
 
 		stateMachine.rollbackEvent( event );
-		Mockito.verify( listener ).eventRolledBack( event.getInverse() );
+		Mockito.verify( listener ).eventRolledBack( event );
 	}
 
 	@Test

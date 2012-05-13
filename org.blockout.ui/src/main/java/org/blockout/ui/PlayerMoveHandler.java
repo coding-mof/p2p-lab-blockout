@@ -3,9 +3,9 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.common.IEvent;
 import org.blockout.logic.handler.IEventHandler;
 import org.blockout.world.LocalGameState;
+import org.blockout.world.event.IEvent;
 import org.blockout.world.event.PlayerMoveEvent;
 import org.blockout.world.state.IStateMachine;
 import org.newdawn.slick.GameContainer;
@@ -83,7 +83,7 @@ public class PlayerMoveHandler implements IEventHandler {
 	private void raiseEvent( final IStateMachine stateMachine, final Path.Step step, final int oldX, final int oldY ) {
 		if ( step != null ) {
 			synchronized ( posLock ) {
-				lastEvent = new PlayerMoveEvent( oldX, oldY, step.getX(), step.getY() );
+				lastEvent = new PlayerMoveEvent( gameState.getPlayer(), oldX, oldY, step.getX(), step.getY() );
 			}
 			stateMachine.pushEvent( lastEvent );
 		}

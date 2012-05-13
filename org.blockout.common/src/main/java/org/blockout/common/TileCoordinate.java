@@ -17,6 +17,18 @@ public class TileCoordinate {
 		return y;
 	}
 
+	public static float computeEuclidianDistance( final TileCoordinate a, final TileCoordinate b ) {
+		return (float) Math.sqrt( computeSquaredEuclidianDistance( a, b ) );
+	}
+
+	public static float computeSquaredEuclidianDistance( final TileCoordinate a, final TileCoordinate b ) {
+		return a.x * b.x + a.y * b.y;
+	}
+
+	public static int computeManhattanDistance( final TileCoordinate a, final TileCoordinate b ) {
+		return Math.abs( a.x - b.x ) + Math.abs( a.y - b.y );
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

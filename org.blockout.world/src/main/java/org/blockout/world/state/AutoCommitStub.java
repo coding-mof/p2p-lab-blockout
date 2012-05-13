@@ -1,6 +1,6 @@
 package org.blockout.world.state;
 
-import org.blockout.common.IEvent;
+import org.blockout.world.event.IEvent;
 
 //@Named
 public class AutoCommitStub implements IStateMachineListener {
