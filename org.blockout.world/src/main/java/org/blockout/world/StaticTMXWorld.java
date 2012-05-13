@@ -16,11 +16,13 @@ import org.newdawn.slick.util.ResourceLocation;
 
 public class StaticTMXWorld implements IWorld {
 
-	private TiledMap				map;
-	private HashMap<String, Tile>	tileCache;
+	private TiledMap						map;
+	private HashMap<TileCoordinate, Tile>	tileCache;
+	private HashMap<Entity, TileCoordinate>	entityCache;
 
 	public StaticTMXWorld(final String tmxFile) {
-		tileCache = new HashMap<String, Tile>();
+		tileCache = new HashMap<TileCoordinate, Tile>();
+		entityCache = new HashMap<Entity, TileCoordinate>();
 		try {
 
 			ResourceLoader.addResourceLocation( new ResourceLocation() {
@@ -47,28 +49,39 @@ public class StaticTMXWorld implements IWorld {
 		if ( x <= -50 || y <= -50 ) {
 			return null;
 		}
-		String key = "(" + x + "," + y + ")";
-		Tile t = tileCache.get( key );
+		Tile t = tileCache.get( new TileCoordinate( x, y ) );
 		if ( t == null ) {
 			int spriteId = map.getTileId( x + 50, y + 50, 0 ) - 1;
+			if ( spriteId < 0 ) {
+				return null;
+			}
 			int objectId = map.getTileId( x + 50, y + 50, 1 ) - 1;
 			if ( objectId == 586 ) {
-				t = new Tile( spriteId, new Crate() );
+				Crate entity = new Crate();
+				t = new Tile( spriteId, entity );
+				putEntity( entity, x, y );
 			} else if ( objectId == 249 ) {
-				t = new Tile( spriteId, new Zombie( 1 ) ); // SpriteType.Zombie
+				Zombie entity = new Zombie( 1 );
+				t = new Tile( spriteId, entity ); // SpriteType.Zombie
+				putEntity( entity, x, y );
 			} else if ( objectId == 250 ) {
-				t = new Tile( spriteId, new Monster( "Skeleton", 1, 100, 25 ) ); // SpriteType.Skeleton
+				Monster entity = new Monster( "Skeleton", 1, 100, 25 );
+				t = new Tile( spriteId, entity ); // SpriteType.Skeleton
+				putEntity( entity, x, y );
 			} else {
 				t = new Tile( spriteId, (spriteId == 849 /* StoneGround Dark */) ? Tile.WALL_HEIGHT : Tile.GROUND_HEIGHT );
 			}
 		}
-		tileCache.put( key, t );
+		tileCache.put( new TileCoordinate( x, y ), t );
 		return t;
 	}
 
+	protected void putEntity( final Entity e, final int x, final int y ) {
+		entityCache.put( e, new TileCoordinate( x, y ) );
+	}
+
 	@Override
-	public TileCoordinate findTile(Entity entity) {
-		// TODO Auto-generated method stub
-		return null;
+	public TileCoordinate findTile( final Entity entity ) {
+		return entityCache.get( entity );
 	}
 }

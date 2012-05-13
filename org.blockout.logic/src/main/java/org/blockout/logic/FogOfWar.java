@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.inject.Named;
 
+import org.blockout.common.TileCoordinate;
+
 /**
  * This class is a data structure for storing the Fog Of War information. It
  * allows to store fog information for all 2D coordinates in the range from
@@ -17,18 +19,18 @@ import javax.inject.Named;
 @Named
 public class FogOfWar {
 
-	private static final int		SEGMENT_SIZE	= 48;
+	private static final int				SEGMENT_SIZE	= 48;
 
-	protected Map<String, BitSet>	exploreState;
+	protected Map<TileCoordinate, BitSet>	exploreState;
 
 	public FogOfWar() {
-		exploreState = new HashMap<String, BitSet>();
+		exploreState = new HashMap<TileCoordinate, BitSet>();
 	}
 
 	public boolean isExplored( final int x, final int y ) {
 		int segmentX = (SEGMENT_SIZE + x) / SEGMENT_SIZE;
 		int segmentY = (SEGMENT_SIZE + y) / SEGMENT_SIZE;
-		BitSet segment = exploreState.get( "(" + segmentX + "," + segmentY + ")" );
+		BitSet segment = exploreState.get( new TileCoordinate( segmentX, segmentY ) );
 		if ( segment == null ) {
 			return false;
 		}
@@ -40,7 +42,7 @@ public class FogOfWar {
 	public void setExplored( final int x, final int y, final boolean explored ) {
 		int segmentX = (SEGMENT_SIZE + x) / SEGMENT_SIZE;
 		int segmentY = (SEGMENT_SIZE + y) / SEGMENT_SIZE;
-		String key = "(" + segmentX + "," + segmentY + ")";
+		TileCoordinate key = new TileCoordinate( segmentX, segmentY );
 		BitSet segment = exploreState.get( key );
 		if ( segment == null ) {
 			segment = new BitSet( SEGMENT_SIZE * SEGMENT_SIZE );
