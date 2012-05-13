@@ -22,7 +22,7 @@ public class TileCoordinate {
 	}
 
 	public static float computeSquaredEuclidianDistance( final TileCoordinate a, final TileCoordinate b ) {
-		return a.x * b.x + a.y * b.y;
+		return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
 	}
 
 	public static int computeManhattanDistance( final TileCoordinate a, final TileCoordinate b ) {
@@ -57,6 +57,11 @@ public class TileCoordinate {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "TileCoordinate[x=" + x + ", y=" + y + "]";
 	}
 
 }

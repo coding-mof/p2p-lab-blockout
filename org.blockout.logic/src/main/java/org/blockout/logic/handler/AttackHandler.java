@@ -38,6 +38,7 @@ public class AttackHandler implements IEventHandler {
 		}
 
 		AttackEvent ae = (AttackEvent) event;
+		logger.debug( "Handling event: " + event );
 
 		int damage = ae.getAggressor().getStrength() - ae.getVictim().getArmor();
 		if ( damage > 0 ) {

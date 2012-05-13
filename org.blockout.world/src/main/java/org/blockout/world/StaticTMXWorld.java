@@ -8,13 +8,20 @@ import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Monster;
+import org.blockout.world.entity.Player;
 import org.blockout.world.entity.Zombie;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 import org.newdawn.slick.util.ResourceLoader;
 import org.newdawn.slick.util.ResourceLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StaticTMXWorld implements IWorld {
+	private static final Logger				logger;
+	static {
+		logger = LoggerFactory.getLogger( StaticTMXWorld.class );
+	}
 
 	private TiledMap						map;
 	private HashMap<TileCoordinate, Tile>	tileCache;
@@ -83,5 +90,10 @@ public class StaticTMXWorld implements IWorld {
 	@Override
 	public TileCoordinate findTile( final Entity entity ) {
 		return entityCache.get( entity );
+	}
+
+	@Override
+	public void setPlayerPosition( final Player p, final TileCoordinate coord ) {
+		entityCache.put( p, coord );
 	}
 }

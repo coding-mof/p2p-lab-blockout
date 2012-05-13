@@ -36,6 +36,10 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 		id = UUID.randomUUID();
 	}
 
+	public Player getPlayer() {
+		return player;
+	}
+
 	public int getOldX() {
 		return oldX;
 	}

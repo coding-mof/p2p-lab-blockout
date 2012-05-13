@@ -2,6 +2,7 @@ package org.blockout.world;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
+import org.blockout.world.entity.Player;
 
 /**
  * Interface for world implementations. Theoretically the world has no bounds
@@ -25,12 +26,16 @@ public interface IWorld {
 	 * @return The tile at the given location or null if currently not present.
 	 */
 	public Tile getTile( int x, int y );
-	
+
 	/**
 	 * Returns the position of the tile containing the given entity
-	 * @param entity 
-	 * @return Tupel with the coordinates of the tile in the world containing the entity
-	 * 			null if the current Chunk doesn't contain such an entity
+	 * 
+	 * @param entity
+	 * @return Tupel with the coordinates of the tile in the world containing
+	 *         the entity null if the current Chunk doesn't contain such an
+	 *         entity
 	 */
-	public TileCoordinate findTile(Entity entity);
+	public TileCoordinate findTile( Entity entity );
+
+	public void setPlayerPosition( Player p, TileCoordinate coord );
 }

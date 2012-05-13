@@ -3,7 +3,9 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.common.TileCoordinate;
 import org.blockout.logic.handler.IEventHandler;
+import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.event.PlayerMoveEvent;
@@ -26,6 +28,7 @@ public class PlayerMoveHandler implements IEventHandler {
 
 	protected final Camera			camera;
 	protected final LocalGameState	gameState;
+	protected IWorld				world;
 
 	private final Object			pathLock	= new Object();
 	private Path					path;
@@ -41,9 +44,10 @@ public class PlayerMoveHandler implements IEventHandler {
 	private int						startY;
 
 	@Inject
-	public PlayerMoveHandler(final Camera camera, final LocalGameState gameState) {
+	public PlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world) {
 		this.camera = camera;
 		this.gameState = gameState;
+		this.world = world;
 	}
 
 	public void update( final GameContainer container, final int deltaMillis ) {
@@ -121,6 +125,8 @@ public class PlayerMoveHandler implements IEventHandler {
 			return;
 		}
 		PlayerMoveEvent pme = (PlayerMoveEvent) event;
+
+		world.setPlayerPosition( pme.getPlayer(), new TileCoordinate( pme.getNewX(), pme.getNewY() ) );
 
 		synchronized ( pathLock ) {
 			nextStep++;

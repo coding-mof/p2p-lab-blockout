@@ -2,6 +2,7 @@ package org.blockout.world;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
+import org.blockout.world.entity.Player;
 
 public class World implements IWorld {
 
@@ -49,6 +50,12 @@ public class World implements IWorld {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void setPlayerPosition( final Player p, final TileCoordinate coord ) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
