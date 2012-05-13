@@ -1,8 +1,11 @@
-package org.blockout.engine;
+package org.blockout.engine.animation;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.blockout.engine.ISpriteManager;
+import org.blockout.engine.ISpriteSheet;
+import org.blockout.engine.SpriteType;
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Image;
 

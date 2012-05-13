@@ -1,4 +1,4 @@
-package org.blockout.engine;
+package org.blockout.engine.sfx;
 
 import org.newdawn.slick.Music;
 import org.newdawn.slick.Sound;

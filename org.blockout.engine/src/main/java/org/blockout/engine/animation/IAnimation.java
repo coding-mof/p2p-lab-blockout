@@ -1,4 +1,4 @@
-package org.blockout.engine;
+package org.blockout.engine.animation;
 
 /**
  * Implementaion of this interface handle the lifetime of an graphical animation.

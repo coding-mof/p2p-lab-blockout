@@ -1,4 +1,5 @@
-package org.blockout.engine;
+package org.blockout.engine.sfx;
+
 
 import com.google.common.base.Preconditions;
 
