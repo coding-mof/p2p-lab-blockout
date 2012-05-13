@@ -25,6 +25,9 @@ import org.newdawn.slick.util.pathfinding.PathFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.elements.Element;
+
 /**
  * This class is responsible for converting user interactions to {@link IEvent}s
  * for the underlying {@link IStateMachine}.
@@ -47,6 +50,7 @@ public class InputHandler implements MouseListener, KeyListener {
 	protected IWorld			world;
 	protected GameContainer		container;
 	protected ISpriteManager	spriteManager;
+	protected Nifty				nifty;
 
 	@Inject
 	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
@@ -63,6 +67,10 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	public void setGameContainer( final GameContainer container ) {
 		this.container = container;
+	}
+
+	public void setNifty( final Nifty nifty ) {
+		this.nifty = nifty;
 	}
 
 	@Override
@@ -88,6 +96,19 @@ public class InputHandler implements MouseListener, KeyListener {
 
 	@Override
 	public void keyReleased( final int arg0, final char arg1 ) {
+		if ( arg0 == Input.KEY_I ) {
+			Element inventory = nifty.getCurrentScreen().findElementByName( "inventory_layer" );
+			inventory.setVisible( !inventory.isVisible() );
+		}
+		// if ( arg0 == Input.KEY_F ) {
+		// camera.lock();
+		// if ( camera.getWidth() == 1024 ) {
+		// camera.setBounds( 512, camera.getHeight() );
+		// } else {
+		// camera.setBounds( 1024, camera.getHeight() );
+		// }
+		// camera.unlock();
+		// }
 	}
 
 	@Override
@@ -146,7 +167,8 @@ public class InputHandler implements MouseListener, KeyListener {
 
 		// Handle Attacks
 		Tile tile = world.getTile( tileX, tileY );
-		if ( tile != null && tile.getEntityOnTile() instanceof Actor && areNeighbours( tileX, tileY, centerX, centerY ) ) {
+		// && areNeighbours( tileX, tileY, centerX, centerY )
+		if ( tile != null && tile.getEntityOnTile() instanceof Actor ) {
 			stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile() ) );
 			return;
 		}

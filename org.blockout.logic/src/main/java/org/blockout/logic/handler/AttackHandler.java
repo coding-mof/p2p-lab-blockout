@@ -7,6 +7,7 @@ import org.blockout.world.entity.Monster;
 import org.blockout.world.entity.Player;
 import org.blockout.world.event.AttackEvent;
 import org.blockout.world.event.IEvent;
+import org.blockout.world.event.MonsterSlayedEvent;
 import org.blockout.world.event.PlayerDiedEvent;
 import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
@@ -38,38 +39,22 @@ public class AttackHandler implements IEventHandler {
 		}
 
 		AttackEvent ae = (AttackEvent) event;
-		logger.debug( "Handling event: " + event );
 
 		int damage = ae.getAggressor().getStrength() - ae.getVictim().getArmor();
 		if ( damage > 0 ) {
 			logger.debug( "Doing " + damage + " damage to victim." );
 			int healthLeft = ae.getVictim().getCurrentHealth() - damage;
 			if ( healthLeft <= 0 ) {
-				logger.info( "Actor (Victim) died: " + ae.getVictim() );
-				raiseDeathEvent( stateMachine, ae.getVictim() );
+				if ( ae.getVictim() instanceof Player ) {
+					logger.info( "Player died: " + ae.getVictim() );
+					stateMachine.pushEvent( new PlayerDiedEvent( (Player) ae.getVictim() ) );
+				} else if ( ae.getVictim() instanceof Monster ) {
+					logger.info( "Monster died: " + ae.getVictim() );
+					stateMachine.pushEvent( new MonsterSlayedEvent( ae.getAggressor(), (Monster) ae.getVictim() ) );
+				}
 			} else {
 				ae.getVictim().setCurrentHealth( healthLeft );
 			}
-		}
-
-		damage = ae.getVictim().getStrength() - ae.getAggressor().getArmor();
-		if ( damage > 0 ) {
-			logger.debug( "Doing " + damage + " aggressor to victim." );
-			int healthLeft = ae.getAggressor().getCurrentHealth() - damage;
-			if ( healthLeft <= 0 ) {
-				logger.info( "Actor (Aggressor) died: " + ae.getAggressor() );
-				raiseDeathEvent( stateMachine, ae.getAggressor() );
-			} else {
-				ae.getAggressor().setCurrentHealth( healthLeft );
-			}
-		}
-	}
-
-	private void raiseDeathEvent( final IStateMachine stateMachine, final Actor actor ) {
-		if ( actor instanceof Player ) {
-			stateMachine.pushEvent( new PlayerDiedEvent( (Player) actor ) );
-		} else if ( actor instanceof Monster ) {
-
 		}
 	}
 }

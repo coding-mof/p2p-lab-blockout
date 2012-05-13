@@ -12,46 +12,47 @@ import org.newdawn.slick.particles.effects.FireEmitter;
 
 public class EngineTestbed extends BasicGame {
 
-	public static void main(String[] args) {
+	public static void main( final String[] args ) {
 		try {
-			AppGameContainer app = new AppGameContainer(new EngineTestbed("EngineTestbed"));
-			app.setDisplayMode(640, 480, false);
-			app.setAlwaysRender(true);
+			AppGameContainer app = new AppGameContainer( new EngineTestbed( "EngineTestbed" ) );
+			app.setDisplayMode( 640, 480, false );
+			app.setAlwaysRender( true );
 			app.start();
-		} catch (SlickException e) {
+		} catch ( SlickException e ) {
 			e.printStackTrace();
 		}
 	}
-	
-	ParticleAnimation animation;
-	ParticleSystem particleSystem;
-	
-	public EngineTestbed(String title) {
-		super(title);
+
+	ParticleAnimation	animation;
+
+	ParticleSystem		particleSystem;
+
+	public EngineTestbed(final String title) {
+		super( title );
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public void render(GameContainer arg0, Graphics arg1) throws SlickException {
-		animation.render(300, 300);
-		particleSystem.render(200, 100);
+	public void render( final GameContainer arg0, final Graphics arg1 ) throws SlickException {
+		animation.render( 300, 300 );
+		particleSystem.render( 200, 100 );
 	}
 
 	@Override
-	public void init(GameContainer arg0) throws SlickException {
+	public void init( final GameContainer arg0 ) throws SlickException {
 		animation = new ParticleAnimation();
-		//animation.addEffect("fire", new FireEmitter(0, 0, 10));
-		animation.addEffect("ring", new ExplosionEmitter(100));
-		animation.setLooping(true);
+		// animation.addEffect( "fire", new FireEmitter( 0, 0, 10 ) );
+		animation.addEffect( "ring", new ExplosionEmitter( 100 ) );
+		animation.setLooping( true );
 		animation.start();
-		
-		particleSystem = new ParticleSystem("particle.tga");
-		particleSystem.addEmitter(new FireEmitter());
+
+		particleSystem = new ParticleSystem( "particle.tga" );
+		particleSystem.addEmitter( new FireEmitter() );
 	}
 
 	@Override
-	public void update(GameContainer container, int delta) throws SlickException {
-		animation.update(delta);
-		particleSystem.update(delta);
+	public void update( final GameContainer container, final int delta ) throws SlickException {
+		animation.update( delta );
+		particleSystem.update( delta );
 	}
 }

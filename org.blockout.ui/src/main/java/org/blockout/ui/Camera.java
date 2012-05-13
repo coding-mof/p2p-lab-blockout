@@ -45,6 +45,10 @@ public class Camera {
 
 		this.tileSize = tileSize;
 
+		setBounds( displayWidth, displayHeight );
+	}
+
+	public void setBounds( final int displayWidth, final int displayHeight ) {
 		width = displayWidth;
 		height = displayHeight;
 
@@ -59,6 +63,7 @@ public class Camera {
 		if ( displayHeight % tileSize == 0 ) {
 			numVerTiles++;
 		}
+		adjustOfsets();
 	}
 
 	public void lock() {

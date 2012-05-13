@@ -26,12 +26,9 @@ public class BlockOutGame extends StateBasedGame {
 
 	@Override
 	public void initStatesList( final GameContainer gc ) throws SlickException {
-
 		for ( GameState state : gameStates ) {
-			System.out.println( "State: " + state );
 			addState( state );
 		}
-
 		this.enterState( GameStates.StartMenu.ordinal() );
 	}
 }

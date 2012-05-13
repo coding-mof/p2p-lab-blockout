@@ -1,13 +1,10 @@
 package org.blockout.world.event;
 
-import java.util.Calendar;
-import java.util.UUID;
-
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Player;
 
-public class CrateOpenedEvent implements IEvent<CrateOpenedEvent> {
+public class CrateOpenedEvent extends AbstractEvent<CrateOpenedEvent> {
 
 	protected Player	player;
 	protected Crate		crate;
@@ -26,18 +23,6 @@ public class CrateOpenedEvent implements IEvent<CrateOpenedEvent> {
 	}
 
 	@Override
-	public UUID getId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Calendar getLocalTime() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public long getDuration() {
 		return 200;
 	}
@@ -48,4 +33,8 @@ public class CrateOpenedEvent implements IEvent<CrateOpenedEvent> {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return player + " opened crate " + crate;
+	}
 }

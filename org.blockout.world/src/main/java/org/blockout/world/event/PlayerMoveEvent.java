@@ -1,9 +1,5 @@
 package org.blockout.world.event;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.UUID;
-
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Player;
 
@@ -14,7 +10,7 @@ import org.blockout.world.entity.Player;
  * @author Marc-Christian Schulze
  * 
  */
-public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
+public class PlayerMoveEvent extends AbstractEvent<PlayerMoveEvent> {
 
 	protected Player	player;
 	protected int		oldX;
@@ -22,18 +18,12 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 	protected int		newX;
 	protected int		newY;
 
-	protected Calendar	localTime;
-	protected UUID		id;
-
 	public PlayerMoveEvent(final Player player, final int oldX, final int oldY, final int newX, final int newY) {
 		this.player = player;
 		this.oldX = oldX;
 		this.oldY = oldY;
 		this.newX = newX;
 		this.newY = newY;
-
-		localTime = Calendar.getInstance();
-		id = UUID.randomUUID();
 	}
 
 	public Player getPlayer() {
@@ -54,16 +44,6 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 
 	public int getNewY() {
 		return newY;
-	}
-
-	@Override
-	public UUID getId() {
-		return id;
-	}
-
-	@Override
-	public Calendar getLocalTime() {
-		return localTime;
 	}
 
 	@Override
@@ -96,10 +76,7 @@ public class PlayerMoveEvent implements IEvent<PlayerMoveEvent> {
 	@Override
 	public String toString() {
 		StringBuilder buf = new StringBuilder();
-		buf.append( "[" );
-		SimpleDateFormat fmt = new SimpleDateFormat( "dd.MM.yyyy HH:mm:ss.SSS" );
-		buf.append( fmt.format( localTime.getTime() ) );
-		buf.append( "] Player moved from (" );
+		buf.append( "Player moved from (" );
 		buf.append( oldX );
 		buf.append( "," );
 		buf.append( oldY );

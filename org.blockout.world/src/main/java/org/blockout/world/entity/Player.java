@@ -11,7 +11,8 @@ import com.google.common.base.Preconditions;
  * 
  */
 public class Player extends Actor {
-	protected int	experience;
+	protected int		experience;
+	protected Inventory	inventory;
 
 	/**
 	 * Constructs a new player with the given name, full health, no experience
@@ -24,11 +25,16 @@ public class Player extends Actor {
 	 */
 	public Player(final String name) {
 		super( name );
+		inventory = new Inventory();
 	}
 
 	private Player() {
 		super( "" );
 		// just here to let jackson deserialize the object
+	}
+
+	public Inventory getInventory() {
+		return inventory;
 	}
 
 	public int getExperience() {
@@ -59,7 +65,7 @@ public class Player extends Actor {
 
 	@Override
 	public int getStrength() {
-		return 20 + getLevel() * 5;
+		return 20 + getLevel() * 15;
 	}
 
 	@Override

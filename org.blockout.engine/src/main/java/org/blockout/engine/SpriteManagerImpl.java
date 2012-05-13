@@ -23,7 +23,7 @@ public class SpriteManagerImpl implements ISpriteManager {
 	ISpriteSheet							spriteSheet;
 	SpriteMapping							spriteMapping;
 
-	private final HashMap<String, Image>	sprites;
+	private final HashMap<Integer, Image>	sprites;
 
 	/**
 	 * Constructor to create a new SpriteManager with an internal cache
@@ -39,7 +39,7 @@ public class SpriteManagerImpl implements ISpriteManager {
 
 		this.spriteSheet = spriteSheet;
 		spriteMapping = new SpriteMapping();
-		sprites = new HashMap<String, Image>();
+		sprites = new HashMap<Integer, Image>();
 
 	}
 
@@ -70,7 +70,10 @@ public class SpriteManagerImpl implements ISpriteManager {
 			return null;
 		}
 
-		String spriteKey = (excludeBackground) ? "nobg_" + spriteId : Integer.toString( spriteId );
+		int spriteKey = spriteId * 10;
+		if ( excludeBackground ) {
+			spriteKey++;
+		}
 
 		Image sprite = sprites.get( spriteKey );
 		if ( null == sprite ) {
@@ -86,7 +89,7 @@ public class SpriteManagerImpl implements ISpriteManager {
 
 		return sprite;
 	}
-	
+
 	/**
 	 * @see ISpriteManager#startUse()
 	 */
@@ -95,7 +98,7 @@ public class SpriteManagerImpl implements ISpriteManager {
 		if ( !spriteSheet.isSpriteSheetLoaded() ) {
 			loadDefaultSpriteSheet();
 		}
-		
+
 		spriteSheet.startUse();
 	}
 
@@ -111,17 +114,17 @@ public class SpriteManagerImpl implements ISpriteManager {
 	 * @see ISpriteManager#renderInUse(SpriteType, int, int)
 	 */
 	@Override
-	public void renderInUse( SpriteType type, int x, int y ) {
-		Preconditions.checkNotNull(type);
-		
+	public void renderInUse( final SpriteType type, final int x, final int y ) {
+		Preconditions.checkNotNull( type );
+
 		if ( !spriteSheet.isSpriteSheetLoaded() ) {
 			loadDefaultSpriteSheet();
 		}
-		
-		spriteSheet.renderInUse(spriteMapping.getSpriteId(type), x, y);
+
+		spriteSheet.renderInUse( spriteMapping.getSpriteId( type ), x, y );
 	}
-	
-	private void loadDefaultSpriteSheet(){
+
+	private void loadDefaultSpriteSheet() {
 		try {
 			spriteSheet.loadSpriteSheet( "nethack_spritesheet.jpg", 32, 32 );
 		} catch ( IllegalArgumentException e ) {

@@ -63,6 +63,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		this.nifty = nifty;
 
 		nifty.fromXml( "ingame-screen.xml", "start" );
+		inputHandler.setNifty( nifty );
 	}
 
 	@Override
@@ -75,7 +76,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 			throws SlickException {
 
 		worldRenderer.render( g );
-
 	}
 
 	@Override
@@ -111,17 +111,21 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		playerController.update( container, deltaMillis );
 
 		if ( container.getInput().isKeyDown( Input.KEY_ESCAPE ) ) {
-			exitPopup = nifty.createPopup( "popupMenu" );
-			Button btnReturnToGame = exitPopup.findNiftyControl( "btnReturnToGame", Button.class );
-			nifty.subscribe( nifty.getCurrentScreen(), btnReturnToGame.getId(), ButtonClickedEvent.class,
-					new EventTopicSubscriber<ButtonClickedEvent>() {
+			if ( exitPopup == null ) {
+				exitPopup = nifty.createPopup( "popupMenu" );
+				Button btnReturnToGame = exitPopup.findNiftyControl( "btnReturnToGame", Button.class );
+				nifty.subscribe( nifty.getCurrentScreen(), btnReturnToGame.getId(), ButtonClickedEvent.class,
+						new EventTopicSubscriber<ButtonClickedEvent>() {
 
-						@Override
-						public void onEvent( final String arg0, final ButtonClickedEvent arg1 ) {
-							nifty.closePopup( exitPopup.getId() );
-						}
-					} );
-			nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
+							@Override
+							public void onEvent( final String arg0, final ButtonClickedEvent arg1 ) {
+								System.out.println( "Closing popup..." );
+								nifty.closePopup( exitPopup.getId() );
+								exitPopup = null;
+							}
+						} );
+				nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
+			}
 		}
 	}
 

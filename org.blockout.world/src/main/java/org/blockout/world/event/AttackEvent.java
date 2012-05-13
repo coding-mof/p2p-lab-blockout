@@ -1,12 +1,9 @@
 package org.blockout.world.event;
 
-import java.util.Calendar;
-import java.util.UUID;
-
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Actor;
 
-public class AttackEvent implements IEvent<AttackEvent> {
+public class AttackEvent extends AbstractEvent<AttackEvent> {
 	protected Actor	aggressor;
 	protected Actor	victim;
 
@@ -21,18 +18,6 @@ public class AttackEvent implements IEvent<AttackEvent> {
 
 	public Actor getVictim() {
 		return victim;
-	}
-
-	@Override
-	public UUID getId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Calendar getLocalTime() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

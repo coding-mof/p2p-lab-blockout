@@ -2,6 +2,7 @@ package org.blockout.world.state;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.text.SimpleDateFormat;
 
 import javax.inject.Named;
 import javax.swing.JFrame;
@@ -9,6 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultCaret;
 
 import org.blockout.world.event.IEvent;
 
@@ -33,11 +35,13 @@ public class StateMachineMonitorFrame extends JFrame implements IStateMachineLis
 		getContentPane().add( scrollPane, BorderLayout.CENTER );
 
 		txtEventLog = new JTextArea();
-		txtEventLog.setEnabled( false );
 		txtEventLog.setEditable( false );
 		scrollPane.setViewportView( txtEventLog );
 
-		setMinimumSize( new Dimension( 500, 550 ) );
+		DefaultCaret caret = (DefaultCaret) txtEventLog.getCaret();
+		caret.setUpdatePolicy( DefaultCaret.ALWAYS_UPDATE );
+
+		setMinimumSize( new Dimension( 650, 550 ) );
 		pack();
 		setVisible( true );
 	}
@@ -48,7 +52,14 @@ public class StateMachineMonitorFrame extends JFrame implements IStateMachineLis
 
 			@Override
 			public void run() {
-				txtEventLog.append( event.toString() + "\n" );
+				StringBuilder buf = new StringBuilder();
+				buf.append( "[" );
+				SimpleDateFormat fmt = new SimpleDateFormat( "dd.MM.yyyy HH:mm:ss.SSS" );
+				buf.append( fmt.format( event.getLocalTime().getTime() ) );
+				buf.append( "] " );
+				buf.append( event.toString() );
+				buf.append( "\n" );
+				txtEventLog.append( buf.toString() );
 			}
 		} );
 	}

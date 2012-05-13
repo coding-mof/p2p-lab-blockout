@@ -1,4 +1,4 @@
-package org.blockout.world;
+package org.blockout.world.entity;
 
 import static org.junit.Assert.assertEquals;
 

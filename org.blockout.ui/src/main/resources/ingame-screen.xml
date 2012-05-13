@@ -36,11 +36,56 @@
             </panel>
         </layer>
         <layer visible="false" id="inventory_layer" childLayout="vertical">
-            <panel backgroundColor="#0F0F" align="right" valign="bottom">
+            <panel align="right" childLayout="absolute" valign="top" width="256" height="512" backgroundImage="inventory_01.jpg">
                 
                 
+                
+                
+                
+                <!-- Belt -->
+                <control id="belt0" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="24" y="264" />
+                <control id="belt1" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="59" y="264" />
+                <control id="belt2" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="93" y="264" />
+                <control id="belt3" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="128" y="264" />
+                <control id="belt4" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="163" y="264" />
+                <control id="belt5" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="198" y="264" />
+                
+                <!-- Inventory items -->
+                <control id="drop4x0" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="24" y="317" />
+                <control id="drop4x1" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="59" y="317" />
+                <control id="drop4x2" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="93" y="317" />
+                <control id="drop4x3" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="128" y="317" />
+                <control id="drop4x4" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="163" y="317" />
+                <control id="drop4x5" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="198" y="317" />
+                
+                <control id="drop3x0" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="24" y="352" />
+                <control id="drop3x1" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="59" y="352" />
+                <control id="drop3x2" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="93" y="352" />
+                <control id="drop3x3" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="128" y="352" />
+                <control id="drop3x4" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="163" y="352" />
+                <control id="drop3x5" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="198" y="352" />
+                
+                <control id="drop2x0" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="24" y="387" />
+                <control id="drop2x1" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="59" y="387" />
+                <control id="drop2x2" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="93" y="387" />
+                <control id="drop2x3" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="128" y="387" />
+                <control id="drop2x4" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="163" y="387" />
+                <control id="drop2x5" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="198" y="387" />
+                
+                <control id="drop1x0" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="24" y="422" />
+                <control id="drop1x1" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="59" y="422" />
+                <control id="drop1x2" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="93" y="422" />
+                <control id="drop1x3" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="128" y="422" />
+                <control id="drop1x4" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="163" y="422" />
+                <control id="drop1x5" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="198" y="422" />
+                
+                <control id="drop0x0" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="24" y="457" />
+                <control id="drop0x1" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="59" y="457" />
+                <control id="drop0x2" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="93" y="457" />
+                <control id="drop0x3" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="128" y="457" />
+                <control id="drop0x4" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="163" y="457" />
+                <control id="drop0x5" backgroundColor="#00F5" name="droppable" style="dropArea" width="32px" height="32px" x="198" y="457" />
             </panel>
-            
         </layer>
     </screen>
 
