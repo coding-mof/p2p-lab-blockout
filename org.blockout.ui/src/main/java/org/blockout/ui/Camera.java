@@ -81,10 +81,17 @@ public class Camera {
 
 		this.tileSize = tileSize;
 
-		setBounds( displayWidth, displayHeight );
+		try {
+			lock.lock();
+			setBounds( displayWidth, displayHeight );
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	public void setBounds( final int displayWidth, final int displayHeight ) {
+		assert lock.isHeldByCurrentThread();
+
 		width = displayWidth;
 		height = displayHeight;
 
@@ -122,58 +129,72 @@ public class Camera {
 	}
 
 	public float getCenterX() {
+		assert lock.isHeldByCurrentThread();
 		return centerX;
 	}
 
 	public float getCenterY() {
+		assert lock.isHeldByCurrentThread();
 		return centerY;
 	}
 
 	public int getWidth() {
+		assert lock.isHeldByCurrentThread();
 		return width;
 	}
 
 	public int getHeight() {
+		assert lock.isHeldByCurrentThread();
 		return height;
 	}
 
 	public float getHalfWidth() {
+		assert lock.isHeldByCurrentThread();
 		return halfWidth;
 	}
 
 	public float getHalfHeight() {
+		assert lock.isHeldByCurrentThread();
 		return halfHeight;
 	}
 
 	public int getNumHorTiles() {
+		assert lock.isHeldByCurrentThread();
 		return numHorTiles;
 	}
 
 	public int getNumVerTiles() {
+		assert lock.isHeldByCurrentThread();
 		return numVerTiles;
 	}
 
 	public int getTileSize() {
+		assert lock.isHeldByCurrentThread();
 		return tileSize;
 	}
 
 	public int getWidthOfset() {
+		assert lock.isHeldByCurrentThread();
 		return widthOfset;
 	}
 
 	public int getHeightOfset() {
+		assert lock.isHeldByCurrentThread();
 		return heightOfset;
 	}
 
 	public int getStartTileX() {
+		assert lock.isHeldByCurrentThread();
 		return startTileX;
 	}
 
 	public int getStartTileY() {
+		assert lock.isHeldByCurrentThread();
 		return startTileY;
 	}
 
 	public void setViewCenter( final float x, final float y ) {
+		assert lock.isHeldByCurrentThread();
 		centerX = x;
 		centerY = y;
 		adjustOfsets();
@@ -196,6 +217,7 @@ public class Camera {
 	}
 
 	public int convertY( final int y ) {
+		assert lock.isHeldByCurrentThread();
 		return height - y;
 	}
 
@@ -207,11 +229,13 @@ public class Camera {
 	}
 
 	public float screenToWorldX( final int screenX ) {
+		assert lock.isHeldByCurrentThread();
 		float worldX0 = centerX - (halfWidth / tileSize);
 		return worldX0 + (screenX / ((float) tileSize));
 	}
 
 	public float screenToWorldY( final int screenY ) {
+		assert lock.isHeldByCurrentThread();
 		float worldY0 = centerY - (halfHeight / tileSize);
 		return worldY0 + (convertY( screenY ) / ((float) tileSize));
 	}

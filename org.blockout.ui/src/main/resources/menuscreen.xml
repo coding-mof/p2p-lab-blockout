@@ -88,7 +88,7 @@
                 </panel>
                 <panel height="10%"/>
                 
-                <control name="label" text="Or select an automatically discovered Peer:" width="" />
+                <control name="label" align="left" text="Or select an automatically discovered Peer:" width="" />
                 <control id="listPeers" name="listBox" displayItems="10" horizontal="optional" selection="Single" vertical="optional" />
                 <control name="button" align="right" backgroundColor="#0000" label="Connect" width="">
                         <interact onClick="connectToPeer()" />
@@ -99,20 +99,16 @@
                  childLayout="horizontal"
                 height="25%" width="75%" >
 
-                <panel id="panel_bottom_left"
-                    backgroundColor="#44f8" childLayout="center"
+                <panel id="panel_bottom_left" childLayout="center"
                     height="50%" valign="center" width="33%" >
 
-                    <control id="back" name="button" align="center"
-                        backgroundColor="#0000" label="Back" >
-
+                    <control id="back" name="button" align="center" label="Back" >
                         <interact onClick="goBack()" />
                     </control>
                 </panel>
 
                 <panel
                     id="panel_bottom_center"
-                    backgroundColor="#88f8"
                     childLayout="center"
                     height="50%"
                     valign="center"
@@ -123,7 +119,6 @@
 
                 <panel
                     id="panel_bottom_right"
-                    backgroundColor="#88f8"
                     childLayout="center"
                     height="50%"
                     valign="center"
@@ -147,28 +142,28 @@
                 height="25%"
                 width="75%" >
 
-                <panel childLayout="horizontal">
-	                <control name="label" text="Create new Player" width="50%" align="left"/>
-	                
-	                <panel childLayout="vertical" width="50%">
-	                    <control id="txtPlayerName" name="textfield" align="left"/>
-		                <control name="button" width="" label="Start with new Profile" align="left" >
-		                    <interact onClick="createNewPlayer()" />
-		                </control>
-	                </panel>
-                </panel>
+                
                 
             </panel>
             
              <panel
                 id="panel_mid"
                 align="center"
-                childLayout="center"
+                childLayout="vertical"
                 height="50%"
                 width="75%" >
+                
+                <panel childLayout="horizontal">
+	                <control name="label" text="Create new Player" width="30%" align="left"/>
+                    <control id="txtPlayerName" name="textfield" align="left" width="30%"/>
+	                <control name="button" width="" label="Create and Start" align="left" >
+	                    <interact onClick="createNewPlayer()" />
+	                </control>
+                </panel>
+                <panel height="10%"/>
 
                 <panel childLayout="vertical">
-                    <control name="label" text="Select existing Player" width="50%" align="left"/>
+                    <control name="label" text="Select existing Player" width="" align="left"/>
                     <panel childLayout="horizontal">
                         <control id="playerProfiles" name="listBox" displayItems="10" horizontal="optional" selection="Single" vertical="optional" width="50%" />
                         
@@ -189,7 +184,7 @@
                 		</panel>
                         
                     </panel>
-                    <control id="btnStartWithSelected" name="button" align="right" enabled="false" width="" label="Start Game" >
+                    <control id="btnStartWithSelected" name="button" align="right" enabled="false" width="" label="Start with Selected" >
 	                    <interact onClick="startWithSelected()" />
 	                </control>
                 </panel>

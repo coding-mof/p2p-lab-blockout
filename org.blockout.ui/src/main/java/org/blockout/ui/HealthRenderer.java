@@ -70,7 +70,16 @@ public class HealthRenderer {
 
 	public void render() {
 		init();
-		shader.setUniform2FVariable( "SphereCenter", camera.getWidth() - 10, -150 );
+		int width = 0;
+		int height = 0;
+		try {
+			camera.lock();
+			width = camera.getWidth();
+			height = camera.getHeight();
+		} finally {
+			camera.unlock();
+		}
+		shader.setUniform2FVariable( "SphereCenter", width - 10, -150 );
 		shader.setUniformFVariable( "FillSquaredDistance", currentDistance );
 		shader.setUniformFVariable( "GlowSquaredDistance",
 				(float) Math.pow( Math.sqrt( currentDistance ) + (currentGlowFactor * 10), 2 ) );
@@ -78,7 +87,7 @@ public class HealthRenderer {
 		shader.setUniform3FVariable( "Color", 1, 0, 0 );
 
 		shader.startShader();
-		healthSphere.drawCentered( camera.getWidth() - 10, camera.getHeight() + 150 );
+		healthSphere.drawCentered( width - 10, height + 150 );
 
 		Shader.forceFixedShader();
 	}
