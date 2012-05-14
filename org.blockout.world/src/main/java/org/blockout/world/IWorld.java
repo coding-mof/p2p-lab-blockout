@@ -37,5 +37,27 @@ public interface IWorld {
 	 */
 	public TileCoordinate findTile( Entity entity );
 
+	/**
+	 * Sets the position of the given player to the given coordinates
+	 * should only used when moving the local player
+	 * calling this method could result in moving the current view on the world
+	 * 
+	 * @param p the player which should be moved
+	 * @param coord the new coordinates of he player
+	 */
 	public void setPlayerPosition( Player p, TileCoordinate coord );
+	
+	/**
+	 * Sets the position of the given entity to the given coordinates
+	 * should not be used when moving the local player
+	 * 
+	 * will just add the given entity to the world at the given coordinates
+	 * if the entity is not already found within the (local present) world
+	 * otherwise the entity will be moved to the given coordinates
+	 *  
+	 * 
+	 * @param e the entity which should be moved
+	 * @param coord the new coordinates of he player
+	 */
+	public void setEnityPosition( Entity e, TileCoordinate coord );
 }

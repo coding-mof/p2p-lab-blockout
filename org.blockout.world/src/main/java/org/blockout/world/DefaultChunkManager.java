@@ -18,6 +18,8 @@ public class DefaultChunkManager implements IChunkManager {
 	private IStateMachine						stateMachine;
 
 	private Hashtable<TileCoordinate, Chunk>	chunks;
+	
+	private ChunkGenerator						chunkGenerator;
 
 	@Override
 	public void init( final IStateMachine stateMachine ) {
@@ -54,10 +56,10 @@ public class DefaultChunkManager implements IChunkManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Chunk getChunk( final TileCoordinate position ) {
-		Chunk chunk = ChunkGenerator.generateBasicChunk( position, Chunk.CHUNK_SIZE );
+	public Chunk requestChunk( final TileCoordinate position ) {
+		Chunk chunk = chunkGenerator.generateBasicChunk( position, Chunk.CHUNK_SIZE );
 		chunks.put( chunk.getPosition(), chunk );
 		return chunk;
+		//TODO networkrequest
 	}
-
 }
