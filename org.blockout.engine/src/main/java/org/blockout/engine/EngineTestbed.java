@@ -2,13 +2,14 @@ package org.blockout.engine;
 
 import org.blockout.engine.animation.ParticleAnimation;
 import org.blockout.engine.animation.effects.ExplosionEmitter;
+import org.blockout.engine.sfx.AudioManagerImpl;
+import org.blockout.engine.sfx.AudioType;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.particles.ParticleSystem;
-import org.newdawn.slick.particles.effects.FireEmitter;
+import org.newdawn.slick.Sound;
 
 public class EngineTestbed extends BasicGame {
 
@@ -24,18 +25,17 @@ public class EngineTestbed extends BasicGame {
 	}
 
 	ParticleAnimation	animation;
-
-	ParticleSystem		particleSystem;
-
+	AudioManagerImpl audioManager;
+	Sound footStep;
+	
 	public EngineTestbed(final String title) {
 		super( title );
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	@Override
 	public void render( final GameContainer arg0, final Graphics arg1 ) throws SlickException {
 		animation.render( 300, 300 );
-		particleSystem.render( 200, 100 );
 	}
 
 	@Override
@@ -45,14 +45,14 @@ public class EngineTestbed extends BasicGame {
 		animation.addEffect( "ring", new ExplosionEmitter( 100 ) );
 		animation.setLooping( true );
 		animation.start();
-
-		particleSystem = new ParticleSystem( "particle.tga" );
-		particleSystem.addEmitter( new FireEmitter() );
+		
+		audioManager = new AudioManagerImpl();
+		footStep = audioManager.getSound(AudioType.sword_clash1);
+		footStep.loop(1,0.5f);
 	}
 
 	@Override
 	public void update( final GameContainer container, final int delta ) throws SlickException {
 		animation.update( delta );
-		particleSystem.update( delta );
 	}
 }

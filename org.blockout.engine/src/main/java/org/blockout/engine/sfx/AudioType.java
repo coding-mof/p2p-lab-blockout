@@ -7,5 +7,14 @@ package org.blockout.engine.sfx;
  *
  */
 public enum AudioType {
-	// TODO: Add audio types
+	swing1,
+	swing2,
+	swing3,
+	sword_clash1,
+	sword_clash2,
+	sword_clash3,
+	sword_clash4,
+	sword_clash5,
+	stonestep_fast,
+	stonestep
 }
