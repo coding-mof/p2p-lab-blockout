@@ -1,13 +1,17 @@
 package org.blockout.world;
 
+import java.util.Hashtable;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
 
 public class World implements IWorld {
 
-	private Chunk			current;
-	private IChunkManager	chunkManager;
+	private TileCoordinate 						pos;
+	private Hashtable<TileCoordinate, Chunk>	view;
+	private Hashtable<TileCoordinate, Chunk> 	managedChunks;
+	private IChunkManager						chunkManager;
 
 	/**
 	 * {@inheritDoc}
@@ -17,16 +21,15 @@ public class World implements IWorld {
 		int chunkx, chunky, tilex, tiley;
 		chunkx = x / Chunk.CHUNK_SIZE;
 		chunky = y / Chunk.CHUNK_SIZE;
-		tilex = x % Chunk.CHUNK_SIZE;
-		tiley = y % Chunk.CHUNK_SIZE;
-		if ( tilex < 0 ) {
+		if ( x < 0 ) {
 			chunkx = chunkx - 1;
 		}
-		if ( tiley < 0 ) {
+		if ( y < 0 ) {
 			chunky = chunky - 1;
 		}
-		if ( current.getX() == chunkx && current.getY() == chunky ) {
-			return current.getTile( tilex, tiley );
+		Chunk chunk;
+		if((chunk = view.get(new TileCoordinate(chunkx, chunky))) != null){
+			chunk.getTile(x, y);
 		}
 		return null;
 	}
@@ -36,26 +39,36 @@ public class World implements IWorld {
 	 */
 	@Override
 	public TileCoordinate findTile( final Entity entity ) {
-		int x = 0;
-		int y = 0;
-		// TODO: seems to me quiet inefficient since the worst case
-		// would be 48x48 = 2304 iterations
-		for ( int i = 0; i < Chunk.CHUNK_SIZE; i++ ) {
-			for ( int j = 0; j < Chunk.CHUNK_SIZE; j++ ) {
-				if ( entity.equals( current.getTile( i, j ) ) ) {
-					x = current.getX() * Chunk.CHUNK_SIZE + i;
-					y = current.getY() * Chunk.CHUNK_SIZE + j;
-					return new TileCoordinate( x, y );
-				}
+		TileCoordinate coordinate = null;
+		for (Chunk c : view.values()) {
+			if((coordinate = c.getEntityCoordinate(entity)) != null){
+				return coordinate;
+			}
+		}
+		for (Chunk c : managedChunks.values()) {
+			if((coordinate = c.getEntityCoordinate(entity)) != null){
+				return coordinate;
 			}
 		}
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setPlayerPosition( final Player p, final TileCoordinate coord ) {
 		// TODO Auto-generated method stub
 
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setEnityPosition(Entity e, TileCoordinate coord) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

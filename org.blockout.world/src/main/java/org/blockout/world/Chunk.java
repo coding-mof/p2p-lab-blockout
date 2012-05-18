@@ -1,6 +1,10 @@
 package org.blockout.world;
 
+import java.util.HashMap;
+import java.util.Hashtable;
+
 import org.blockout.common.TileCoordinate;
+import org.blockout.world.entity.Entity;
 
 import com.google.common.base.Preconditions;
 
@@ -10,10 +14,11 @@ import com.google.common.base.Preconditions;
  */
 public class Chunk {
 
-	public static final int			CHUNK_SIZE	= 48;
+	public static final int CHUNK_SIZE = 48;
 
-	private final TileCoordinate	pos;
-	private Tile[][]				tiles;
+	private HashMap<Entity, TileCoordinate> 	entitys;
+	private final TileCoordinate 				pos;
+	private Tile[][] 							tiles;
 
 	/**
 	 * 
@@ -26,9 +31,11 @@ public class Chunk {
 	 * @throws IllegalArgumentException
 	 *             if tiles is not a NxN matrix or null
 	 */
-	public Chunk(final int x, final int y, final Tile[][] tiles) throws IllegalArgumentException {
-		setTiles( tiles );
-		pos = new TileCoordinate( x, y );
+	public Chunk(final int x, final int y, final Tile[][] tiles)
+			throws IllegalArgumentException {
+		entitys = new HashMap<Entity, TileCoordinate>();
+		pos = new TileCoordinate(x, y);
+		setTiles(tiles);
 	}
 
 	/**
@@ -40,9 +47,11 @@ public class Chunk {
 	 * @throws IllegalArgumentException
 	 *             if tiles is not a NxN matrix or null
 	 */
-	public Chunk(final TileCoordinate position, final Tile[][] tiles) throws IllegalArgumentException {
-		setTiles( tiles );
+	public Chunk(final TileCoordinate position, final Tile[][] tiles)
+			throws IllegalArgumentException {
+		entitys = new HashMap<Entity, TileCoordinate>();
 		pos = position;
+		setTiles(tiles);
 	}
 
 	/**
@@ -76,33 +85,105 @@ public class Chunk {
 	 * @throws IllegalArgumentException
 	 *             If the given array/matrix is not symmetric.
 	 */
-	public void setTiles( final Tile[][] tiles ) {
-		Preconditions.checkNotNull( tiles );
-		if ( tiles.length != CHUNK_SIZE ) {
-			throw new IllegalArgumentException( "Tile matrix is not symetric" );
+	public void setTiles(final Tile[][] tiles) {
+		Preconditions.checkNotNull(tiles);
+		if (tiles.length != CHUNK_SIZE) {
+			throw new IllegalArgumentException("Tile matrix is not symetric");
 		}
-		for ( Tile[] tile : tiles ) {
-			if ( tile.length != CHUNK_SIZE ) {
-				throw new IllegalArgumentException( "Tile matrix is not symetric" );
+		for (Tile[] tile : tiles) {
+			if (tile.length != CHUNK_SIZE) {
+				throw new IllegalArgumentException(
+						"Tile matrix is not symetric");
 			}
 		}
+		
 		this.tiles = tiles;
+
+		int x = pos.getX() * CHUNK_SIZE;
+		int y = pos.getY() * CHUNK_SIZE;
+		for (int i = 0; i < tiles.length; i++) {
+			for (int j = 0; j < tiles[i].length; j++) {
+				if (tiles[i][j].getEntityOnTile() != null) {
+					entitys.put(tiles[i][j].getEntityOnTile(),
+							new TileCoordinate(x + i, y + j));
+				}
+			}
+		}
 	}
+	
 
 	/**
 	 * 
 	 * @param x
-	 *            location of the Tile within the chunk
+	 *            location of the Tile within the world
 	 * @param y
-	 *            location of the Tile within the chunk
+	 *            location of the Tile within the world
 	 * @return the Tile t the given location
 	 * @throws NullPointerException
 	 *             if tiles are still null
 	 */
-	public Tile getTile( final int x, final int y ) {
-		int x2 = (x < 0) ? CHUNK_SIZE + x : x;
-		int y2 = (x < 0) ? CHUNK_SIZE + y : y;
+	public Tile getTile(final int x, final int y) {
+		int x2 = x % CHUNK_SIZE;
+		int y2 = y % CHUNK_SIZE;
+		x2 = (x < 0) ? CHUNK_SIZE + x : x;
+		y2 = (x < 0) ? CHUNK_SIZE + y : y;
 		return tiles[x2][y2];
 	}
-
+	
+	/**
+	 * returns the coordinates of the given entity within the world
+	 * 
+	 * @param e the entity which position is required
+	 * @return	the coordinates of the given entity within the world
+	 * 			null if this entity is not found within this chunk
+	 */
+	public TileCoordinate getEntityCoordinate(final Entity e) {
+		return entitys.get(e);		
+	}
+	
+	/**
+	 * sets the Coordinates of the given entity to the given position
+	 * 	if entity is not already found within this chunk it will be
+	 * 	inserted at the given coordinates
+	 * 
+	 * @param e entity which should be moved
+	 * @param x
+	 * @param y
+	 */
+	public void moveEntityCoordinate(final Entity e, final int x, final int y) {
+		TileCoordinate coord = entitys.get(e);
+		if (coord != null) {
+			int tx = coord.getX() % CHUNK_SIZE;
+			int ty = coord.getY() % CHUNK_SIZE;
+			tx = (tx < 0) ? tx - 1 : tx;
+			ty = (ty < 0) ? ty - 1 : ty;
+			tiles[tx][ty] = new Tile(tiles[tx][ty].getTileType(),
+					tiles[tx][ty].getHeight());
+		}
+		int tx = x % CHUNK_SIZE;
+		int ty = y % CHUNK_SIZE;
+		tx = (tx < 0) ? tx - 1 : tx;
+		ty = (ty < 0) ? ty - 1 : ty;
+		tiles[tx][ty] = new Tile(tiles[tx][ty].getTileType(),
+				e);
+		entitys.put(e, new TileCoordinate(x, y));
+	}
+	
+	/**
+	 * removes the given entity from this chunk
+	 * 	if entity is not found within this chunk no action will be taken
+	 * 
+	 * @param e entity which should be moved
+	 */
+	public void removeEntity(final Entity e) {
+		TileCoordinate coord = entitys.get(e);
+		if (coord != null) {
+			int tx = coord.getX() % CHUNK_SIZE;
+			int ty = coord.getY() % CHUNK_SIZE;
+			tx = (tx < 0) ? tx - 1 : tx;
+			ty = (ty < 0) ? ty - 1 : ty;
+			tiles[tx][ty] = new Tile(tiles[tx][ty].getTileType(),
+					tiles[tx][ty].getHeight());
+		}
+	}
 }

@@ -14,8 +14,8 @@ public interface IChunkManager extends IStateMachineListener {
 	/**
 	 * Returns the Chunk at the requested position
 	 * 
-	 * @param position position if the requested Chunk
+	 * @param position position of the requested Chunk
 	 * @return Chunk at the requested position
 	 */
-	public Chunk getChunk(TileCoordinate position);
+	public Chunk requestChunk(TileCoordinate position);
 }

@@ -96,4 +96,10 @@ public class StaticTMXWorld implements IWorld {
 	public void setPlayerPosition( final Player p, final TileCoordinate coord ) {
 		entityCache.put( p, coord );
 	}
+
+	@Override
+	public void setEnityPosition(Entity e, TileCoordinate coord) {
+		// TODO Auto-generated method stub
+		
+	}
 }
