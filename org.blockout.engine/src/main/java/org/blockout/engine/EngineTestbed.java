@@ -1,5 +1,7 @@
 package org.blockout.engine;
 
+import java.io.IOException;
+
 import org.blockout.engine.animation.ParticleAnimation;
 import org.blockout.engine.animation.effects.ExplosionEmitter;
 import org.blockout.engine.sfx.AudioManagerImpl;
@@ -40,9 +42,15 @@ public class EngineTestbed extends BasicGame {
 
 	@Override
 	public void init( final GameContainer arg0 ) throws SlickException {
-		animation = new ParticleAnimation();
+		//animation = new ParticleAnimation();
 		// animation.addEffect( "fire", new FireEmitter( 0, 0, 10 ) );
-		animation.addEffect( "ring", new ExplosionEmitter( 100 ) );
+		//animation.addEffect( "ring", new ExplosionEmitter( 100 ) );
+		
+		try {
+			animation = new ParticleAnimation("test_system.xml");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		animation.setLooping( true );
 		animation.start();
 		
