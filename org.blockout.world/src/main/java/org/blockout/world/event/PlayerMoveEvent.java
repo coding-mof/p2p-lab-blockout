@@ -12,11 +12,12 @@ import org.blockout.world.entity.Player;
  */
 public class PlayerMoveEvent extends AbstractEvent<PlayerMoveEvent> {
 
-	protected Player	player;
-	protected int		oldX;
-	protected int		oldY;
-	protected int		newX;
-	protected int		newY;
+	private static final long	serialVersionUID	= -8369418703996561782L;
+	protected Player			player;
+	protected int				oldX;
+	protected int				oldY;
+	protected int				newX;
+	protected int				newY;
 
 	public PlayerMoveEvent(final Player player, final int oldX, final int oldY, final int newX, final int newY) {
 		this.player = player;

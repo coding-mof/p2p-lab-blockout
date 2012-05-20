@@ -1,5 +1,6 @@
 package org.blockout.world.event;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ import org.blockout.common.TileCoordinate;
  * @author Marc-Christian Schulze
  * 
  */
-public interface IEvent<T extends IEvent<T>> {
+public interface IEvent<T extends IEvent<T>> extends Serializable {
 	/**
 	 * Returns the unique id of this event.
 	 * 
