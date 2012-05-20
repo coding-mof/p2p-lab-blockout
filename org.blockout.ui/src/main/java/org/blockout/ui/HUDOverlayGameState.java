@@ -1,9 +1,9 @@
 package org.blockout.ui;
 
-/*     */
-/*     */import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.newdawn.slick.InputListener;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
@@ -16,152 +16,120 @@ import de.lessvoid.nifty.slick2d.sound.SlickSoundDevice;
 import de.lessvoid.nifty.slick2d.time.LWJGLTimeProvider;
 import de.lessvoid.nifty.spi.time.TimeProvider;
 
-/*     */
-/*     */public abstract class HUDOverlayGameState extends BasicGameState
-/*     */{
-	/*     */private SlickInputSystem	inputSystem;
-	/*     */private Nifty				niftyGUI;
+public abstract class HUDOverlayGameState extends BasicGameState {
+	private SlickInputSystem	inputSystem;
+	private Nifty				niftyGUI;
+	private final InputListener	inputListener;
 
-	/*     */
-	/*     */@Override
-	public final void enter( final GameContainer container, final StateBasedGame game )
-	/*     */throws SlickException
-	/*     */{
-		/* 34 */Input input = container.getInput();
-		/* 35 */input.removeListener( inputSystem );
-		/* 36 */input.addListener( inputSystem );
-		/*     */
-		/* 38 */enterState( container, game );
-		/*     */}
+	public HUDOverlayGameState(final InputListener inputListener) {
+		this.inputListener = inputListener;
+	}
 
-	/*     */
-	/*     */protected abstract void enterState( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame )
-	/*     */throws SlickException;
+	@Override
+	public final void enter( final GameContainer container, final StateBasedGame game ) throws SlickException {
+		Input input = container.getInput();
+		input.removeListener( inputSystem );
+		input.addListener( inputSystem );
 
-	/*     */
-	/*     */public final Nifty getNifty()
-	/*     */{
-		/* 60 */return niftyGUI;
-		/*     */}
+		enterState( container, game );
+	}
 
-	/*     */
-	/*     */@Override
-	public final void init( final GameContainer container, final StateBasedGame game )
-	/*     */throws SlickException
-	/*     */{
-		/* 68 */initGameAndGUI( container, game );
-		/*     */
-		/* 70 */if ( niftyGUI == null ) {
-			/* 71 */throw new IllegalStateException( "NiftyGUI was not initialized." );
-			/*     */}
-		/*     */
-		/* 74 */container.getInput().removeListener( game );
-		/*     */}
+	protected abstract void enterState( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame )
+			throws SlickException;
 
-	/*     */
-	/*     */protected abstract void initGameAndGUI( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame )
-	/*     */throws SlickException;
+	public final Nifty getNifty() {
+		return niftyGUI;
+	}
 
-	/*     */
-	/*     */protected final void initNifty( final GameContainer container, final StateBasedGame game,
+	@Override
+	public final void init( final GameContainer container, final StateBasedGame game ) throws SlickException {
+		initNifty( container, game );
+
+		if ( niftyGUI == null ) {
+			throw new IllegalStateException( "NiftyGUI was not initialized." );
+		}
+
+		container.getInput().removeListener( game );
+	}
+
+	protected final void initNifty( final GameContainer container, final StateBasedGame game,
 			final SlickRenderDevice renderDevice, final SlickSoundDevice soundDevice,
-			final SlickInputSystem inputSystem, final TimeProvider timeProvider )
-	/*     */{
-		/* 116 */if ( niftyGUI != null ) {
-			/* 117 */throw new IllegalStateException(
-					"The NiftyGUI was already initialized. Its illegal to do so twice." );
-			/*     */}
-		/*     */
-		/* 120 */inputSystem.setInput( container.getInput() );
-		/*     */
-		/* 122 */niftyGUI = new Nifty( renderDevice, soundDevice, inputSystem, timeProvider );
-		/*     */
-		/* 124 */this.inputSystem = inputSystem;
-		/*     */
-		/* 126 */prepareNifty( niftyGUI, game );
-		/*     */}
+			final SlickInputSystem inputSystem, final TimeProvider timeProvider ) {
+		if ( niftyGUI != null ) {
+			throw new IllegalStateException( "The NiftyGUI was already initialized. Its illegal to do so twice." );
+		}
 
-	/*     */
-	/*     */protected final void initNifty( final GameContainer container, final StateBasedGame game,
-			final SlickRenderDevice renderDevice, final SlickSoundDevice soundDevice, final SlickInputSystem inputSystem )
-	/*     */{
-		/* 152 */initNifty( container, game, renderDevice, soundDevice, inputSystem, new LWJGLTimeProvider() );
-		/*     */}
+		inputSystem.setInput( container.getInput() );
 
-	/*     */
-	/*     */protected final void initNifty( final GameContainer container, final StateBasedGame game,
-			final SlickInputSystem inputSystem )
-	/*     */{
-		/* 175 */initNifty( container, game, new SlickRenderDevice( container ), new SlickSoundDevice(), inputSystem );
-		/*     */}
+		niftyGUI = new Nifty( renderDevice, soundDevice, inputSystem, timeProvider );
 
-	/*     */
-	/*     */protected final void initNifty( final GameContainer container, final StateBasedGame game )
-	/*     */{
-		/* 196 */initNifty( container, game, new SlickSlickInputSystem( this ) );
-		/*     */}
+		this.inputSystem = inputSystem;
 
-	/*     */
-	/*     */@Override
-	public final void leave( final GameContainer container, final StateBasedGame game )
-	/*     */throws SlickException
-	/*     */{
-		/* 204 */Input input = container.getInput();
-		/* 205 */input.removeListener( inputSystem );
-		/*     */
-		/* 207 */leaveState( container, game );
-		/*     */}
+		prepareNifty( niftyGUI, game );
+	}
 
-	/*     */
-	/*     */protected abstract void leaveState( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame )
-	/*     */throws SlickException;
+	protected final void initNifty( final GameContainer container, final StateBasedGame game,
+			final SlickRenderDevice renderDevice, final SlickSoundDevice soundDevice, final SlickInputSystem inputSystem ) {
+		initNifty( container, game, renderDevice, soundDevice, inputSystem, new LWJGLTimeProvider() );
+	}
 
-	/*     */
-	/*     */protected abstract void prepareNifty( Nifty paramNifty, StateBasedGame paramStateBasedGame );
+	protected final void initNifty( final GameContainer container, final StateBasedGame game,
+			final SlickInputSystem inputSystem ) {
+		initNifty( container, game, new SlickRenderDevice( container ), new SlickSoundDevice(), inputSystem );
+	}
 
-	/*     */
-	/*     */@Override
+	protected final void initNifty( final GameContainer container, final StateBasedGame game ) {
+
+		initNifty( container, game, new SlickSlickInputSystem( inputListener ) );
+	}
+
+	@Override
+	public final void leave( final GameContainer container, final StateBasedGame game ) throws SlickException {
+		Input input = container.getInput();
+		input.removeListener( inputSystem );
+
+		leaveState( container, game );
+	}
+
+	protected abstract void leaveState( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame )
+			throws SlickException;
+
+	protected abstract void prepareNifty( Nifty paramNifty, StateBasedGame paramStateBasedGame );
+
+	@Override
 	public final void render( final GameContainer container, final StateBasedGame game, final Graphics g )
-	/*     */throws SlickException
-	/*     */{
-		/* 240 */renderGame( container, game, g );
-		/*     */
-		/* 242 */if ( niftyGUI != null ) {
-			/* 243 */niftyGUI.render( false );
+			throws SlickException {
+		renderGame( container, game, g );
+
+		if ( niftyGUI != null ) {
+			niftyGUI.render( false );
 
 			renderHUDOverlay( container, game, g );
-			/*     */
+
 		}
 	}
 
-	/*     */
-	/*     */protected abstract void renderGame( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame,
-			Graphics paramGraphics )
-	/*     */throws SlickException;
+	protected abstract void renderGame( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame,
+			Graphics paramGraphics ) throws SlickException;
 
 	protected void renderHUDOverlay( final GameContainer paramGameContainer, final StateBasedGame paramStateBasedGame,
 			final Graphics paramGraphics ) throws SlickException {
 
 	}
 
-	/*     */
-	/*     */@Override
+	@Override
 	public final void update( final GameContainer container, final StateBasedGame game, final int delta )
-	/*     */throws SlickException
-	/*     */{
-		/* 266 */updateGame( container, game, delta );
-		/*     */
-		/* 268 */if ( niftyGUI != null ) {
-			/* 269 */niftyGUI.update();
-			/*     */
+			throws SlickException {
+		updateGame( container, game, delta );
+
+		if ( niftyGUI != null ) {
+			niftyGUI.update();
+
 		}
 	}
 
-	/*     */
-	/*     */protected abstract void updateGame( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame,
-			int paramInt )
-	/*     */throws SlickException;
-	/*     */
+	protected abstract void updateGame( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame,
+			int paramInt ) throws SlickException;
 }
 
 /*
