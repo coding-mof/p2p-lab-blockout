@@ -42,11 +42,11 @@ public class AttackHandler implements IEventHandler {
 	public AttackHandler(final IAudioManager audioManager) {
 		this.audioManager = audioManager;
 		attackTypes = new ArrayList<AudioType>();
-		attackTypes.add( AudioType.sword_clash1 );
-		attackTypes.add( AudioType.sword_clash2 );
-		attackTypes.add( AudioType.sword_clash3 );
-		attackTypes.add( AudioType.sword_clash4 );
-		attackTypes.add( AudioType.sword_clash5 );
+		attackTypes.add( AudioType.sfx_sword_clash1 );
+		attackTypes.add( AudioType.sfx_sword_clash2 );
+		attackTypes.add( AudioType.sfx_sword_clash3 );
+		attackTypes.add( AudioType.sfx_sword_clash4 );
+		attackTypes.add( AudioType.sfx_sword_clash5 );
 		rand = new Random( System.currentTimeMillis() );
 	}
 

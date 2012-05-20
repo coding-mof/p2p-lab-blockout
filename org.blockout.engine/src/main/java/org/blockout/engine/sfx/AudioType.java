@@ -7,14 +7,19 @@ package org.blockout.engine.sfx;
  *
  */
 public enum AudioType {
-	swing1,
-	swing2,
-	swing3,
-	sword_clash1,
-	sword_clash2,
-	sword_clash3,
-	sword_clash4,
-	sword_clash5,
-	stonestep_fast,
-	stonestep
+	// Sound effects
+	sfx_swing1,
+	sfx_swing2,
+	sfx_swing3,
+	sfx_sword_clash1,
+	sfx_sword_clash2,
+	sfx_sword_clash3,
+	sfx_sword_clash4,
+	sfx_sword_clash5,
+	sfx_stonestep_fast,
+	sfx_stonestep,
+	sfx_open_chest,
+	
+	// Ambient music
+	music_irish_meadow
 }

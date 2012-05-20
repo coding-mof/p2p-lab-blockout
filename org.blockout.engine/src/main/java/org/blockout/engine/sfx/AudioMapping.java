@@ -25,26 +25,31 @@ public class AudioMapping {
 		Preconditions.checkNotNull( type );
 
 		switch ( type ) {
-			case swing1:
+			case sfx_swing1:
 				return "sfx/swing.wav";
-			case swing2:
+			case sfx_swing2:
 				return "sfx/swing2.wav";
-			case swing3:
+			case sfx_swing3:
 				return "sfx/swing3.wav";
-			case sword_clash1:
+			case sfx_sword_clash1:
 				return "sfx/sword-unsheathe.wav";
-			case sword_clash2:
+			case sfx_sword_clash2:
 				return "sfx/sword-unsheathe2.wav";
-			case sword_clash3:
+			case sfx_sword_clash3:
 				return "sfx/sword-unsheathe3.wav";
-			case sword_clash4:
+			case sfx_sword_clash4:
 				return "sfx/sword-unsheathe4.wav";
-			case sword_clash5:
+			case sfx_sword_clash5:
 				return "sfx/sword-unsheathe5.wav";
-			case stonestep_fast:
+			case sfx_stonestep_fast:
 				return "sfx/stonestep_fast.wav";
-			case stonestep:
+			case sfx_stonestep:
 				return "sfx/stonestep.wav";
+			case sfx_open_chest:
+				return "sfx/open-chest.wav";
+				
+			case music_irish_meadow:
+				return "ambient/Marc_Teichert_-_Irish_Meadow.ogg";
 			default:
 				throw new IllegalArgumentException( "Unknown audio type: " + type );
 		}

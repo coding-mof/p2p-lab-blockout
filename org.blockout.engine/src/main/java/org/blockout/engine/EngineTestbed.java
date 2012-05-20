@@ -10,6 +10,7 @@ import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
 
@@ -28,7 +29,6 @@ public class EngineTestbed extends BasicGame {
 
 	ParticleAnimation	animation;
 	AudioManagerImpl audioManager;
-	Sound footStep;
 	
 	public EngineTestbed(final String title) {
 		super( title );
@@ -49,14 +49,14 @@ public class EngineTestbed extends BasicGame {
 		try {
 			animation = new ParticleAnimation("test_system.xml");
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException("Failed to load test_system.xml", e);
 		}
 		animation.setLooping( true );
 		animation.start();
 		
 		audioManager = new AudioManagerImpl();
-		footStep = audioManager.getSound(AudioType.sword_clash1);
-		footStep.loop(1,0.5f);
+		//audioManager.getSound(AudioType.sfx_open_chest).play();
+		audioManager.getMusic(AudioType.music_irish_meadow).play(1, 0.5f);
 	}
 
 	@Override
