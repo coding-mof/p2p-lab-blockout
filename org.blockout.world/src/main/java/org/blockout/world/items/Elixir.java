@@ -10,8 +10,9 @@ import com.google.common.base.Preconditions;
  */
 public class Elixir implements Item {
 
-	protected Type	type;
-	protected int	points;
+	private static final long	serialVersionUID	= 193471324522183511L;
+	protected Type				type;
+	protected int				points;
 
 	public Elixir(final Type type, final int points) {
 		Preconditions.checkNotNull( type );

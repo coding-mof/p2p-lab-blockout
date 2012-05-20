@@ -15,9 +15,9 @@ import javax.swing.text.DefaultCaret;
 import org.blockout.world.event.IEvent;
 
 /**
- * Monitoring frame for debugging the
+ * Monitoring frame for debugging the {@link IStateMachine}.
  * 
- * @author azrael
+ * @author Marc-Christian Schulze
  * 
  */
 @Named

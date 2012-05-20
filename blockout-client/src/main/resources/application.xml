@@ -18,7 +18,6 @@
 		<constructor-arg ref="game"/>
 	</bean>
 	
-	
 	<bean class ="org.blockout.engine.SpriteSheetImpl"/>
 	
 	<bean class="org.blockout.world.StaticTMXWorld">

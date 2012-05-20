@@ -8,6 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+/**
+ * Tests the {@link Inventory} class.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class TestInventory {
 
 	protected Inventory	inventory;

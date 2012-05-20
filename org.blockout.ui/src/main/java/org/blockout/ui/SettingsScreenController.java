@@ -20,7 +20,15 @@ import de.lessvoid.nifty.NiftyEventSubscriber;
 import de.lessvoid.nifty.controls.DropDown;
 import de.lessvoid.nifty.controls.DropDownSelectionChangedEvent;
 import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.screen.ScreenController;
 
+/**
+ * {@link ScreenController} for managing user input when configuring the game
+ * settings.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class SettingsScreenController implements StateBasedScreenController {
 
@@ -35,6 +43,7 @@ public class SettingsScreenController implements StateBasedScreenController {
 
 	private DisplayMode				selectedDisplayMode;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void bind( final Nifty nifty, final Screen screen ) {
 		this.nifty = nifty;

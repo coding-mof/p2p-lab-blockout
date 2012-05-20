@@ -10,7 +10,8 @@ import com.google.common.base.Preconditions;
  */
 public class Shield implements Item {
 
-	protected int	protection;
+	private static final long	serialVersionUID	= 3664422684819188243L;
+	protected int				protection;
 
 	public Shield(final int protection) {
 		Preconditions.checkArgument( protection >= 0, "Protection must be greater or equal to zero." );

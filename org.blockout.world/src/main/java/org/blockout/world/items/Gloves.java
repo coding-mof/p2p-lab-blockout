@@ -9,7 +9,9 @@ import com.google.common.base.Preconditions;
  * 
  */
 public class Gloves implements Item {
-	protected int	protection;
+
+	private static final long	serialVersionUID	= -5516595822116967578L;
+	protected int				protection;
 
 	public Gloves(final int protection) {
 		Preconditions.checkArgument( protection >= 0, "Protection must be greater or equal to zero." );

@@ -2,9 +2,14 @@ package org.blockout.world.entity;
 
 import static org.junit.Assert.assertEquals;
 
-import org.blockout.world.entity.Player;
 import org.junit.Test;
 
+/**
+ * Tests the {@link Player} class.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class TestPlayer {
 
 	@Test

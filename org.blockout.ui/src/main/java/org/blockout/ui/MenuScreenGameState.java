@@ -11,6 +11,12 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.ScreenController;
 import de.lessvoid.nifty.slick2d.NiftyBasicGameState;
 
+/**
+ * Starting game state which manages all menus.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class MenuScreenGameState extends NiftyBasicGameState {
 

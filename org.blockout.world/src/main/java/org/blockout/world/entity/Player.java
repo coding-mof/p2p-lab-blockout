@@ -11,8 +11,10 @@ import com.google.common.base.Preconditions;
  * 
  */
 public class Player extends Actor {
-	protected int		experience;
-	protected Inventory	inventory;
+
+	private static final long	serialVersionUID	= 8675297903080506894L;
+	protected int				experience;
+	protected Inventory			inventory;
 
 	/**
 	 * Constructs a new player with the given name, full health, no experience

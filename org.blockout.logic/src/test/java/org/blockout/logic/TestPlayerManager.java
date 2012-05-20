@@ -13,6 +13,12 @@ import org.blockout.world.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the {@link PlayerManager} class.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class TestPlayerManager {
 
 	protected PlayerManager	playerMgr;

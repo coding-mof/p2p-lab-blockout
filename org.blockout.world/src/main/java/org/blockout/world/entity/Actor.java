@@ -13,9 +13,10 @@ import com.google.common.base.Preconditions;
  */
 public abstract class Actor implements Entity, Mover {
 
-	protected String	name;
-	protected int		level;
-	protected int		currentHealth;
+	private static final long	serialVersionUID	= -5097030020273809455L;
+	protected String			name;
+	protected int				level;
+	protected int				currentHealth;
 
 	protected Actor(final String name) {
 		setName( name );

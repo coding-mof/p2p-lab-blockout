@@ -10,7 +10,9 @@ import com.google.common.base.Preconditions;
  * 
  */
 public class Helm implements Item {
-	protected int	protection;
+
+	private static final long	serialVersionUID	= -3350831942032949111L;
+	protected int				protection;
 
 	public Helm(final int protection) {
 		Preconditions.checkArgument( protection >= 0, "Protection must be greater or equal to zero." );

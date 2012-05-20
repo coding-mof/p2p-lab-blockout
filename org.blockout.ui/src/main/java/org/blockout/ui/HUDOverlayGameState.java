@@ -16,6 +16,12 @@ import de.lessvoid.nifty.slick2d.sound.SlickSoundDevice;
 import de.lessvoid.nifty.slick2d.time.LWJGLTimeProvider;
 import de.lessvoid.nifty.spi.time.TimeProvider;
 
+/**
+ * Customized OverlayGameState.
+ * 
+ * @author Marc-Christian Schulze
+ * @see de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState
+ */
 public abstract class HUDOverlayGameState extends BasicGameState {
 	private SlickInputSystem	inputSystem;
 	private Nifty				niftyGUI;
@@ -131,11 +137,3 @@ public abstract class HUDOverlayGameState extends BasicGameState {
 	protected abstract void updateGame( GameContainer paramGameContainer, StateBasedGame paramStateBasedGame,
 			int paramInt ) throws SlickException;
 }
-
-/*
- * Location:
- * C:\Users\azrael\.m2\repository\lessvoid\nifty-slick-renderer\1.3.1\nifty
- * -slick-renderer-1.3.1.jar Qualified Name:
- * de.lessvoid.nifty.slick2d.NiftyOverlayBasicGameState Java Class Version: 6
- * (50.0) JD-Core Version: 0.5.3
- */

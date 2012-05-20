@@ -4,6 +4,12 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Useful utilities for handling io.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class IOUtils {
 	public static void close( final Closeable c ) {
 		if ( c == null ) {

@@ -10,7 +10,8 @@ import com.google.common.base.Preconditions;
  */
 public class Weapon implements Item {
 
-	protected int	strength;
+	private static final long	serialVersionUID	= -542381053531355902L;
+	protected int				strength;
 
 	public Weapon(final int strength) {
 		Preconditions.checkArgument( strength >= 0, "Strength must be greater or equal to zero." );
