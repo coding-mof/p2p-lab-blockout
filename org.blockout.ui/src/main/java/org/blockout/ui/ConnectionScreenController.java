@@ -1,13 +1,21 @@
 package org.blockout.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.network.DiscoveryListener;
+import org.blockout.network.INodeDiscovery;
+import org.blockout.network.NodeInfo;
 import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
 import org.newdawn.slick.state.transition.FadeOutTransition;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.controls.ListBox;
 import de.lessvoid.nifty.screen.Screen;
 
 /**
@@ -19,27 +27,38 @@ import de.lessvoid.nifty.screen.Screen;
  * 
  */
 @Named
-public class ConnectionScreenController implements StateBasedScreenController {
+public class ConnectionScreenController implements StateBasedScreenController, DiscoveryListener {
 
 	// Own state
 	protected Nifty				nifty;
+	protected Screen			screen;
 	protected StateBasedGame	game;
+	protected INodeDiscovery	discovery;
+	protected List<NodeInfo>	knownNodes;
+
+	@Inject
+	public ConnectionScreenController(final INodeDiscovery discovery) {
+		this.discovery = discovery;
+		knownNodes = new ArrayList<NodeInfo>( discovery.listNodes() );
+	}
 
 	@Override
 	public void bind( final Nifty nifty, final Screen screen ) {
 		this.nifty = nifty;
+		this.screen = screen;
 	}
 
 	@Override
 	public void onEndScreen() {
-		// TODO Auto-generated method stub
-
+		discovery.removeDiscoveryListener( this );
 	}
 
 	@Override
 	public void onStartScreen() {
-		// TODO Auto-generated method stub
-
+		knownNodes.clear();
+		knownNodes.addAll( discovery.listNodes() );
+		discovery.addDiscoveryListener( this );
+		updateNodeList();
 	}
 
 	public void goBack() {
@@ -53,5 +72,19 @@ public class ConnectionScreenController implements StateBasedScreenController {
 	@Override
 	public void bindToGameState( final StateBasedGame game, final GameState state ) {
 		this.game = game;
+	}
+
+	@Override
+	public void nodeDiscovered( final NodeInfo info ) {
+		knownNodes.add( info );
+		updateNodeList();
+	}
+
+	protected void updateNodeList() {
+		@SuppressWarnings("unchecked")
+		ListBox<NodeInfo> listBox = screen.findNiftyControl( "listPeers", ListBox.class );
+		listBox.clear();
+
+		listBox.addAllItems( new ArrayList<NodeInfo>( knownNodes ) );
 	}
 }
