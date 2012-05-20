@@ -1,7 +1,10 @@
 package org.blockout.logic.handler;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.engine.sfx.AudioType;
+import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.event.CrateOpenedEvent;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
@@ -24,10 +27,19 @@ public class CrateHandler implements IEventHandler {
 		logger = LoggerFactory.getLogger( CrateHandler.class );
 	}
 
+	protected IAudioManager		audioManager;
+
+	@Inject
+	public CrateHandler(final IAudioManager audioManager) {
+		this.audioManager = audioManager;
+	}
+
 	@Override
 	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
-		// TODO Auto-generated method stub
-
+		if ( !(event instanceof CrateOpenedEvent) ) {
+			return;
+		}
+		audioManager.getSound( AudioType.sfx_open_chest ).play();
 	}
 
 	@Override

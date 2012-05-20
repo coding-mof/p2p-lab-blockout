@@ -3,6 +3,8 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.engine.sfx.AudioType;
+import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.LocalGameState;
 import org.bushe.swing.event.EventTopicSubscriber;
 import org.newdawn.slick.GameContainer;
@@ -46,15 +48,18 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	protected final PlayerMoveHandler	playerController;
 
 	private final HealthRenderer		healthRenderer;
+	private final IAudioManager			audioManager;
 
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
-			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController) {
+			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController,
+			final IAudioManager audioManager) {
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
 		this.camera = camera;
 		this.worldRenderer = worldRenderer;
 		this.playerController = playerController;
+		this.audioManager = audioManager;
 		healthRenderer = new HealthRenderer( camera, gameState );
 	}
 
@@ -88,6 +93,8 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	@Override
 	protected void enterState( final GameContainer container, final StateBasedGame game ) throws SlickException {
 		getNifty().gotoScreen( "start" );
+
+		audioManager.getMusic( AudioType.music_irish_meadow ).loop();
 
 		inputHandler.setGameContainer( container );
 		container.getInput().addKeyListener( inputHandler );

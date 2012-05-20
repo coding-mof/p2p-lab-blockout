@@ -36,7 +36,7 @@
             </panel>
         </layer>
         <layer visible="false" id="inventory_layer" childLayout="vertical">
-            <panel align="right" childLayout="absolute" valign="top" width="256" height="512" backgroundImage="inventory_01.jpg">
+            <panel align="right" childLayout="absolute" valign="top" width="256" height="512" backgroundImage="inventory_01.jpg" visibleToMouse="true">
                 
                 
                 
