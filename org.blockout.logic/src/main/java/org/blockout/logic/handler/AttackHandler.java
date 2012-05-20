@@ -1,7 +1,13 @@
 package org.blockout.logic.handler;
 
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.engine.sfx.AudioType;
+import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Monster;
 import org.blockout.world.entity.Player;
@@ -23,13 +29,35 @@ import org.slf4j.LoggerFactory;
 @Named
 public class AttackHandler implements IEventHandler {
 
-	private static final Logger	logger;
+	private static final Logger			logger;
 	static {
 		logger = LoggerFactory.getLogger( AttackHandler.class );
 	}
 
+	protected IAudioManager				audioManager;
+	private final ArrayList<AudioType>	attackTypes;
+	private final Random				rand;
+
+	@Inject
+	public AttackHandler(final IAudioManager audioManager) {
+		this.audioManager = audioManager;
+		attackTypes = new ArrayList<AudioType>();
+		attackTypes.add( AudioType.sword_clash1 );
+		attackTypes.add( AudioType.sword_clash2 );
+		attackTypes.add( AudioType.sword_clash3 );
+		attackTypes.add( AudioType.sword_clash4 );
+		attackTypes.add( AudioType.sword_clash5 );
+		rand = new Random( System.currentTimeMillis() );
+	}
+
 	@Override
 	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
+		if ( !(event instanceof AttackEvent) ) {
+			return;
+		}
+
+		int index = rand.nextInt( attackTypes.size() );
+		audioManager.getSound( attackTypes.get( index ) ).play();
 	}
 
 	@Override

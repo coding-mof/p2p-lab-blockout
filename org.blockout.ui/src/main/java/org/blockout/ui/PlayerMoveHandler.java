@@ -4,6 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.engine.sfx.AudioType;
+import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.logic.handler.IEventHandler;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
@@ -29,6 +31,7 @@ public class PlayerMoveHandler implements IEventHandler {
 	protected final Camera			camera;
 	protected final LocalGameState	gameState;
 	protected IWorld				world;
+	protected IAudioManager			audioManager;
 
 	private final Object			pathLock	= new Object();
 	private Path					path;
@@ -44,10 +47,12 @@ public class PlayerMoveHandler implements IEventHandler {
 	private int						startY;
 
 	@Inject
-	public PlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world) {
+	public PlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world,
+			final IAudioManager audioManager) {
 		this.camera = camera;
 		this.gameState = gameState;
 		this.world = world;
+		this.audioManager = audioManager;
 	}
 
 	public void update( final GameContainer container, final int deltaMillis ) {
@@ -108,6 +113,9 @@ public class PlayerMoveHandler implements IEventHandler {
 		if ( !(event instanceof PlayerMoveEvent) ) {
 			return;
 		}
+
+		audioManager.getSound( AudioType.stonestep ).play();
+
 		PlayerMoveEvent pme = (PlayerMoveEvent) event;
 		synchronized ( posLock ) {
 			desiredX = pme.getNewX();
