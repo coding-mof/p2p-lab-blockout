@@ -1,5 +1,7 @@
 package org.blockout.world.items;
 
+import org.blockout.engine.SpriteType;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -46,5 +48,10 @@ public class Elixir implements Item {
 	@Override
 	public String toString() {
 		return "Elixir[type=" + type + ", points=" + points + "]";
+	}
+
+	@Override
+	public SpriteType getSpriteType() {
+		return SpriteType.rock_piercer;
 	}
 }

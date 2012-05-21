@@ -1,5 +1,7 @@
 package org.blockout.world.entity;
 
+import java.util.UUID;
+
 import org.newdawn.slick.util.pathfinding.Mover;
 
 import com.google.common.base.Preconditions;
@@ -14,6 +16,7 @@ import com.google.common.base.Preconditions;
 public abstract class Actor implements Entity, Mover {
 
 	private static final long	serialVersionUID	= -5097030020273809455L;
+	protected UUID				id;
 	protected String			name;
 	protected int				level;
 	protected int				currentHealth;
@@ -22,6 +25,11 @@ public abstract class Actor implements Entity, Mover {
 		setName( name );
 		setLevel( 1 );
 		setCurrentHealth( getMaxHealth() );
+		id = UUID.randomUUID();
+	}
+
+	public UUID getId() {
+		return id;
 	}
 
 	@Override
@@ -85,4 +93,31 @@ public abstract class Actor implements Entity, Mover {
 	public abstract int getStrength();
 
 	public abstract int getArmor();
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+
+	@Override
+	public boolean equals( final Object obj ) {
+		if ( this == obj ) {
+			return true;
+		}
+		if ( obj == null ) {
+			return false;
+		}
+		if ( getClass() != obj.getClass() ) {
+			return false;
+		}
+		Actor other = (Actor) obj;
+		if ( id == null ) {
+			if ( other.id != null ) {
+				return false;
+			}
+		} else if ( !id.equals( other.id ) ) {
+			return false;
+		}
+		return true;
+	}
 }

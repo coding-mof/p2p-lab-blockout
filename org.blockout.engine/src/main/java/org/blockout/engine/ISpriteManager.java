@@ -2,8 +2,6 @@ package org.blockout.engine;
 
 import org.newdawn.slick.Image;
 
-import de.lessvoid.nifty.slick2d.render.image.loader.SlickRenderImageLoader;
-
 /**
  * Implementations have to provide access to the sprites of the game.
  * Implementations are free to cache the sprites.
@@ -11,7 +9,7 @@ import de.lessvoid.nifty.slick2d.render.image.loader.SlickRenderImageLoader;
  * @author Marc-Christian Schulze
  * 
  */
-public interface ISpriteManager extends SlickRenderImageLoader {
+public interface ISpriteManager {
 
 	/**
 	 * Returns the sprite of the given type. The returned sprite might be cached
@@ -22,37 +20,38 @@ public interface ISpriteManager extends SlickRenderImageLoader {
 	 * @return The sprite identified by the type or null if sprite is unknown.
 	 */
 	public Image getSprite( SpriteType type );
-	
+
 	/**
-	 * Returns the sprite of the given type and optionally removes the background. 
-	 * The returned sprite might be cached by this implementation.
+	 * Returns the sprite of the given type and optionally removes the
+	 * background. The returned sprite might be cached by this implementation.
 	 * 
 	 * @param type
 	 *            The type of the sprite.
 	 * @param excludeBackground
-	 * 			  True if the background should be removed from the sprite, false otherwise.
+	 *            True if the background should be removed from the sprite,
+	 *            false otherwise.
 	 * @return The sprite identified by the type or null if sprite is unknown.
 	 */
-	public Image getSprite( SpriteType type, boolean excludeBackground);
-	
+	public Image getSprite( SpriteType type, boolean excludeBackground );
+
 	/**
 	 * Start internal batch mode to speedup rendering
 	 */
 	public void startUse();
-	
+
 	/**
 	 * Stop internal batch mode
 	 */
 	public void endUse();
-	
+
 	/**
 	 * 
 	 * @param spriteId
-	 * 		Id of the sprite
+	 *            Id of the sprite
 	 * @param x
-	 * 		x position where to render the sprite
+	 *            x position where to render the sprite
 	 * @param y
-	 * 		y position where to render the sprite
+	 *            y position where to render the sprite
 	 */
 	public void renderInUse( SpriteType type, int x, int y );
 }

@@ -51,6 +51,14 @@
                 id="inventory"
                 visibleToMouse="true"
                 controller="org.blockout.ui.InventoryController" >
+				
+                <!-- Equipment -->
+                <control id="helm" name="droppable" style="dropArea" width="32px" height="32px" x="110" y="28" />
+                <control id="armor" name="droppable" style="dropArea" width="32px" height="32px" x="110" y="76" />
+                <control id="shoes" name="droppable" style="dropArea" width="32px" height="32px" x="110" y="128" />
+                <control id="weapon" name="droppable" style="dropArea" width="32px" height="32px" x="39" y="76" />
+                <control id="shield" name="droppable" style="dropArea" width="32px" height="32px" x="178" y="76" />
+                <control id="gloves" name="droppable" style="dropArea" width="32px" height="32px" x="39" y="128" />
                 
                 <!-- Belt -->
                 <control id="belt0" name="droppable" style="dropArea" width="32px" height="32px" x="24" y="264" />
@@ -103,7 +111,7 @@
         id="popupMenu"
         backgroundColor="#0005"
         childLayout="center"
-        controller="org.blockout.ui.InGameGameState" >
+        visibleToMouse="true" >
 
 <!--         <interact onClick="closePopup()" onSecondaryClick="closePopup()" onTertiaryClick="closePopup()" /> -->
         

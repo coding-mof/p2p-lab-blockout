@@ -1,5 +1,8 @@
 package org.blockout.ui;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -28,23 +31,26 @@ import org.newdawn.slick.util.pathfinding.Path.Step;
 @Named
 public class PlayerMoveHandler implements IEventHandler {
 
-	protected final Camera			camera;
-	protected final LocalGameState	gameState;
-	protected IWorld				world;
-	protected IAudioManager			audioManager;
+	protected final Camera				camera;
+	protected final LocalGameState		gameState;
+	protected IWorld					world;
+	protected IAudioManager				audioManager;
 
-	private final Object			pathLock	= new Object();
-	private Path					path;
-	private int						nextStep;
-	private IEvent<?>				lastEvent;
+	private final Object				pathLock	= new Object();
+	private Path						path;
+	private int							nextStep;
+	private IEvent<?>					lastEvent;
 
-	private final Object			posLock		= new Object();
-	private float					desiredX;
-	private float					desiredY;
-	private long					startTime;
-	private long					duration;
-	private int						startX;
-	private int						startY;
+	private final Object				posLock		= new Object();
+	private float						desiredX;
+	private float						desiredY;
+	private long						startTime;
+	private long						duration;
+	private int							startX;
+	private int							startY;
+
+	private final ArrayList<AudioType>	walkSounds;
+	private final Random				rand;
 
 	@Inject
 	public PlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world,
@@ -53,6 +59,12 @@ public class PlayerMoveHandler implements IEventHandler {
 		this.gameState = gameState;
 		this.world = world;
 		this.audioManager = audioManager;
+
+		walkSounds = new ArrayList<AudioType>();
+		walkSounds.add( AudioType.sfx_stonestep1 );
+		walkSounds.add( AudioType.sfx_stonestep2 );
+		walkSounds.add( AudioType.sfx_stonestep3 );
+		rand = new Random( System.currentTimeMillis() );
 	}
 
 	public void update( final GameContainer container, final int deltaMillis ) {
@@ -114,7 +126,7 @@ public class PlayerMoveHandler implements IEventHandler {
 			return;
 		}
 
-		audioManager.getSound( AudioType.sfx_stonestep1 ).play();
+		audioManager.getSound( walkSounds.get( rand.nextInt( walkSounds.size() ) ) ).play();
 
 		PlayerMoveEvent pme = (PlayerMoveEvent) event;
 		synchronized ( posLock ) {

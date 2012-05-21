@@ -6,18 +6,17 @@ import javax.inject.Named;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.LocalGameState;
-import org.bushe.swing.event.EventTopicSubscriber;
+import org.blockout.world.items.Elixir;
+import org.blockout.world.items.Elixir.Type;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.controls.Button;
-import de.lessvoid.nifty.controls.ButtonClickedEvent;
+import de.lessvoid.nifty.controls.Controller;
 import de.lessvoid.nifty.controls.Label;
-import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
@@ -31,28 +30,26 @@ import de.lessvoid.nifty.screen.ScreenController;
 @Named
 public final class InGameGameState extends HUDOverlayGameState implements ScreenController {
 
-	private Nifty						nifty;
+	private Label							lblPlayer;
+	private Label							lblHealth;
+	private Label							lblXP;
+	private Label							lblLevel;
 
-	private Element						exitPopup;
+	protected final IWorldRenderer			worldRenderer;
+	protected final LocalGameState			gameState;
+	protected final InputHandler			inputHandler;
+	protected final Camera					camera;
+	protected final PlayerMoveHandler		playerController;
 
-	private Label						lblPlayer;
-	private Label						lblHealth;
-	private Label						lblXP;
-	private Label						lblLevel;
+	private final HealthRenderer			healthRenderer;
+	private final IAudioManager				audioManager;
 
-	protected final IWorldRenderer		worldRenderer;
-	protected final LocalGameState		gameState;
-	protected final InputHandler		inputHandler;
-	protected final Camera				camera;
-	protected final PlayerMoveHandler	playerController;
-
-	private final HealthRenderer		healthRenderer;
-	private final IAudioManager			audioManager;
+	protected AutowireCapableBeanFactory	beanFactory;
 
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
 			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController,
-			final IAudioManager audioManager) {
+			final IAudioManager audioManager, final AutowireCapableBeanFactory beanFactory) {
 		super( inputHandler );
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
@@ -61,13 +58,18 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		this.playerController = playerController;
 		this.audioManager = audioManager;
 		healthRenderer = new HealthRenderer( camera, gameState );
+
+		this.beanFactory = beanFactory;
 	}
 
 	@Override
 	protected void prepareNifty( final Nifty nifty, final StateBasedGame game ) {
-		this.nifty = nifty;
-
 		nifty.fromXml( "ingame-screen.xml", "start" );
+		// Since Nifty requires to create it's own instance of the Controller -
+		// we need to autowire it here
+		Controller ctrl = nifty.getCurrentScreen().findElementByName( "inventory" ).getControl( Controller.class );
+		beanFactory.autowireBean( ctrl );
+
 		inputHandler.setNifty( nifty );
 	}
 
@@ -97,6 +99,13 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		audioManager.getMusic( AudioType.music_irish_meadow ).loop();
 
 		inputHandler.setGameContainer( container );
+
+		// TODO: this is just for debugging...
+		// TODO: implement logic to collect items...
+		System.out.println( "-------------- FILLING INEVNTORY ------------------" );
+		gameState.getPlayer().getInventory().setItem( 0, 0, new Elixir( Type.Health, 50 ) );
+		gameState.getPlayer().getInventory().setItem( 1, 1, new Elixir( Type.Health, 10 ) );
+		gameState.getPlayer().getInventory().setItem( 2, 2, new Elixir( Type.Health, 30 ) );
 	}
 
 	@Override
@@ -109,27 +118,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 
 		playerController.update( container, deltaMillis );
 
-		if ( container.getInput().isKeyDown( Input.KEY_ESCAPE ) ) {
-			if ( exitPopup == null ) {
-				exitPopup = nifty.createPopup( "popupMenu" );
-				Button btnReturnToGame = exitPopup.findNiftyControl( "btnReturnToGame", Button.class );
-				nifty.subscribe( nifty.getCurrentScreen(), btnReturnToGame.getId(), ButtonClickedEvent.class,
-						new EventTopicSubscriber<ButtonClickedEvent>() {
-
-							@Override
-							public void onEvent( final String arg0, final ButtonClickedEvent arg1 ) {
-								System.out.println( "Closing popup..." );
-								nifty.closePopup( exitPopup.getId() );
-								exitPopup = null;
-							}
-						} );
-				nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
-			}
-		}
-		if ( container.getInput().isKeyDown( Input.KEY_I ) ) {
-			Element inventory = nifty.getCurrentScreen().findElementByName( "inventory_layer" );
-			inventory.setVisible( !inventory.isVisible() );
-		}
 	}
 
 	private void updateHUD() {
@@ -145,10 +133,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		lblXP.setText( "" + gameState.getPlayer().getExperience() + " / "
 				+ gameState.getPlayer().getRequiredExperience() );
 		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
-	}
-
-	public void closePopup() {
-		nifty.closePopup( exitPopup.getId() );
 	}
 
 	@Override
