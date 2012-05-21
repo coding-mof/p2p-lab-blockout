@@ -1,5 +1,7 @@
 package org.blockout.common;
 
+import java.io.Serializable;
+
 /**
  * Represents a coordinate in a 2 dimensional cartesian coordinate system.
  * 
@@ -7,7 +9,8 @@ package org.blockout.common;
  * @threadSafety immutable
  * 
  */
-public class TileCoordinate {
+public class TileCoordinate implements Serializable {
+	private static final long serialVersionUID = 7373840209443845396L;
 	private final int	x;
 	private final int	y;
 

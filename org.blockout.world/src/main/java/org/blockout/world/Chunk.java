@@ -1,5 +1,6 @@
 package org.blockout.world;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
@@ -10,7 +11,9 @@ import com.google.common.base.Preconditions;
  * 
  * @author Konstantin Ramig
  */
-public class Chunk {
+public class Chunk implements Serializable{
+
+	private static final long serialVersionUID = 6458398672895072597L;
 
 	public static final int CHUNK_SIZE = 48;
 
