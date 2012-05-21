@@ -26,7 +26,7 @@ public class DiscoveryStub implements INodeDiscovery {
 
 		try {
 			knownNodes.add( new NodeInfo( InetAddress.getLocalHost() ) );
-			knownNodes.add( new NodeInfo( InetAddress.getLoopbackAddress() ) );
+			knownNodes.add( new NodeInfo( InetAddress.getByName( "127.0.0.1" ) ) );
 		} catch ( UnknownHostException e ) {
 			e.printStackTrace();
 		}
