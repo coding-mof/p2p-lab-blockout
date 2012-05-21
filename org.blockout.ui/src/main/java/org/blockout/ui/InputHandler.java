@@ -214,8 +214,7 @@ public class InputHandler implements InputListener {
 
 	@Override
 	public boolean isAcceptingInput() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override

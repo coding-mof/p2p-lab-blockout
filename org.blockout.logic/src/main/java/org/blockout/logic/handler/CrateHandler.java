@@ -7,6 +7,7 @@ import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.event.CrateOpenedEvent;
 import org.blockout.world.event.IEvent;
+import org.blockout.world.items.Item;
 import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,5 +51,16 @@ public class CrateHandler implements IEventHandler {
 		CrateOpenedEvent coa = (CrateOpenedEvent) event;
 
 		logger.info( "Crate " + coa.getCrate() + " opened by " + coa.getPlayer() );
+		Item item = coa.getCrate().getItem();
+		if ( item == null ) {
+			logger.info( "Crate " + coa.getCrate() + " was empty." );
+		} else {
+			if ( coa.getPlayer().getInventory().storeItem( item ) ) {
+				coa.getCrate().removeItem();
+				logger.info( "Player " + coa.getPlayer() + " got " + item );
+			} else {
+				logger.info( "Player " + coa.getPlayer() + " has no free slot in his inventory." );
+			}
+		}
 	}
 }

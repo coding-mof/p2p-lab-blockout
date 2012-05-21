@@ -3,6 +3,8 @@ package org.blockout.world.entity;
 import java.util.UUID;
 
 import org.blockout.engine.SpriteType;
+import org.blockout.world.items.Item;
+import org.blockout.world.items.Weapon;
 
 /**
  * Instances of this class represent {@link Crate}s that the {@link Player} can
@@ -16,9 +18,24 @@ public class Crate implements Entity {
 	private static final long	serialVersionUID	= -5301210134052727017L;
 
 	protected UUID				id;
+	// Currently we have only a single item in a crate
+	protected Item				item;
 
 	public Crate() {
 		id = UUID.randomUUID();
+		item = new Weapon( 10 );
+	}
+
+	public Item removeItem() {
+		try {
+			return item;
+		} finally {
+			item = null;
+		}
+	}
+
+	public Item getItem() {
+		return item;
 	}
 
 	@Override
