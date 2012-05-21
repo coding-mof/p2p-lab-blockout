@@ -1,5 +1,7 @@
 package org.blockout.world;
 
+import org.blockout.common.TileCoordinate;
+
 /**
  * 
  * @author Konstantin Ramig
@@ -7,11 +9,11 @@ package org.blockout.world;
 public interface IChunkGenerator {
 
 	/**
+	 * Generator will return a random Chunk size Chunk.CHUNK_SIZExChunk.CHUNK_SIZE
+	 * with the given coordinates
 	 * 
-	 * @param x
-	 * @param y
-	 * @param size
-	 * @return an Chunk with the given coordinates an a Tilematrix sizeXsize
+	 * @param coordinate
+	 * @return
 	 */
-	public Chunk generateChunk( int x, int y, int size );
+	public Chunk generateChunk( TileCoordinate coordinate);
 }

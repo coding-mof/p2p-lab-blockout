@@ -1,7 +1,5 @@
 package org.blockout.world;
 
-import java.util.Hashtable;
-
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
@@ -16,10 +14,10 @@ import org.blockout.world.state.IStateMachine;
 public class DefaultChunkManager implements IChunkManager {
 
 	private IStateMachine						stateMachine;
-
-	private Hashtable<TileCoordinate, Chunk>	chunks;
 	
-	private ChunkGenerator						chunkGenerator;
+	private WorldAdapter 						worldAdapter;
+	
+	private BasicChunkGenerator						chunkGenerator;
 
 	@Override
 	public void init( final IStateMachine stateMachine ) {
@@ -56,10 +54,13 @@ public class DefaultChunkManager implements IChunkManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Chunk requestChunk( final TileCoordinate position ) {
-		Chunk chunk = chunkGenerator.generateBasicChunk( position, Chunk.CHUNK_SIZE );
-		chunks.put( chunk.getPosition(), chunk );
-		return chunk;
+	public void requestChunk( final TileCoordinate position ) {
 		//TODO networkrequest
+	}
+
+	@Override
+	public void stopUpdating(TileCoordinate position) {
+		// TODO stop networkrequest
+		
 	}
 }

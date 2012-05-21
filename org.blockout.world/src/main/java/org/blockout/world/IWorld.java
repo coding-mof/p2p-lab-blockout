@@ -51,9 +51,12 @@ public interface IWorld {
 	 * Sets the position of the given entity to the given coordinates
 	 * should not be used when moving the local player
 	 * 
-	 * will just add the given entity to the world at the given coordinates
-	 * if the entity is not already found within the (local present) world
-	 * otherwise the entity will be moved to the given coordinates
+	 * if the given entity is not found within the current world 
+	 * 	it will be created at the given coordinates
+	 * if the given coordinates are not found within the current world
+	 * 	the given entity will be removed from the world
+	 * else the given entity will be moved from its original position
+	 * 	to the given coordinates
 	 *  
 	 * 
 	 * @param e the entity which should be moved

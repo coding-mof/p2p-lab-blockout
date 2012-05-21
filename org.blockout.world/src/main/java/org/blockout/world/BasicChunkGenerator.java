@@ -1,5 +1,7 @@
 package org.blockout.world;
 
+import javax.inject.Named;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.SpriteMapping;
 import org.blockout.engine.SpriteType;
@@ -8,7 +10,8 @@ import org.blockout.engine.SpriteType;
  * 
  * @author Konstantin Ramig
  */
-public class ChunkGenerator {
+@Named
+public class BasicChunkGenerator implements IChunkGenerator{
 	
 	private SpriteMapping mapping = new SpriteMapping();
 
@@ -28,4 +31,12 @@ public class ChunkGenerator {
 		}
 		return new Chunk(pos, tiles);
 	}
+
+
+	@Override
+	public Chunk generateChunk(TileCoordinate coordinate) {
+		return generateBasicChunk(coordinate, Chunk.CHUNK_SIZE);
+	}
+	
+
 }
