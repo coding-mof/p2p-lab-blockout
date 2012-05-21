@@ -25,7 +25,7 @@ import de.lessvoid.nifty.slick2d.render.image.loader.SlickRenderImageLoader;
  * 
  */
 @Named
-public class SpriteManagerImpl implements ISpriteManager{
+public class SpriteManagerImpl implements ISpriteManager, SlickRenderImageLoader {
 
 	ISpriteSheet							spriteSheet;
 	SpriteMapping							spriteMapping;
