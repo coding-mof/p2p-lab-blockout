@@ -14,14 +14,14 @@ import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
 import org.newdawn.slick.util.ResourceLoader;
 import org.newdawn.slick.util.ResourceLocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * Simple implementation of a static world using a TMX-File.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class StaticTMXWorld implements IWorld {
-	private static final Logger				logger;
-	static {
-		logger = LoggerFactory.getLogger( StaticTMXWorld.class );
-	}
 
 	private TiledMap						map;
 	private HashMap<TileCoordinate, Tile>	tileCache;
@@ -69,11 +69,11 @@ public class StaticTMXWorld implements IWorld {
 				putEntity( entity, x, y );
 			} else if ( objectId == 249 ) {
 				Zombie entity = new Zombie( 1 );
-				t = new Tile( spriteId, entity ); // SpriteType.Zombie
+				t = new Tile( spriteId, entity );
 				putEntity( entity, x, y );
 			} else if ( objectId == 250 ) {
 				Monster entity = new Monster( "Skeleton", 1, 100, 25 );
-				t = new Tile( spriteId, entity ); // SpriteType.Skeleton
+				t = new Tile( spriteId, entity );
 				putEntity( entity, x, y );
 			} else {
 				t = new Tile( spriteId, (spriteId == 849 /* StoneGround Dark */) ? Tile.WALL_HEIGHT : Tile.GROUND_HEIGHT );
@@ -98,8 +98,8 @@ public class StaticTMXWorld implements IWorld {
 	}
 
 	@Override
-	public void setEnityPosition(Entity e, TileCoordinate coord) {
+	public void setEnityPosition( final Entity e, final TileCoordinate coord ) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

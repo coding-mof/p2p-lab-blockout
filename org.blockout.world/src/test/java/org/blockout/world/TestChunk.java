@@ -17,7 +17,7 @@ public class TestChunk {
 	
 	@Before
 	public void setUp(){
-		ChunkGenerator chunkGenerator = new ChunkGenerator();
+		BasicChunkGenerator chunkGenerator = new BasicChunkGenerator();
 		chunk = chunkGenerator.generateBasicChunk(new TileCoordinate(0, 0), Chunk.CHUNK_SIZE);
 	}
 	
@@ -26,7 +26,7 @@ public class TestChunk {
 	public void getEntityCoordinate (){
 		Entity e = Mockito.mock(Entity.class);
 		assertNull(chunk.getEntityCoordinate(e));
-		chunk.moveEntityCoordinate(e, 1, 1);
+		chunk.setEntityCoordinate(e, 1, 1);
 		assertEquals(new TileCoordinate(1, 1), chunk.getEntityCoordinate(e));
 	}
 	
@@ -34,11 +34,23 @@ public class TestChunk {
 	@Test
 	public void moveEntity(){
 		Entity e = Mockito.mock(Entity.class);
-		chunk.moveEntityCoordinate(e, 0, 0);
+		chunk.setEntityCoordinate(e, 0, 0);
 		assertEquals(e, chunk.getTile(0, 0).getEntityOnTile());
 		assertEquals(new TileCoordinate(0, 0), chunk.getEntityCoordinate(e));
-		chunk.moveEntityCoordinate(e, 1, 1);
+		int type = chunk.getTile(1, 1).getTileType();
+		chunk.setEntityCoordinate(e, 1, 1);
 		assertEquals(e, chunk.getTile(1, 1).getEntityOnTile());
 		assertEquals(new TileCoordinate(1, 1), chunk.getEntityCoordinate(e));
+		chunk.setEntityCoordinate(e, 0, 1);
+		assertEquals(type, chunk.getTile(1, 1).getTileType());
+	}
+	
+	@Test
+	public void removeEntity(){
+		Entity e = Mockito.mock(Entity.class);
+		chunk.setEntityCoordinate(e, 50, 5);
+		chunk.removeEntity(e);
+		assertNull(chunk.getEntityCoordinate(e));
+		assertNull(chunk.getTile(50, 5).getEntityOnTile());
 	}
 }

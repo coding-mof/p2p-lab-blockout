@@ -7,6 +7,12 @@ import org.blockout.world.entity.Player;
 import org.blockout.world.event.PlayerMoveEvent;
 import org.junit.Test;
 
+/**
+ * Tests the {@link PlayerMoveEvent} class.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class TestPlayerMoveEvent {
 
 	@Test

@@ -16,8 +16,7 @@ import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.KeyListener;
-import org.newdawn.slick.MouseListener;
+import org.newdawn.slick.InputListener;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.pathfinding.Path;
 import org.newdawn.slick.util.pathfinding.Path.Step;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.elements.Element;
 
 /**
  * This class is responsible for converting user interactions to {@link IEvent}s
@@ -36,7 +34,7 @@ import de.lessvoid.nifty.elements.Element;
  * 
  */
 @Named
-public class InputHandler implements MouseListener, KeyListener {
+public class InputHandler implements InputListener {
 
 	private static final Logger	logger;
 	static {
@@ -74,32 +72,8 @@ public class InputHandler implements MouseListener, KeyListener {
 	}
 
 	@Override
-	public void inputEnded() {
-	}
-
-	@Override
-	public void inputStarted() {
-	}
-
-	@Override
-	public boolean isAcceptingInput() {
-		return true;
-	}
-
-	@Override
-	public void setInput( final Input input ) {
-	}
-
-	@Override
-	public void keyPressed( final int arg0, final char arg1 ) {
-	}
-
-	@Override
 	public void keyReleased( final int arg0, final char arg1 ) {
-		if ( arg0 == Input.KEY_I ) {
-			Element inventory = nifty.getCurrentScreen().findElementByName( "inventory_layer" );
-			inventory.setVisible( !inventory.isVisible() );
-		}
+
 		// if ( arg0 == Input.KEY_F ) {
 		// camera.lock();
 		// if ( camera.getWidth() == 1024 ) {
@@ -109,14 +83,6 @@ public class InputHandler implements MouseListener, KeyListener {
 		// }
 		// camera.unlock();
 		// }
-	}
-
-	@Override
-	public void mouseClicked( final int button, final int x, final int y, final int clickCount ) {
-	}
-
-	@Override
-	public void mouseDragged( final int oldx, final int oldy, final int newx, final int newy ) {
 	}
 
 	private static enum MouseCursor {
@@ -144,10 +110,6 @@ public class InputHandler implements MouseListener, KeyListener {
 		} finally {
 			camera.unlock();
 		}
-	}
-
-	@Override
-	public void mousePressed( final int button, final int x, final int y ) {
 	}
 
 	private boolean areNeighbours( final int x1, final int y1, final int x2, final int y2 ) {
@@ -204,6 +166,117 @@ public class InputHandler implements MouseListener, KeyListener {
 	}
 
 	@Override
-	public void mouseWheelMoved( final int change ) {
+	public void mouseWheelMoved( final int paramInt ) {
+		// TODO Auto-generated method stub
+
 	}
+
+	@Override
+	public void mouseClicked( final int paramInt1, final int paramInt2, final int paramInt3, final int paramInt4 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed( final int paramInt1, final int paramInt2, final int paramInt3 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseDragged( final int paramInt1, final int paramInt2, final int paramInt3, final int paramInt4 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setInput( final Input paramInput ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean isAcceptingInput() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void inputEnded() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void inputStarted() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void keyPressed( final int paramInt, final char paramChar ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerLeftPressed( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerLeftReleased( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerRightPressed( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerRightReleased( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerUpPressed( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerUpReleased( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerDownPressed( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerDownReleased( final int paramInt ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerButtonPressed( final int paramInt1, final int paramInt2 ) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void controllerButtonReleased( final int paramInt1, final int paramInt2 ) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

@@ -12,8 +12,9 @@ import com.google.common.base.Preconditions;
  */
 public class Monster extends Actor {
 
-	protected int	strength;
-	protected int	armor;
+	private static final long	serialVersionUID	= 8049484327263845076L;
+	protected int				strength;
+	protected int				armor;
 
 	public Monster(final String name, final int level, final int strength, final int armor) {
 		super( name );
@@ -23,6 +24,7 @@ public class Monster extends Actor {
 		setArmor( armor );
 	}
 
+	@Override
 	public int getStrength() {
 		return strength;
 	}
@@ -32,6 +34,7 @@ public class Monster extends Actor {
 		this.strength = strength;
 	}
 
+	@Override
 	public int getArmor() {
 		return armor;
 	}

@@ -17,7 +17,9 @@ public enum AudioType {
 	sfx_sword_clash4,
 	sfx_sword_clash5,
 	sfx_stonestep_fast,
-	sfx_stonestep,
+	sfx_stonestep1,
+	sfx_stonestep2,
+	sfx_stonestep3,
 	sfx_open_chest,
 	
 	// Ambient music

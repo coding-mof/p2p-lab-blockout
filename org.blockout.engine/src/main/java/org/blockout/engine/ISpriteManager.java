@@ -2,6 +2,8 @@ package org.blockout.engine;
 
 import org.newdawn.slick.Image;
 
+import de.lessvoid.nifty.slick2d.render.image.loader.SlickRenderImageLoader;
+
 /**
  * Implementations have to provide access to the sprites of the game.
  * Implementations are free to cache the sprites.
@@ -9,7 +11,7 @@ import org.newdawn.slick.Image;
  * @author Marc-Christian Schulze
  * 
  */
-public interface ISpriteManager {
+public interface ISpriteManager extends SlickRenderImageLoader {
 
 	/**
 	 * Returns the sprite of the given type. The returned sprite might be cached

@@ -5,6 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * Tests the {@link FogOfWar} class.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class TestFogOfWar {
 
 	@Test

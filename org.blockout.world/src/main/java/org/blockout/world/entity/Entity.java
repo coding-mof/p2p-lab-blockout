@@ -1,5 +1,7 @@
 package org.blockout.world.entity;
 
+import java.io.Serializable;
+
 import org.blockout.engine.SpriteType;
 
 /**
@@ -8,7 +10,7 @@ import org.blockout.engine.SpriteType;
  * @author Marc-Christian Schulze
  * 
  */
-public interface Entity {
+public interface Entity extends Serializable {
 
 	public String getName();
 

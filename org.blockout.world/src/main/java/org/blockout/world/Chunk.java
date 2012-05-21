@@ -1,8 +1,6 @@
 package org.blockout.world;
 
 import java.util.HashMap;
-import java.util.Hashtable;
-
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 
@@ -125,8 +123,8 @@ public class Chunk {
 	public Tile getTile(final int x, final int y) {
 		int x2 = x % CHUNK_SIZE;
 		int y2 = y % CHUNK_SIZE;
-		x2 = (x < 0) ? CHUNK_SIZE + x : x;
-		y2 = (x < 0) ? CHUNK_SIZE + y : y;
+		x2 = (x < 0) ? CHUNK_SIZE + x2 : x2;
+		y2 = (x < 0) ? CHUNK_SIZE + y2 : y2;
 		return tiles[x2][y2];
 	}
 	
@@ -150,7 +148,7 @@ public class Chunk {
 	 * @param x
 	 * @param y
 	 */
-	public void moveEntityCoordinate(final Entity e, final int x, final int y) {
+	public void setEntityCoordinate(final Entity e, final int x, final int y) {
 		TileCoordinate coord = entitys.get(e);
 		if (coord != null) {
 			int tx = coord.getX() % CHUNK_SIZE;
@@ -169,6 +167,8 @@ public class Chunk {
 		entitys.put(e, new TileCoordinate(x, y));
 	}
 	
+	
+	
 	/**
 	 * removes the given entity from this chunk
 	 * 	if entity is not found within this chunk no action will be taken
@@ -184,6 +184,7 @@ public class Chunk {
 			ty = (ty < 0) ? ty - 1 : ty;
 			tiles[tx][ty] = new Tile(tiles[tx][ty].getTileType(),
 					tiles[tx][ty].getHeight());
+			entitys.remove(e);
 		}
 	}
 }

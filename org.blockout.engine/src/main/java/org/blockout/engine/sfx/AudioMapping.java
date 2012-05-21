@@ -43,8 +43,12 @@ public class AudioMapping {
 				return "sfx/sword-unsheathe5.wav";
 			case sfx_stonestep_fast:
 				return "sfx/stonestep_fast.wav";
-			case sfx_stonestep:
+			case sfx_stonestep1:
 				return "sfx/stonestep.wav";
+			case sfx_stonestep2:
+				return "sfx/stonestep2.wav";
+			case sfx_stonestep3:
+				return "sfx/stonestep2.wav";
 			case sfx_open_chest:
 				return "sfx/open-chest.wav";
 				

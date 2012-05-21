@@ -12,6 +12,12 @@ import org.blockout.world.state.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Validator for {@link AttackEvent}s.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class AttackValidator implements IEventValidator {
 

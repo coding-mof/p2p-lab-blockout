@@ -20,7 +20,6 @@ import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
-import de.lessvoid.nifty.slick2d.input.PlainSlickInputSystem;
 
 /**
  * The main game state which renders the game.
@@ -54,6 +53,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
 			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController,
 			final IAudioManager audioManager) {
+		super( inputHandler );
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
 		this.camera = camera;
@@ -97,14 +97,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		audioManager.getMusic( AudioType.music_irish_meadow ).loop();
 
 		inputHandler.setGameContainer( container );
-		container.getInput().addKeyListener( inputHandler );
-		container.getInput().addMouseListener( inputHandler );
-	}
-
-	@Override
-	protected void initGameAndGUI( final GameContainer container, final StateBasedGame game ) throws SlickException {
-		initNifty( container, game, new PlainSlickInputSystem() );
-		getNifty().gotoScreen( "start" );
 	}
 
 	@Override
@@ -133,6 +125,10 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 						} );
 				nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
 			}
+		}
+		if ( container.getInput().isKeyDown( Input.KEY_I ) ) {
+			Element inventory = nifty.getCurrentScreen().findElementByName( "inventory_layer" );
+			inventory.setVisible( !inventory.isVisible() );
 		}
 	}
 
@@ -169,7 +165,5 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 
 	@Override
 	protected void leaveState( final GameContainer container, final StateBasedGame arg1 ) throws SlickException {
-		container.getInput().removeKeyListener( inputHandler );
-		container.getInput().removeMouseListener( inputHandler );
 	}
 }

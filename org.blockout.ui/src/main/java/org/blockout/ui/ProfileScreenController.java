@@ -24,7 +24,15 @@ import de.lessvoid.nifty.controls.ListBox;
 import de.lessvoid.nifty.controls.ListBoxSelectionChangedEvent;
 import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.screen.ScreenController;
 
+/**
+ * {@link ScreenController} for handling the user input when choosing a player
+ * profile.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class ProfileScreenController implements StateBasedScreenController {
 
@@ -38,7 +46,6 @@ public class ProfileScreenController implements StateBasedScreenController {
 	private Screen					screen;
 	private Nifty					nifty;
 	private Player					currentSelectedPlayer;
-	private StateBasedGame			game;
 
 	@Inject
 	public ProfileScreenController(final PlayerManager playerManager, final LocalGameState gameState) {
@@ -138,6 +145,5 @@ public class ProfileScreenController implements StateBasedScreenController {
 
 	@Override
 	public void bindToGameState( final StateBasedGame game, final GameState state ) {
-		this.game = game;
 	}
 }

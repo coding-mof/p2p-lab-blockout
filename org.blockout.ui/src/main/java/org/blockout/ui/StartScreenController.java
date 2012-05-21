@@ -9,7 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.screen.ScreenController;
 
+/**
+ * {@link ScreenController} for the welcome screen.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 @Named
 public class StartScreenController implements StateBasedScreenController {
 
@@ -39,19 +46,13 @@ public class StartScreenController implements StateBasedScreenController {
 
 	@Override
 	public void onStartScreen() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void onEndScreen() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void bindToGameState( final StateBasedGame game, final GameState state ) {
-		// TODO Auto-generated method stub
-
 	}
 }

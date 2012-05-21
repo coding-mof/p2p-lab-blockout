@@ -1,5 +1,7 @@
 package org.blockout.world;
 
+import org.blockout.common.TileCoordinate;
+
 
 /**
  * 
@@ -8,10 +10,9 @@ package org.blockout.world;
 public interface IChunkLoader {
 	
 	/**
-	 * loading Chunk with the given coordinates
-	 * @param x coordinate of the Chunk
-	 * @param y coordinate of the Chunk
-	 * @return the Chunk with the given coordinates
+	 * 
+	 * @param coordinate coordinates the returned chunk should have
+	 * @return the loaded Chunk
 	 */
-	public Chunk loadChunk(int x, int y);
+	public Chunk loadChunk(TileCoordinate  coordinate);
 }
