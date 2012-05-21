@@ -91,6 +91,7 @@ public class TestServer {
 		Channel inner_channel = mock(Channel.class);
 		
 		when(ctx.getChannel()).thenReturn(inner_channel);
+		when(inner_channel.getPipeline()).thenReturn(pipeline);
 		
 		
 		this.server.addListener(listener);
