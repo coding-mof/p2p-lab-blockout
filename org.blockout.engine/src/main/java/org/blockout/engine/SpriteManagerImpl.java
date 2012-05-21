@@ -10,6 +10,11 @@ import org.newdawn.slick.Image;
 
 import com.google.common.base.Preconditions;
 
+import de.lessvoid.nifty.slick2d.render.image.ImageSlickRenderImage;
+import de.lessvoid.nifty.slick2d.render.image.SlickLoadImageException;
+import de.lessvoid.nifty.slick2d.render.image.SlickRenderImage;
+import de.lessvoid.nifty.slick2d.render.image.loader.SlickRenderImageLoader;
+
 /**
  * Implementation of a SpriteManager that provides access to the sprites of the
  * game and caches them
@@ -18,7 +23,7 @@ import com.google.common.base.Preconditions;
  * 
  */
 @Named
-public class SpriteManagerImpl implements ISpriteManager {
+public class SpriteManagerImpl implements ISpriteManager, SlickRenderImageLoader {
 
 	ISpriteSheet							spriteSheet;
 	SpriteMapping							spriteMapping;
@@ -88,6 +93,35 @@ public class SpriteManagerImpl implements ISpriteManager {
 		}
 
 		return sprite;
+	}
+	
+	/**
+	 * Load a sprite to use it in nifty GUI	 
+	 *
+	 * @throws NullPointerException
+	 * 		If filename is null
+	 * @throws SlickLoadImageException
+	 * 		If there is a problem while loading the image
+	 */
+	@Override
+	public SlickRenderImage loadImage( final String filename, final boolean filterLinear )
+			throws SlickLoadImageException {
+		Preconditions.checkNotNull(filename);
+		SpriteType type;
+		
+		try{
+			type = SpriteType.valueOf(filename);
+		}
+		catch (IllegalArgumentException e) {
+			throw new SlickLoadImageException("There is no image with the name '" + filename + "'");
+		}
+		
+		Image image = getSprite(type, true);
+		
+		if(null != image)
+			return new ImageSlickRenderImage(image);
+		
+		throw new SlickLoadImageException("Failed to load image with the name '" + filename + "'");
 	}
 
 	/**
