@@ -18,21 +18,21 @@ public class World implements IWorld, WorldAdapter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Tile getTile( final int x, final int y ) {
+	public Tile getTile(final int x, final int y) {
 		int chunkx, chunky;
 		chunkx = x / Chunk.CHUNK_SIZE;
 		chunky = y / Chunk.CHUNK_SIZE;
-		if ( x < 0 ) {
+		if (x < 0) {
 			chunkx = chunkx - 1;
 		}
-		if ( y < 0 ) {
+		if (y < 0) {
 			chunky = chunky - 1;
 		}
 		Chunk chunk;
-		if((chunk = view.get(new TileCoordinate(chunkx, chunky))) != null){
+		if ((chunk = view.get(new TileCoordinate(chunkx, chunky))) != null) {
 			return chunk.getTile(x, y);
 		}
-		if((chunk = managedChunks.get(new TileCoordinate(chunkx, chunky))) != null){
+		if ((chunk = managedChunks.get(new TileCoordinate(chunkx, chunky))) != null) {
 			return chunk.getTile(x, y);
 		}
 		return null;
@@ -42,15 +42,15 @@ public class World implements IWorld, WorldAdapter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public TileCoordinate findTile( final Entity entity ) {
+	public TileCoordinate findTile(final Entity entity) {
 		TileCoordinate coordinate = null;
 		for (Chunk c : view.values()) {
-			if((coordinate = c.getEntityCoordinate(entity)) != null){
+			if ((coordinate = c.getEntityCoordinate(entity)) != null) {
 				return coordinate;
 			}
 		}
 		for (Chunk c : managedChunks.values()) {
-			if((coordinate = c.getEntityCoordinate(entity)) != null){
+			if ((coordinate = c.getEntityCoordinate(entity)) != null) {
 				return coordinate;
 			}
 		}
@@ -61,22 +61,24 @@ public class World implements IWorld, WorldAdapter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setPlayerPosition( final Player p, final TileCoordinate coord ) {
-		int chunkx,chunky;
-		chunkx = coord.getX()/Chunk.CHUNK_SIZE;
-		chunky = coord.getY()/Chunk.CHUNK_SIZE;
-		if(!pos.equals(new TileCoordinate(chunkx, chunky))){
+	public void setPlayerPosition(final Player p, final TileCoordinate coord) {
+		int chunkx, chunky;
+		chunkx = coord.getX() / Chunk.CHUNK_SIZE;
+		chunky = coord.getY() / Chunk.CHUNK_SIZE;
+		if (!pos.equals(new TileCoordinate(chunkx, chunky))) {
 			view.get(pos).removeEntity(p);
 			pos = new TileCoordinate(chunkx, chunky);
-			
-			//request new chunks for buffer
-			for (int x = pos.getX()-1; x < pos.getX()+1; x++) {
-				for (int y = pos.getX()-1; y < pos.getY(); y++) {
-					if(!view.containsKey(new TileCoordinate(x, y))){
-						if(!managedChunks.containsKey(new TileCoordinate(x, y))){
+
+			// request new chunks for buffer
+			for (int x = pos.getX() - 1; x < pos.getX() + 1; x++) {
+				for (int y = pos.getX() - 1; y < pos.getY(); y++) {
+					if (!view.containsKey(new TileCoordinate(x, y))) {
+						if (!managedChunks
+								.containsKey(new TileCoordinate(x, y))) {
 							chunkManager.requestChunk(new TileCoordinate(x, y));
-						}else{
-							view.put(new TileCoordinate(x, y), managedChunks.get(new TileCoordinate(x, y)));
+						} else {
+							view.put(new TileCoordinate(x, y),
+									managedChunks.get(new TileCoordinate(x, y)));
 						}
 					}
 				}
@@ -94,20 +96,21 @@ public class World implements IWorld, WorldAdapter {
 		if (tmp != null) {
 			int x1 = tmp.getX() / Chunk.CHUNK_SIZE;
 			int y1 = tmp.getY() / Chunk.CHUNK_SIZE;
-			if(view.containsKey(new TileCoordinate(x1, y1))){
+			if (view.containsKey(new TileCoordinate(x1, y1))) {
 				view.get(new TileCoordinate(x1, y1)).removeEntity(e);
 			}
-			if(managedChunks.containsKey(new TileCoordinate(x1, y1))){
+			if (managedChunks.containsKey(new TileCoordinate(x1, y1))) {
 				managedChunks.get(new TileCoordinate(x1, y1)).removeEntity(e);
 			}
 		}
 		int x2 = coord.getX() / Chunk.CHUNK_SIZE;
 		int y2 = coord.getY() / Chunk.CHUNK_SIZE;
-		if(view.containsKey(new TileCoordinate(x2, y2))){
+		if (view.containsKey(new TileCoordinate(x2, y2))) {
 			view.get(new TileCoordinate(x2, y2)).setEntityCoordinate(e, x2, y2);
 		}
-		if(managedChunks.containsKey(new TileCoordinate(x2, y2))){
-			managedChunks.get(new TileCoordinate(x2, y2)).setEntityCoordinate(e, x2, y2);
+		if (managedChunks.containsKey(new TileCoordinate(x2, y2))) {
+			managedChunks.get(new TileCoordinate(x2, y2)).setEntityCoordinate(
+					e, x2, y2);
 		}
 	}
 
@@ -117,7 +120,7 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public void manageChunk(Chunk chunk) {
-		if(!managedChunks.containsKey(chunk.getPosition())){
+		if (!managedChunks.containsKey(chunk.getPosition())) {
 			managedChunks.put(chunk.getPosition(), chunk);
 		}
 	}
@@ -136,11 +139,30 @@ public class World implements IWorld, WorldAdapter {
 	@Override
 	public Chunk getChunk(TileCoordinate coord) {
 		Chunk c = managedChunks.get(coord);
-		if(c == null){
+		if (c == null) {
 			c = chunkGenerator.generateChunk(coord);
 			managedChunks.put(coord, c);
 		}
 		return c;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeEntity(Entity e) {
+		TileCoordinate c = findTile(e);
+		if (c != null) {
+			int chunkx,chunky;
+			chunkx = c.getX()%Chunk.CHUNK_SIZE;
+			chunky = c.getY()&Chunk.CHUNK_SIZE;
+			TileCoordinate chunkCoordinate = new TileCoordinate(chunkx, chunky);
+			if(view.containsKey(chunkCoordinate)){
+				view.get(chunkCoordinate).removeEntity(e);
+			}else{
+				managedChunks.get(chunkCoordinate).removeEntity(e);
+			}
+		}
 	}
 
 }

@@ -10,9 +10,11 @@ import org.blockout.common.TileCoordinate;
 public interface IChunkLoader {
 	
 	/**
+	 * Loads a predefined Chunk from an tmx-file
 	 * 
-	 * @param coordinate coordinates the returned chunk should have
-	 * @return the loaded Chunk
+	 * @param coordinate coordinates the Chunk should have
+	 * @param tmxFile the File from which the Chunk should be loaded
+	 * @return the desired Chunk
 	 */
-	public Chunk loadChunk(TileCoordinate  coordinate);
+	public Chunk loadChunk(TileCoordinate  coordinate, String tmxFile);
 }

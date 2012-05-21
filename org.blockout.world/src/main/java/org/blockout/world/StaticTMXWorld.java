@@ -102,4 +102,10 @@ public class StaticTMXWorld implements IWorld {
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public void removeEntity(Entity e) {
+		// TODO Auto-generated method stub
+		
+	}
 }
