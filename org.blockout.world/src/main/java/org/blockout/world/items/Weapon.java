@@ -1,5 +1,7 @@
 package org.blockout.world.items;
 
+import org.blockout.engine.SpriteType;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -30,5 +32,10 @@ public class Weapon implements Item {
 	@Override
 	public String toString() {
 		return "Weapon[strength=" + strength + "]";
+	}
+
+	@Override
+	public SpriteType getSpriteType() {
+		return SpriteType.staircase_up;
 	}
 }

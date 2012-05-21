@@ -1,6 +1,7 @@
 package org.blockout.world.entity;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import org.blockout.engine.SpriteType;
 
@@ -11,6 +12,8 @@ import org.blockout.engine.SpriteType;
  * 
  */
 public interface Entity extends Serializable {
+
+	public UUID getId();
 
 	public String getName();
 

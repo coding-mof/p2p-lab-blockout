@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import de.lessvoid.nifty.slick2d.loaders.SlickAddLoaderLocation;
+import de.lessvoid.nifty.slick2d.loaders.SlickRenderImageLoaders;
+
 /**
  * Main class for bootstrapping Spring's application context and thereby the
  * whole game.
@@ -29,18 +32,8 @@ public class Main {
 
 			Log.setLogSystem( new SLF4JLogSystem() );
 			AppGameContainer app = context.getBean( AppGameContainer.class );
-			//
-			// SlickRenderImageLoaders.getInstance().addLoader( new
-			// SlickRenderImageLoader() {
-			//
-			// @Override
-			// public SlickRenderImage loadImage( final String filename, final
-			// boolean filterLinear )
-			// throws SlickLoadImageException {
-			// // TODO Auto-generated method stub
-			// return null;
-			// }
-			// }, SlickAddLoaderLocation.first );
+
+			SlickRenderImageLoaders.getInstance().loadDefaultLoaders( SlickAddLoaderLocation.last );
 
 			app.setDisplayMode( 1024, 768, false );
 			app.setAlwaysRender( true );

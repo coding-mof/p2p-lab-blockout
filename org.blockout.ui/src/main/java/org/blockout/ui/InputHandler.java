@@ -14,6 +14,7 @@ import org.blockout.world.event.AttackEvent;
 import org.blockout.world.event.CrateOpenedEvent;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
+import org.bushe.swing.event.EventTopicSubscriber;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.InputListener;
@@ -25,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.controls.Button;
+import de.lessvoid.nifty.controls.ButtonClickedEvent;
+import de.lessvoid.nifty.elements.Element;
 
 /**
  * This class is responsible for converting user interactions to {@link IEvent}s
@@ -50,6 +54,8 @@ public class InputHandler implements InputListener {
 	protected ISpriteManager	spriteManager;
 	protected Nifty				nifty;
 
+	private Element				exitPopup;
+
 	@Inject
 	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
 			final PlayerMoveHandler playerController, final IStateMachine stateMachine, final IWorld world,
@@ -73,16 +79,28 @@ public class InputHandler implements InputListener {
 
 	@Override
 	public void keyReleased( final int arg0, final char arg1 ) {
+		if ( arg0 == Input.KEY_I ) {
+			Element inventory = nifty.getCurrentScreen().findElementByName( "inventory_layer" );
+			inventory.setVisible( !inventory.isVisible() );
+		}
 
-		// if ( arg0 == Input.KEY_F ) {
-		// camera.lock();
-		// if ( camera.getWidth() == 1024 ) {
-		// camera.setBounds( 512, camera.getHeight() );
-		// } else {
-		// camera.setBounds( 1024, camera.getHeight() );
-		// }
-		// camera.unlock();
-		// }
+		if ( arg0 == Input.KEY_ESCAPE ) {
+			if ( exitPopup == null ) {
+				exitPopup = nifty.createPopup( "popupMenu" );
+				Button btnReturnToGame = exitPopup.findNiftyControl( "btnReturnToGame", Button.class );
+				nifty.subscribe( nifty.getCurrentScreen(), btnReturnToGame.getId(), ButtonClickedEvent.class,
+						new EventTopicSubscriber<ButtonClickedEvent>() {
+
+							@Override
+							public void onEvent( final String arg0, final ButtonClickedEvent arg1 ) {
+								System.out.println( "Closing popup..." );
+								nifty.closePopup( exitPopup.getId() );
+								exitPopup = null;
+							}
+						} );
+				nifty.showPopup( nifty.getCurrentScreen(), exitPopup.getId(), null );
+			}
+		}
 	}
 
 	private static enum MouseCursor {
@@ -133,7 +151,6 @@ public class InputHandler implements InputListener {
 
 			// Handle Attacks
 			Tile tile = world.getTile( tileX, tileY );
-			// && areNeighbours( tileX, tileY, centerX, centerY )
 			if ( tile != null && tile.getEntityOnTile() instanceof Actor ) {
 				stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile() ) );
 				return;

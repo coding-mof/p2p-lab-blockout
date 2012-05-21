@@ -1,5 +1,7 @@
 package org.blockout.world.items;
 
+import org.blockout.engine.SpriteType;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -32,4 +34,10 @@ public class Helm implements Item {
 	public String toString() {
 		return "Helm[protection=" + protection + "]";
 	}
+
+	@Override
+	public SpriteType getSpriteType() {
+		return SpriteType.blue_jelly;
+	}
+
 }

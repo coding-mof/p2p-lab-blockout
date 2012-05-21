@@ -15,6 +15,7 @@ public class Player extends Actor {
 	private static final long	serialVersionUID	= 8675297903080506894L;
 	protected int				experience;
 	protected Inventory			inventory;
+	protected Equipment			equipment;
 
 	/**
 	 * Constructs a new player with the given name, full health, no experience
@@ -28,6 +29,7 @@ public class Player extends Actor {
 	public Player(final String name) {
 		super( name );
 		inventory = new Inventory();
+		equipment = new Equipment();
 	}
 
 	private Player() {
@@ -37,6 +39,10 @@ public class Player extends Actor {
 
 	public Inventory getInventory() {
 		return inventory;
+	}
+
+	public Equipment getEquipment() {
+		return equipment;
 	}
 
 	public int getExperience() {

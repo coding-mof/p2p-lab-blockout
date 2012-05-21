@@ -2,6 +2,8 @@ package org.blockout.world.items;
 
 import java.io.Serializable;
 
+import org.blockout.engine.SpriteType;
+
 /**
  * Common interface for all items a player can carry.
  * 
@@ -15,4 +17,11 @@ public interface Item extends Serializable {
 	 * @return A human readable name of the item.
 	 */
 	public String getName();
+
+	/**
+	 * Returns the type of sprite used to render this item.
+	 * 
+	 * @return The type of sprite used to render this item.
+	 */
+	public SpriteType getSpriteType();
 }

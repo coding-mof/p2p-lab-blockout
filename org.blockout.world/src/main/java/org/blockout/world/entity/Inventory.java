@@ -1,5 +1,7 @@
 package org.blockout.world.entity;
 
+import java.io.Serializable;
+
 import org.blockout.world.items.Item;
 
 import com.google.common.base.Preconditions;
@@ -10,8 +12,10 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * 
  */
-public class Inventory {
-	protected Item[][]	items;
+public class Inventory implements Serializable {
+
+	private static final long	serialVersionUID	= 8726137167924141445L;
+	protected Item[][]			items;
 
 	/**
 	 * Creates a new empty inventory.
