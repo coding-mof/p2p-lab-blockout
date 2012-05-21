@@ -114,7 +114,7 @@ public class PlayerMoveHandler implements IEventHandler {
 			return;
 		}
 
-		audioManager.getSound( AudioType.sfx_stonestep ).play();
+		audioManager.getSound( AudioType.sfx_stonestep1 ).play();
 
 		PlayerMoveEvent pme = (PlayerMoveEvent) event;
 		synchronized ( posLock ) {
