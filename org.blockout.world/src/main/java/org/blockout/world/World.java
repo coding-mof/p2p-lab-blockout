@@ -2,17 +2,29 @@ package org.blockout.world;
 
 import java.util.Hashtable;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
 
+/**
+ * Implementation of the {@link IWorld} interface with optional {@link WorldAdapter}
+ * 
+ * This implementation is based on {@link Chunk}s
+ * 
+ * @author key3
+ *
+ */
+@Named
 public class World implements IWorld, WorldAdapter {
 
 	private TileCoordinate 						pos;
 	private Hashtable<TileCoordinate, Chunk>	view;
 	private Hashtable<TileCoordinate, Chunk> 	managedChunks;
-	private IChunkManager						chunkManager;
-	private IChunkGenerator						chunkGenerator;
+	@Inject private IChunkManager				chunkManager;
+	@Inject private IChunkGenerator				chunkGenerator;
 
 	/**
 	 * {@inheritDoc}

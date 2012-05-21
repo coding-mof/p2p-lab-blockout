@@ -1,10 +1,14 @@
 package org.blockout.world;
 
+import java.util.Random;
+
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.SpriteMapping;
 import org.blockout.engine.SpriteType;
+import org.blockout.world.entity.Crate;
+import org.blockout.world.entity.Zombie;
 
 /**
  * 
@@ -29,6 +33,38 @@ public class BasicChunkGenerator implements IChunkGenerator{
 				tiles[i][j] = new Tile(mapping.getSpriteId(SpriteType.stoneground));
 			}
 		}
+		Random r = new Random();
+		
+		int mobcount = r.nextInt(20)+1;
+		int chestCount = r.nextInt(10)+1;
+		for (int i = 0; i < mobcount; i++) {
+			boolean finished = false;
+			while (!finished) {
+				int x = r.nextInt(Chunk.CHUNK_SIZE);
+				int y = r.nextInt(Chunk.CHUNK_SIZE);
+				
+				if(tiles[x][y].getHeight() == Tile.GROUND_HEIGHT && tiles[x][y].getEntityOnTile() == null){
+					tiles[x][y]= new Tile(tiles[x][y].getTileType(), new Zombie(5));
+					finished = true;
+				}
+				
+			}
+		}
+		
+		for (int i = 0; i < chestCount; i++) {
+			boolean finished = false;
+			while (!finished) {
+				int x = r.nextInt(Chunk.CHUNK_SIZE);
+				int y = r.nextInt(Chunk.CHUNK_SIZE);
+				
+				if(tiles[x][y].getHeight() == Tile.GROUND_HEIGHT && tiles[x][y].getEntityOnTile() == null){
+					tiles[x][y]= new Tile(tiles[x][y].getTileType(), new Crate());
+					finished = true;
+				}
+				
+			}
+		}
+		
 		return new Chunk(pos, tiles);
 	}
 
