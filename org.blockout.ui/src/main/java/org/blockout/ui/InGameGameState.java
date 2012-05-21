@@ -35,11 +35,10 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	private Label							lblXP;
 	private Label							lblLevel;
 
-	protected final IWorldRenderer			worldRenderer;
-	protected final LocalGameState			gameState;
-	protected final InputHandler			inputHandler;
-	protected final Camera					camera;
-	protected final PlayerMoveHandler		playerController;
+	private final IWorldRenderer			worldRenderer;
+	private final LocalGameState			gameState;
+	private final InputHandler				inputHandler;
+	private final PlayerMoveHandler			playerController;
 
 	private final HealthRenderer			healthRenderer;
 	private final IAudioManager				audioManager;
@@ -53,7 +52,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		super( inputHandler );
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
-		this.camera = camera;
 		this.worldRenderer = worldRenderer;
 		this.playerController = playerController;
 		this.audioManager = audioManager;

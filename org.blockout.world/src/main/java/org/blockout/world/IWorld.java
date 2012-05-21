@@ -63,4 +63,13 @@ public interface IWorld {
 	 * @param coord the new coordinates of he player
 	 */
 	public void setEnityPosition( Entity e, TileCoordinate coord );
+	
+	/**
+	 *	Removes the given entity from the World
+	 *	no actions will be taken i the given entity is 
+	 *	not found within the world
+	 *
+	 * @param e the entity which should be moved
+	 */
+	public void removeEntity( Entity e);
 }

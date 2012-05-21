@@ -54,6 +54,26 @@ public class Inventory implements Serializable {
 	}
 
 	/**
+	 * Stores the item in the first free slot in the inventory. Returns whether
+	 * there was a free slot to store.
+	 * 
+	 * @param item
+	 *            The item to store
+	 * @return Whether there was a slot to store the item in.
+	 */
+	public boolean storeItem( final Item item ) {
+		for ( int x = 0; x < 5; x++ ) {
+			for ( int y = 0; y < 6; y++ ) {
+				if ( items[x][y] == null ) {
+					items[x][y] = item;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Returns the item at a given position.
 	 * 
 	 * @param x

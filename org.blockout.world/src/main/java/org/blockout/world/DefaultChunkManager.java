@@ -1,5 +1,6 @@
 package org.blockout.world;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
@@ -15,9 +16,13 @@ public class DefaultChunkManager implements IChunkManager {
 
 	private IStateMachine						stateMachine;
 	
-	private WorldAdapter 						worldAdapter;
+	@Inject private WorldAdapter 				worldAdapter;
 	
-	private BasicChunkGenerator						chunkGenerator;
+	private IChunkGenerator				chunkGenerator;
+	
+	public DefaultChunkManager(){
+		chunkGenerator = new BasicChunkGenerator();
+	}
 
 	@Override
 	public void init( final IStateMachine stateMachine ) {
