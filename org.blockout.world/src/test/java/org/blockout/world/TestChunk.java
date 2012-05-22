@@ -3,6 +3,16 @@ package org.blockout.world;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import javassist.bytecode.ByteArray;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
@@ -52,5 +62,25 @@ public class TestChunk {
 		chunk.removeEntity(e);
 		assertNull(chunk.getEntityCoordinate(e));
 		assertNull(chunk.getTile(50, 5).getEntityOnTile());
+	}
+	
+	@Test
+	public void serielize() throws IOException, ClassNotFoundException{
+		Zombie e = new Zombie(5);
+		chunk.setEntityCoordinate(e, 0, 0);
+		ByteArrayOutputStream chars = new ByteArrayOutputStream();
+		ObjectOutputStream out = new ObjectOutputStream(chars);
+		out.writeObject(chunk);
+		ByteArrayInputStream charsIn = new ByteArrayInputStream(chars.toByteArray());
+		ObjectInputStream in = new ObjectInputStream(charsIn);
+		Chunk test = (Chunk)in.readObject();
+		for (int i = 0; i < Chunk.CHUNK_SIZE; i++) {
+			for (int j = 0; j < Chunk.CHUNK_SIZE; j++) {
+				assertEquals(chunk.getTile(i, j).getEntityOnTile(), test.getTile(i, j).getEntityOnTile());
+				assertEquals(chunk.getTile(i, j).getHeight(), test.getTile(i, j).getHeight());
+				assertEquals(chunk.getTile(i, j).getTileType(), test.getTile(i, j).getTileType());
+			}
+		}
+		assertEquals(chunk.getEntityCoordinate(e), test.getEntityCoordinate(e));
 	}
 }

@@ -4,6 +4,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.network.INetworkEvent;
+import org.blockout.network.INetworkInterface;
+import org.blockout.network.NetworkInterface;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 
@@ -18,11 +21,7 @@ public class DefaultChunkManager implements IChunkManager {
 	
 	@Inject private WorldAdapter 				worldAdapter;
 	
-	private IChunkGenerator				chunkGenerator;
-	
-	public DefaultChunkManager(){
-		chunkGenerator = new BasicChunkGenerator();
-	}
+	@Inject private INetworkInterface			network;
 
 	@Override
 	public void init( final IStateMachine stateMachine ) {
@@ -60,12 +59,19 @@ public class DefaultChunkManager implements IChunkManager {
 	 */
 	@Override
 	public void requestChunk( final TileCoordinate position ) {
+		worldAdapter.getChunk(position);
 		//TODO networkrequest
 	}
 
 	@Override
 	public void stopUpdating(TileCoordinate position) {
 		// TODO stop networkrequest
+		
+	}
+
+	@Override
+	public void notify(INetworkEvent<?> event) {
+		// TODO Auto-generated method stub
 		
 	}
 }
