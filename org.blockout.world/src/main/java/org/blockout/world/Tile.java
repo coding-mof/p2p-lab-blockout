@@ -1,5 +1,7 @@
 package org.blockout.world;
 
+import java.io.Serializable;
+
 import org.blockout.world.entity.Entity;
 
 /**
@@ -8,7 +10,7 @@ import org.blockout.world.entity.Entity;
  * @author Marc-Christian Schulze
  * 
  */
-public class Tile {
+public class Tile implements Serializable {
 	public static final int	GROUND_HEIGHT	= 0;
 	public static final int	WALL_HEIGHT		= 3;
 
