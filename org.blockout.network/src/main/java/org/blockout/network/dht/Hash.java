@@ -2,6 +2,8 @@ package org.blockout.network.dht;
 
 import java.net.InetSocketAddress;
 
+import org.blockout.common.TileCoordinate;
+
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -18,6 +20,12 @@ public class Hash implements IHash {
 	
 	public Hash(String hash){
 		value = hash;
+	}
+	
+	public Hash(TileCoordinate coord){
+		HashFunction hf = Hashing.sha1();
+		HashCode hash = hf.hashString(String.valueOf(coord.hashCode()));
+		value = hash.toString();
 	}
 	
 	@Override

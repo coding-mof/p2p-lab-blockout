@@ -1,35 +1,16 @@
 package org.blockout.network.dht.chord;
 
-import java.net.InetSocketAddress;
 import java.util.Hashtable;
-import java.util.concurrent.Executors;
-
 import org.blockout.network.DiscoveryListener;
 import org.blockout.network.INodeAddress;
-import org.blockout.network.MessagePassing;
 import org.blockout.network.NodeDiscovery;
 import org.blockout.network.NodeInfo;
 import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.message.IMessage;
 import org.blockout.network.message.IMessagePassing;
-import org.blockout.network.message.IMessageReceiver;
 import org.blockout.network.message.MessageReceiver;
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.socket.DatagramChannel;
-import org.jboss.netty.channel.socket.DatagramChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
-import org.jboss.netty.util.CharsetUtil;
+
 
 public class Chord extends MessageReceiver implements IDistributedHashTable, DiscoveryListener {
 	private IMessagePassing mp;
