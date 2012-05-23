@@ -108,4 +108,10 @@ public class StaticTMXWorld implements IWorld {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void init(Player p) {
+		// TODO Auto-generated method stub
+		
+	}
 }

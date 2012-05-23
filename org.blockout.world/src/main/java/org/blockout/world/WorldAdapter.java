@@ -34,4 +34,11 @@ public interface WorldAdapter {
 	 * @return the Chunk at the given coordinates
 	 */
 	public Chunk getChunk(TileCoordinate coord);
+	
+	/**
+	 * used to deliver a requested {@link Chunk} to the {@link WorldAdapter}  
+	 * 
+	 * @param chunk the chunk that should be delivered
+	 */
+	public void responseChunk(Chunk chunk);
 }

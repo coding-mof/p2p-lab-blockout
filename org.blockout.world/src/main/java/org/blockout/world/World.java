@@ -1,6 +1,7 @@
 package org.blockout.world;
 
 import java.util.Hashtable;
+import java.util.Random;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -24,7 +25,13 @@ public class World implements IWorld, WorldAdapter {
 	private Hashtable<TileCoordinate, Chunk>	view;
 	private Hashtable<TileCoordinate, Chunk> 	managedChunks;
 	@Inject private IChunkManager				chunkManager;
-	@Inject private IChunkGenerator				chunkGenerator;
+	private IChunkGenerator						chunkGenerator;
+	
+	public World() {
+		view = new Hashtable<TileCoordinate, Chunk>();
+		managedChunks = new Hashtable<TileCoordinate, Chunk>();
+		chunkGenerator = new BasicChunkGenerator();
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -80,21 +87,8 @@ public class World implements IWorld, WorldAdapter {
 		if (!pos.equals(new TileCoordinate(chunkx, chunky))) {
 			view.get(pos).removeEntity(p);
 			pos = new TileCoordinate(chunkx, chunky);
-
-			// request new chunks for buffer
-			for (int x = pos.getX() - 1; x < pos.getX() + 1; x++) {
-				for (int y = pos.getX() - 1; y < pos.getY(); y++) {
-					if (!view.containsKey(new TileCoordinate(x, y))) {
-						if (!managedChunks
-								.containsKey(new TileCoordinate(x, y))) {
-							chunkManager.requestChunk(new TileCoordinate(x, y));
-						} else {
-							view.put(new TileCoordinate(x, y),
-									managedChunks.get(new TileCoordinate(x, y)));
-						}
-					}
-				}
-			}
+			cleanView();
+			updateView();
 		}
 		view.get(pos).setEntityCoordinate(p, coord.getX(), coord.getY());
 	}
@@ -103,7 +97,7 @@ public class World implements IWorld, WorldAdapter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void setEnityPosition(Entity e, TileCoordinate coord) {
+	public void setEnityPosition(final Entity e, final TileCoordinate coord) {
 		TileCoordinate tmp = findTile(e);
 		if (tmp != null) {
 			int x1 = tmp.getX() / Chunk.CHUNK_SIZE;
@@ -131,7 +125,7 @@ public class World implements IWorld, WorldAdapter {
 	 * 
 	 */
 	@Override
-	public void manageChunk(Chunk chunk) {
+	public void manageChunk(final Chunk chunk) {
 		if (!managedChunks.containsKey(chunk.getPosition())) {
 			managedChunks.put(chunk.getPosition(), chunk);
 		}
@@ -141,7 +135,7 @@ public class World implements IWorld, WorldAdapter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Chunk unmanageChunk(TileCoordinate coord) {
+	public Chunk unmanageChunk(final TileCoordinate coord) {
 		return managedChunks.remove(coord);
 	}
 
@@ -149,7 +143,7 @@ public class World implements IWorld, WorldAdapter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Chunk getChunk(TileCoordinate coord) {
+	public Chunk getChunk(final TileCoordinate coord) {
 		Chunk c = managedChunks.get(coord);
 		if (c == null) {
 			c = chunkGenerator.generateChunk(coord);
@@ -162,17 +156,88 @@ public class World implements IWorld, WorldAdapter {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void removeEntity(Entity e) {
+	public void removeEntity(final Entity e) {
 		TileCoordinate c = findTile(e);
 		if (c != null) {
-			int chunkx,chunky;
-			chunkx = c.getX()%Chunk.CHUNK_SIZE;
-			chunky = c.getY()&Chunk.CHUNK_SIZE;
+			int chunkx, chunky;
+			chunkx = c.getX() % Chunk.CHUNK_SIZE;
+			chunky = c.getY() & Chunk.CHUNK_SIZE;
 			TileCoordinate chunkCoordinate = new TileCoordinate(chunkx, chunky);
-			if(view.containsKey(chunkCoordinate)){
+			if (view.containsKey(chunkCoordinate)) {
 				view.get(chunkCoordinate).removeEntity(e);
-			}else{
+			} else {
 				managedChunks.get(chunkCoordinate).removeEntity(e);
+			}
+		}
+	}
+
+	@Override
+	public void responseChunk(final Chunk chunk) {
+		int x, y;
+		x = Math.abs(chunk.getX() - pos.getX());
+		y = Math.abs(chunk.getY() - pos.getY());
+		if (x <= 1 && y <= 1) {
+			view.put(chunk.getPosition(), chunk);
+		}
+	}
+
+	@Override
+	public void init(final Player p) {
+		// TODO networking version!
+		Chunk c;
+		if (managedChunks.size() == 0) {
+			c = chunkGenerator.generateChunk(new TileCoordinate(0, 0));
+			managedChunks.put(c.getPosition(), c);
+			view.put(c.getPosition(), c);
+			pos = new TileCoordinate(0, 0);
+		} else {
+			c = managedChunks.get(managedChunks.keys().nextElement());
+			view.put(c.getPosition(), c);
+			pos = c.getPosition();
+		}
+		Random r = new Random();
+		boolean set = false;
+		while (!set) {
+			final int x = r.nextInt(Chunk.CHUNK_SIZE);
+			final int y = r.nextInt(Chunk.CHUNK_SIZE);
+			if (c.getTile(x, y).getEntityOnTile() == null
+					&& c.getTile(x, y).getHeight() == Tile.GROUND_HEIGHT) {
+				c.setEntityCoordinate(p, x, y);
+				set = true;
+			}
+		}
+		updateView();
+	}
+
+	/**
+	 * method will request all chunks
+	 */
+	private void updateView() {
+		for (int x = pos.getX() - 1; x < pos.getX() + 1; x++) {
+			for (int y = pos.getX() - 1; y < pos.getY(); y++) {
+				if (!view.containsKey(new TileCoordinate(x, y))) {
+					if (!managedChunks.containsKey(new TileCoordinate(x, y))) {
+						chunkManager.requestChunk(new TileCoordinate(x, y));
+					} else {
+						view.put(new TileCoordinate(x, y),
+								managedChunks.get(new TileCoordinate(x, y)));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * method will remove all chunks no longer needed to buffer
+	 */
+	private void cleanView() {
+		int x, y;
+		for (Chunk chunk : view.values()) {
+			x = Math.abs(pos.getX() - chunk.getX());
+			y = Math.abs(pos.getY() - chunk.getY());
+			if (x > 1 || y > 1) {
+				view.remove(chunk.getPosition());
+				chunkManager.stopUpdating(chunk.getPosition());
 			}
 		}
 	}
