@@ -10,7 +10,7 @@ import org.blockout.world.state.IStateMachineListener;
  * 
  * @author Konstantin Ramig
  */
-public interface IChunkManager extends IStateMachineListener, INetworkListener {
+public interface IChunkManager{
 
 	/**
 	 * Will send a request using the Network for the Chunk with the given position

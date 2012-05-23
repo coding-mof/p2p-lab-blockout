@@ -72,4 +72,11 @@ public interface IWorld {
 	 * @param e the entity which should be moved
 	 */
 	public void removeEntity( Entity e);
+	
+	/**
+	 * Will position the given Player within the World
+	 *  
+	 * @param p
+	 */
+	public void init(Player p);
 }
