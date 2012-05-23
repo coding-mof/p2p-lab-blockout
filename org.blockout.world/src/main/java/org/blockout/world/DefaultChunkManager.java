@@ -3,9 +3,6 @@ package org.blockout.world;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.blockout.common.TileCoordinate;
-import org.blockout.network.INetworkEvent;
-import org.blockout.network.INetworkInterface;
-import org.blockout.network.INetworkListener;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
 import org.blockout.world.state.IStateMachineListener;
@@ -15,13 +12,13 @@ import org.blockout.world.state.IStateMachineListener;
  * @author Konstantin Ramig
  */
 @Named
-public class DefaultChunkManager implements IChunkManager, IStateMachineListener, INetworkListener {
+public class DefaultChunkManager implements IChunkManager, IStateMachineListener {
 
 	private IStateMachine						stateMachine;
 	
 	@Inject private WorldAdapter 				worldAdapter;
 	
-	@Inject private INetworkInterface			network;
+	//@Inject private INetworkInterface			network;
 
 	@Override
 	public void init( final IStateMachine stateMachine ) {
@@ -68,8 +65,4 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		// TODO stop networkrequest
 	}
 
-	@Override
-	public void notify(INetworkEvent<?> event) {
-		// TODO Auto-generated method stub		
-	}
 }
