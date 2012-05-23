@@ -1,33 +1,41 @@
 package org.blockout.network;
 
-import java.net.InetAddress;
-import java.util.UUID;
+import java.net.InetSocketAddress;
 
-/**
- * This class encapsulates information about a node in the network.
- * 
- * @author Marc-Christian Schulze
- * 
- */
-public class NodeInfo {
-	protected UUID			nodeId;
-	protected InetAddress	inetAddress;
+import org.blockout.network.dht.Hash;
+import org.blockout.network.dht.IHash;
 
-	public NodeInfo(final InetAddress inetAddress) {
-		super();
-		this.inetAddress = inetAddress;
+public class NodeInfo implements INodeAddress {
+	private static final long serialVersionUID = -8306565426791526847L;
+	private InetSocketAddress address;
+	private Hash nodeId;
+	
+	public NodeInfo(InetSocketAddress sockAddress){
+		this.address = sockAddress;
+		this.nodeId = new Hash(this.address);
+	}
+	
+	public NodeInfo(Hash nodeId){
+		this.nodeId = nodeId;
+	}
+	
+	public NodeInfo(String hostName, Integer port) {
+		this.address = new InetSocketAddress(hostName, port);
+		this.nodeId = new Hash(this.address);
 	}
 
-	public UUID getNodeId() {
-		return nodeId;
+	@Override
+	public IHash getNodeId() {
+		return this.nodeId;
 	}
 
-	public InetAddress getInetAddress() {
-		return inetAddress;
+	@Override
+	public InetSocketAddress getInetAddress() {
+		return this.address;
 	}
 
 	@Override
 	public String toString() {
-		return "Node[address=" + inetAddress + "]";
+		return "Node[address=" + address + ", hash="+nodeId+"]";
 	}
 }
