@@ -5,17 +5,12 @@ import static org.junit.Assert.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.CharArrayReader;
-import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import javassist.bytecode.ByteArray;
-
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
-import org.blockout.world.entity.Player;
 import org.blockout.world.entity.Zombie;
 import org.junit.Before;
 import org.junit.Test;

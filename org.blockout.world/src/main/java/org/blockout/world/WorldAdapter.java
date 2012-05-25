@@ -41,4 +41,11 @@ public interface WorldAdapter {
 	 * @param chunk the chunk that should be delivered
 	 */
 	public void responseChunk(Chunk chunk);
+	
+	/**
+	 * method will set the responsible {@link IChunkManager} for this World
+	 * 
+	 * @param chunkManager
+	 */
+	public void setManager(IChunkManager chunkManager);
 }

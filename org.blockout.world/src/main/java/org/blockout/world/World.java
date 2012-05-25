@@ -38,20 +38,12 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public Tile getTile(final int x, final int y) {
-		int chunkx, chunky;
-		chunkx = x / Chunk.CHUNK_SIZE;
-		chunky = y / Chunk.CHUNK_SIZE;
-		if (x < 0) {
-			chunkx = chunkx - 1;
-		}
-		if (y < 0) {
-			chunky = chunky - 1;
-		}
+		TileCoordinate coordinate = Chunk.containingCunk(new TileCoordinate(x, y));
 		Chunk chunk;
-		if ((chunk = view.get(new TileCoordinate(chunkx, chunky))) != null) {
+		if ((chunk = view.get(coordinate)) != null) {
 			return chunk.getTile(x, y);
 		}
-		if ((chunk = managedChunks.get(new TileCoordinate(chunkx, chunky))) != null) {
+		if ((chunk = managedChunks.get(coordinate)) != null) {
 			return chunk.getTile(x, y);
 		}
 		return null;
@@ -100,23 +92,21 @@ public class World implements IWorld, WorldAdapter {
 	public void setEnityPosition(final Entity e, final TileCoordinate coord) {
 		TileCoordinate tmp = findTile(e);
 		if (tmp != null) {
-			int x1 = tmp.getX() / Chunk.CHUNK_SIZE;
-			int y1 = tmp.getY() / Chunk.CHUNK_SIZE;
-			if (view.containsKey(new TileCoordinate(x1, y1))) {
-				view.get(new TileCoordinate(x1, y1)).removeEntity(e);
+			tmp = Chunk.containingCunk(tmp);
+			if (view.containsKey(tmp)) {
+				view.get(tmp).removeEntity(e);
 			}
-			if (managedChunks.containsKey(new TileCoordinate(x1, y1))) {
-				managedChunks.get(new TileCoordinate(x1, y1)).removeEntity(e);
+			if (managedChunks.containsKey(tmp)) {
+				managedChunks.get(tmp).removeEntity(e);
 			}
 		}
-		int x2 = coord.getX() / Chunk.CHUNK_SIZE;
-		int y2 = coord.getY() / Chunk.CHUNK_SIZE;
-		if (view.containsKey(new TileCoordinate(x2, y2))) {
-			view.get(new TileCoordinate(x2, y2)).setEntityCoordinate(e, x2, y2);
+		tmp = Chunk.containingCunk(coord);
+		if (view.containsKey(tmp)) {
+			view.get(tmp).setEntityCoordinate(e, coord.getX(), coord.getY());
 		}
-		if (managedChunks.containsKey(new TileCoordinate(x2, y2))) {
-			managedChunks.get(new TileCoordinate(x2, y2)).setEntityCoordinate(
-					e, x2, y2);
+		if (managedChunks.containsKey(tmp)) {
+			managedChunks.get(tmp).setEntityCoordinate(
+					e, coord.getX(), coord.getY());
 		}
 	}
 
@@ -159,10 +149,7 @@ public class World implements IWorld, WorldAdapter {
 	public void removeEntity(final Entity e) {
 		TileCoordinate c = findTile(e);
 		if (c != null) {
-			int chunkx, chunky;
-			chunkx = c.getX() % Chunk.CHUNK_SIZE;
-			chunky = c.getY() & Chunk.CHUNK_SIZE;
-			TileCoordinate chunkCoordinate = new TileCoordinate(chunkx, chunky);
+			TileCoordinate chunkCoordinate = Chunk.containingCunk(c);
 			if (view.containsKey(chunkCoordinate)) {
 				view.get(chunkCoordinate).removeEntity(e);
 			} else {
@@ -171,16 +158,26 @@ public class World implements IWorld, WorldAdapter {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void responseChunk(final Chunk chunk) {
 		int x, y;
 		x = Math.abs(chunk.getX() - pos.getX());
 		y = Math.abs(chunk.getY() - pos.getY());
 		if (x <= 1 && y <= 1) {
-			view.put(chunk.getPosition(), chunk);
+			if(managedChunks.containsKey(chunk.getPosition())){
+				view.put(chunk.getPosition(), managedChunks.get(chunk.getPosition()));
+			}else{
+				view.put(chunk.getPosition(), chunk);
+			}
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void init(final Player p) {
 		// TODO networking version!
@@ -213,8 +210,8 @@ public class World implements IWorld, WorldAdapter {
 	 * method will request all chunks
 	 */
 	private void updateView() {
-		for (int x = pos.getX() - 1; x < pos.getX() + 1; x++) {
-			for (int y = pos.getX() - 1; y < pos.getY(); y++) {
+		for (int x = pos.getX() - 1; x <= pos.getX() + 1; x++) {
+			for (int y = pos.getX() - 1; y <= pos.getY()+1; y++) {
 				if (!view.containsKey(new TileCoordinate(x, y))) {
 					if (!managedChunks.containsKey(new TileCoordinate(x, y))) {
 						chunkManager.requestChunk(new TileCoordinate(x, y));
@@ -240,6 +237,14 @@ public class World implements IWorld, WorldAdapter {
 				chunkManager.stopUpdating(chunk.getPosition());
 			}
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setManager(IChunkManager chunkManager) {
+		this.chunkManager = chunkManager;
 	}
 
 }
