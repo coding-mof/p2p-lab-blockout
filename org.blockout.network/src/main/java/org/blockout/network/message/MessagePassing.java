@@ -1,4 +1,4 @@
-package org.blockout.network;
+package org.blockout.network.message;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
@@ -12,13 +12,10 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.network.INodeAddress;
+import org.blockout.network.NodeInfo;
 import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.message.IMessage;
-import org.blockout.network.message.IMessageEnvelope;
-import org.blockout.network.message.IMessagePassing;
-import org.blockout.network.message.IMessageReceiver;
-import org.blockout.network.message.MessageEnvelope;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
