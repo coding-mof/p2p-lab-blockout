@@ -8,7 +8,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
@@ -17,7 +19,6 @@ import org.blockout.network.message.IMessageEnvelope;
 import org.blockout.network.message.IMessagePassing;
 import org.blockout.network.message.IMessageReceiver;
 import org.blockout.network.message.MessageEnvelope;
-import org.blockout.network.message.MessageReceiver;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -36,9 +37,10 @@ import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
 import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
+@Named
 public class MessagePassing extends SimpleChannelUpstreamHandler implements IMessagePassing{
 	public InetSocketAddress address;
 	public INodeAddress nodeAddress;
@@ -49,6 +51,7 @@ public class MessagePassing extends SimpleChannelUpstreamHandler implements IMes
 	private ChannelPipelineFactory pipelinefactory;
 	private ClientBootstrap clientBootstrap;
 	
+	@Inject
 	public MessagePassing(IDistributedHashTable dht){
 		this.filtredReceivers = HashMultimap.create();
 		this.channelRegister = new Hashtable<IHash, Channel>();
@@ -63,6 +66,7 @@ public class MessagePassing extends SimpleChannelUpstreamHandler implements IMes
 		final MessagePassing that = this;
 		// Set up the pipeline factory.
 		pipelinefactory = new ChannelPipelineFactory() {
+			@Override
 			public ChannelPipeline getPipeline() throws Exception {
 				return Channels.pipeline(
 						new ObjectEncoder(),
@@ -100,9 +104,23 @@ public class MessagePassing extends SimpleChannelUpstreamHandler implements IMes
 		this.address = (InetSocketAddress) serverChannel.getLocalAddress();		
 		this.nodeAddress = new NodeInfo(this.address);
 		
-		this.dht.setUp(this, this.nodeAddress);
+		Runnable future = new Runnable(){
+			@Override
+			public void run() {
+				that.dht.setUp(that, that.nodeAddress);	
+			}
+		};
+		Executors.newCachedThreadPool().execute(future);	
 	}
 
+	public List<NodeInfo> listNodes(){
+		ArrayList<NodeInfo> nodes = new ArrayList<NodeInfo>();
+		for(Channel chan: channelRegister.values()){
+			nodes.add(new NodeInfo((InetSocketAddress)chan.getRemoteAddress()));
+		}
+		return nodes;
+	}
+	
 	@Override
 	public void send(final IMessage msg, final INodeAddress recipient) {
 		final MessagePassing that = this;
@@ -143,6 +161,7 @@ public class MessagePassing extends SimpleChannelUpstreamHandler implements IMes
 
 	@Override
 	public void send(IMessage msg, IHash nodeId) {
+		// TODO
 		Channel chan;
 		if(channelRegister.contains(nodeId)){
 			chan = channelRegister.get(nodeId);
@@ -189,6 +208,7 @@ public class MessagePassing extends SimpleChannelUpstreamHandler implements IMes
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e){
 		IMessageEnvelope envelope = (IMessageEnvelope) e.getMessage(); 
+		this.channelRegister.put(envelope.getSender().getNodeId(), e.getChannel());
 		try {
 			this.notify(envelope.getMessage(), envelope.getSender());
 		} catch (Exception e1) {
@@ -210,5 +230,10 @@ public class MessagePassing extends SimpleChannelUpstreamHandler implements IMes
     	e.getCause().printStackTrace();
     	e.getChannel().close();
     }
+
+	@Override
+	public INodeAddress getOwnAddress() {
+		return this.nodeAddress;
+	}
 	
 }

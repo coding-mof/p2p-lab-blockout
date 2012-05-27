@@ -1,6 +1,9 @@
 package org.blockout.network.dht.chord;
 
 import java.util.Hashtable;
+
+import javax.inject.Named;
+
 import org.blockout.network.DiscoveryListener;
 import org.blockout.network.INodeAddress;
 import org.blockout.network.NodeDiscovery;
@@ -12,9 +15,10 @@ import org.blockout.network.message.MessageReceiver;
 import org.jboss.netty.channel.Channel;
 
 
+@Named
 public class Chord extends MessageReceiver implements IDistributedHashTable, DiscoveryListener {
 	private IMessagePassing mp;
-	private NodeDiscovery discover;
+	private final NodeDiscovery discover;
 	private INodeAddress ownAddress;
 	
 	public Chord(){

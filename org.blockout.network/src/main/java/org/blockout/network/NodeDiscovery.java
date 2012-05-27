@@ -6,8 +6,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 
-import javax.inject.Named;
-
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -23,16 +21,16 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.util.CharsetUtil;
 
-@Named
+
 public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscovery {
 	public final int port = 6423;
-	private DatagramChannelFactory channelFactory;
-	private CopyOnWriteArrayList<NodeInfo> nodes;
-	private CopyOnWriteArraySet<DiscoveryListener> listeners;
+	private final DatagramChannelFactory channelFactory;
+	private final CopyOnWriteArrayList<INodeAddress> nodes;
+	private final CopyOnWriteArraySet<DiscoveryListener> listeners;
 	
 	public NodeDiscovery(){
 		channelFactory = new NioDatagramChannelFactory(Executors.newCachedThreadPool());
-		nodes = new CopyOnWriteArrayList <NodeInfo>();
+		nodes = new CopyOnWriteArrayList<INodeAddress>();
 		listeners = new CopyOnWriteArraySet<DiscoveryListener>();
 	}
 	
@@ -41,6 +39,7 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 
 		// Configure the pipeline factory.
 		b.setPipelineFactory(new ChannelPipelineFactory() {
+			@Override
 			public ChannelPipeline getPipeline() throws Exception {
 				return Channels.pipeline(
 						new StringEncoder(CharsetUtil.ISO_8859_1),
@@ -66,6 +65,7 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 		
 		// Configure the pipeline factory.
 		b.setPipelineFactory(new ChannelPipelineFactory() {
+				@Override
 				public ChannelPipeline getPipeline() throws Exception {
 					return Channels.pipeline(
 							new StringEncoder(CharsetUtil.ISO_8859_1),
@@ -108,7 +108,7 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 	}	
 	
 	@Override
-	public List<NodeInfo> listNodes() {
+	public List<INodeAddress> listNodes() {
 		return this.nodes;
 	}
 

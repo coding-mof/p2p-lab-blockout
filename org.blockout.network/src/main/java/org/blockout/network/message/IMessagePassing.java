@@ -14,4 +14,6 @@ public interface IMessagePassing {
 	public void addReceiver(Set<IMessageReceiver> receiver, Class<? extends IMessage>... filterClass);
 	
 	public void removeReceiver(IMessageReceiver receiver, Class<? extends IMessage>... filterClasses);
+
+	public INodeAddress getOwnAddress();
 }

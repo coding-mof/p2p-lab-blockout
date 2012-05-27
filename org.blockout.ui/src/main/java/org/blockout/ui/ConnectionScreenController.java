@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.network.DiscoveryListener;
+import org.blockout.network.INodeAddress;
 import org.blockout.network.INodeDiscovery;
 import org.blockout.network.NodeInfo;
 import org.newdawn.slick.state.GameState;
@@ -34,12 +35,12 @@ public class ConnectionScreenController implements StateBasedScreenController, D
 	protected Screen			screen;
 	protected StateBasedGame	game;
 	protected INodeDiscovery	discovery;
-	protected List<NodeInfo>	knownNodes;
+	protected List<INodeAddress> knownNodes;
 
 	@Inject
 	public ConnectionScreenController(final INodeDiscovery discovery) {
 		this.discovery = discovery;
-		knownNodes = new ArrayList<NodeInfo>( discovery.listNodes() );
+		knownNodes = new ArrayList<INodeAddress>(discovery.listNodes());
 	}
 
 	@Override
@@ -65,7 +66,7 @@ public class ConnectionScreenController implements StateBasedScreenController, D
 		nifty.gotoScreen( "selectProfile" );
 	}
 
-	public void connectToIp() {
+	public void connectToPeer() {
 		game.enterState( GameStates.InGame.ordinal(), new FadeOutTransition(), new FadeInTransition() );
 	}
 
@@ -82,9 +83,10 @@ public class ConnectionScreenController implements StateBasedScreenController, D
 
 	protected void updateNodeList() {
 		@SuppressWarnings("unchecked")
-		ListBox<NodeInfo> listBox = screen.findNiftyControl( "listPeers", ListBox.class );
+		ListBox<INodeAddress> listBox = screen.findNiftyControl("listPeers",
+				ListBox.class);
 		listBox.clear();
 
-		listBox.addAllItems( new ArrayList<NodeInfo>( knownNodes ) );
+		listBox.addAllItems(new ArrayList<INodeAddress>(knownNodes));
 	}
 }

@@ -17,7 +17,7 @@ public interface INodeDiscovery {
 	 * @return A list of known nodes in the network or an empty list if no nodes
 	 *         are currently known.
 	 */
-	public List<NodeInfo> listNodes();
+	public List<INodeAddress> listNodes();
 
 	/**
 	 * Attaches a new listener.
