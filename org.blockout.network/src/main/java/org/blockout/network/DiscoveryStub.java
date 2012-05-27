@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.network.message.IMessagePassing;
 
@@ -15,7 +14,7 @@ import org.blockout.network.message.IMessagePassing;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
+
 public class DiscoveryStub implements INodeDiscovery {
 
 	protected CopyOnWriteArrayList<DiscoveryListener>	listener;

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.blockout.network.INodeAddress;
 import org.blockout.network.NodeInfo;
-import org.blockout.network.message.MessagePassing;
+import org.blockout.network.message.MessageBroker;
 import org.blockout.network.message.MessageReceiver;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -17,7 +17,7 @@ public class MessagePassingTestbed extends MessageReceiver{
 		ClassPathXmlApplicationContext context;
 		context = new ClassPathXmlApplicationContext("testbed.xml");
 
-		MessagePassing mp = context.getBean(MessagePassing.class);
+		MessageBroker mp = context.getBean(MessageBroker.class);
 		mp.addReceiver(new MessagePassingTestbed(mp), DemoMessage.class);
 		
 		System.out.println("Done");
@@ -38,10 +38,10 @@ public class MessagePassingTestbed extends MessageReceiver{
 		
 	}
 
-	private final MessagePassing sut;
+	private final MessageBroker sut;
 	private int msgCounter;
 	
-	public MessagePassingTestbed(MessagePassing sut){
+	public MessagePassingTestbed(MessageBroker sut){
 		this.sut = sut;
 		this.msgCounter = 0;
 	}

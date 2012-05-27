@@ -2,6 +2,7 @@ package org.blockout.network.dht.chord;
 
 import java.util.Hashtable;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.network.DiscoveryListener;
@@ -18,13 +19,20 @@ import org.jboss.netty.channel.Channel;
 @Named
 public class Chord extends MessageReceiver implements IDistributedHashTable, DiscoveryListener {
 	private IMessagePassing mp;
-	private final NodeDiscovery discover;
+	private NodeDiscovery discover;
 	private INodeAddress ownAddress;
-	
-	public Chord(){
-		discover = new NodeDiscovery();
+
+	@Inject
+	public void setDiscover(NodeDiscovery discover) {
+		this.discover = discover;
 	}
 	
+	@Inject
+	public void setMp(IMessagePassing mp) {
+		this.mp = mp;
+		this.ownAddress = this.mp.getOwnAddress();
+	}
+
 	@Override
 	public Channel connectTo(IHash nodeId,
 			Hashtable<IHash, Channel> protoFingerTable) {
@@ -32,11 +40,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 		return null;
 	}
 
-	@Override
-	public void setUp(IMessagePassing messagePassing, INodeAddress ownAddress) {
-		this.mp = messagePassing;
-		this.ownAddress = ownAddress;
-		
+	public void setUp() {
 		// Get Ready to receive Answers
 		this.mp.addReceiver(
 				this, 

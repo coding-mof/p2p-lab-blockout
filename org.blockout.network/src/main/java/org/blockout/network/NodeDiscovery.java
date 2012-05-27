@@ -6,6 +6,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 
+import javax.inject.Named;
+
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -21,7 +23,7 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.util.CharsetUtil;
 
-
+@Named
 public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscovery {
 	public final int port = 6423;
 	private final DatagramChannelFactory channelFactory;
@@ -79,13 +81,21 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 	
 	
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e){
-		InetSocketAddress address = (InetSocketAddress) e.getRemoteAddress();
-		String port = (String)e.getMessage();
-		System.out.println(address);
-		System.out.println(port);
-		this.addNode(address, port);
-	}	
+	public void messageReceived(ChannelHandlerContext ctx, final MessageEvent e) {
+		final NodeDiscovery that = this;
+		Runnable handleMessage = new Runnable() {
+			@Override
+			public void run() {
+				InetSocketAddress address = (InetSocketAddress) e
+						.getRemoteAddress();
+				String port = (String) e.getMessage();
+				System.out.println(address);
+				System.out.println(port);
+				that.addNode(address, port);
+			}
+		};
+		Executors.newCachedThreadPool().execute(handleMessage);
+	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)

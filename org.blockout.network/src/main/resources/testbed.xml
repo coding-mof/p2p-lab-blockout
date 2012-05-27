@@ -9,4 +9,28 @@
 
 	<context:component-scan base-package="org.blockout" />
 	<context:annotation-config/>
+	<bean name="clientBootstrap" class="org.jboss.netty.bootstrap.ClientBootstrap">
+		<constructor-arg ref="clientSocketFactory"/>
+	</bean>
+	<bean name="clientSocketFactory" class="org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory"></bean>
+	
+	<bean name="serverBootstrap" class="org.jboss.netty.bootstrap.ServerBootstrap">
+		<constructor-arg ref="serverSocketFactory"/>
+	</bean>
+	<bean name="serverSocketFactory" class="org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory"></bean>
+	
+	<bean name="connectionManager" class="org.blockout.network.netty.NettyConnectionManager" init-method="setUp">
+	      <constructor-arg type="int" value="0"/>
+	      <property name="mp" ref="messageBroker" />
+	      <property name="pipelineFactory">
+	      	<bean class="org.blockout.network.netty.NettyChannelPipelineFactory" />
+	      </property>
+	      <property name="serverBootstrap" ref="serverBootstrap" />
+	      <property name="clientBootstrap" ref="clientBootstrap" />
+	</bean>
+	
+	<bean name="messageBroker" class="org.blockout.network.message.MessageBroker" init-method="setUp">
+	<property name="connectionManager" ref="connectionManager"/>
+	</bean>
+	<bean name="dht" class="org.blockout.network.dht.chord.Chord" init-method="setUp"></bean>
 </beans>
