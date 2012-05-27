@@ -21,5 +21,20 @@ public class ChunkDeliveryMessage implements IMessage {
 		return chunk;
 	}
 	
-	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ChunkDeliveryMessage other = (ChunkDeliveryMessage) obj;
+		if (chunk == null) {
+			if (other.chunk != null)
+				return false;
+		} else if (!chunk.getPosition().equals(other.chunk.getPosition()))
+			return false;
+		return true;
+	}
 }

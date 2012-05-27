@@ -24,7 +24,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	
 	private WorldAdapter 										worldAdapter;
 	
-	private IMessagePassing										network;
+	private IMessagePassing										messegePassing;
 	
 	private Hashtable<TileCoordinate, ArrayList<INodeAddress>> 	receiver;
 
@@ -35,7 +35,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		super();
 		this.stateMachine = stateMachine;
 		this.worldAdapter = worldAdapter;
-		this.network = network;
+		this.messegePassing = network;
 		receiver = new Hashtable<TileCoordinate, ArrayList<INodeAddress>>();
 	}
 
@@ -53,7 +53,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 				.getResponsibleTile());
 		if (receiver.containsKey(coordinate)) {
 			for (INodeAddress address : receiver.get(coordinate)) {
-				network.send(new StateMessage(event, StateMessage.COMMIT_MESSAGE),
+				messegePassing.send(new StateMessage(event, StateMessage.COMMIT_MESSAGE),
 						address);
 			}
 		}
@@ -70,7 +70,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 			stateMachine.commitEvent(event);
 			eventCommitted(event);
 		} else {
-			network.send(new StateMessage(event,StateMessage.Push_MESSAGE), new Hash(coordinate));
+			messegePassing.send(new StateMessage(event,StateMessage.Push_MESSAGE), new Hash(coordinate));
 		}
 
 		// TODO add local connections
@@ -85,7 +85,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 				.getResponsibleTile());
 		if (receiver.containsKey(coordinate)) {
 			for (INodeAddress address : receiver.get(coordinate)) {
-				network.send(
+				messegePassing.send(
 						new StateMessage(event, StateMessage.ROLLBAK_MESSAGE),
 						address);
 			}
@@ -99,7 +99,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	 */
 	@Override
 	public void requestChunk( final TileCoordinate position ) {
-		network.send(new ChuckRequestMessage(position), new Hash(position));
+		messegePassing.send(new ChuckRequestMessage(position), new Hash(position));
 	}
 
 	/**
@@ -107,7 +107,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	 */
 	@Override
 	public void stopUpdating(TileCoordinate position) {
-		network.send(new StopUpdatesMessage(position), new Hash(position));
+		messegePassing.send(new StopUpdatesMessage(position), new Hash(position));
 	}
 	
 	public void  receive(StateMessage msg, INodeAddress origin){
@@ -132,7 +132,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 			receiver.put(c.getPosition(), new ArrayList<INodeAddress>());
 		}
 		receiver.get(c.getPosition()).add(origin);
-		network.send(new ChunkDeliveryMessage(c), origin);
+		messegePassing.send(new ChunkDeliveryMessage(c), origin);
 	}
 	
 	public void  receive(ChunkDeliveryMessage msg, INodeAddress origin) {

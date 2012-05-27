@@ -2,10 +2,7 @@ package org.blockout.world;
 
 import java.util.Hashtable;
 import java.util.Random;
-
-import javax.inject.Inject;
 import javax.inject.Named;
-
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
@@ -24,7 +21,7 @@ public class World implements IWorld, WorldAdapter {
 	private TileCoordinate 						pos;
 	private Hashtable<TileCoordinate, Chunk>	view;
 	private Hashtable<TileCoordinate, Chunk> 	managedChunks;
-	@Inject private IChunkManager				chunkManager;
+	private IChunkManager						chunkManager;
 	private IChunkGenerator						chunkGenerator;
 	
 	public World() {
