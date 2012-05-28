@@ -26,13 +26,13 @@ import org.jboss.netty.util.CharsetUtil;
 @Named
 public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscovery {
 	public final int port = 6423;
-	private DatagramChannelFactory channelFactory;
-	private CopyOnWriteArrayList<NodeInfo> nodes;
-	private CopyOnWriteArraySet<DiscoveryListener> listeners;
+	private final DatagramChannelFactory channelFactory;
+	private final CopyOnWriteArrayList<INodeAddress> nodes;
+	private final CopyOnWriteArraySet<DiscoveryListener> listeners;
 	
 	public NodeDiscovery(){
 		channelFactory = new NioDatagramChannelFactory(Executors.newCachedThreadPool());
-		nodes = new CopyOnWriteArrayList <NodeInfo>();
+		nodes = new CopyOnWriteArrayList<INodeAddress>();
 		listeners = new CopyOnWriteArraySet<DiscoveryListener>();
 	}
 	
@@ -41,6 +41,7 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 
 		// Configure the pipeline factory.
 		b.setPipelineFactory(new ChannelPipelineFactory() {
+			@Override
 			public ChannelPipeline getPipeline() throws Exception {
 				return Channels.pipeline(
 						new StringEncoder(CharsetUtil.ISO_8859_1),
@@ -66,6 +67,7 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 		
 		// Configure the pipeline factory.
 		b.setPipelineFactory(new ChannelPipelineFactory() {
+				@Override
 				public ChannelPipeline getPipeline() throws Exception {
 					return Channels.pipeline(
 							new StringEncoder(CharsetUtil.ISO_8859_1),
@@ -79,13 +81,21 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 	
 	
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e){
-		InetSocketAddress address = (InetSocketAddress) e.getRemoteAddress();
-		String port = (String)e.getMessage();
-		System.out.println(address);
-		System.out.println(port);
-		this.addNode(address, port);
-	}	
+	public void messageReceived(ChannelHandlerContext ctx, final MessageEvent e) {
+		final NodeDiscovery that = this;
+		Runnable handleMessage = new Runnable() {
+			@Override
+			public void run() {
+				InetSocketAddress address = (InetSocketAddress) e
+						.getRemoteAddress();
+				String port = (String) e.getMessage();
+				System.out.println(address);
+				System.out.println(port);
+				that.addNode(address, port);
+			}
+		};
+		Executors.newCachedThreadPool().execute(handleMessage);
+	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
@@ -108,7 +118,7 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 	}	
 	
 	@Override
-	public List<NodeInfo> listNodes() {
+	public List<INodeAddress> listNodes() {
 		return this.nodes;
 	}
 

@@ -9,38 +9,6 @@
 
 	<context:component-scan base-package="org.blockout" />
 	<context:annotation-config/>
-	
-	<hera:list class="de.lessvoid.nifty.screen.ScreenController"/>
-	<hera:list class="org.newdawn.slick.state.GameState"/>
-	
-	<bean name="game" class="org.blockout.ui.BlockOutGame"/>
-	<bean class="org.newdawn.slick.AppGameContainer">
-		<constructor-arg ref="game"/>
-	</bean>
-	
-	<bean class ="org.blockout.engine.SpriteSheetImpl"/>
-	
-	<bean class="org.blockout.world.StaticTMXWorld">
-		<constructor-arg value="/maps/test_01.tmx"/>
-	</bean>
-	
-	<bean class="org.blockout.ui.Camera">
-		<constructor-arg value="32"/>
-		<constructor-arg value="1024"/>
-		<constructor-arg value="768"/>
-	</bean>
-	
-	<bean name="pathFindingMap" class="org.blockout.ui.PathFindingMap"/>
-	
-	<bean class="org.newdawn.slick.util.pathfinding.AStarPathFinder">
-		<constructor-arg ref="pathFindingMap"/>
-		<constructor-arg value="80"/>
-		<constructor-arg value="true"/>
-		<constructor-arg>
-			<bean class="org.newdawn.slick.util.pathfinding.heuristics.ClosestSquaredHeuristic"/>
-		</constructor-arg>
-	</bean>
-	
 	<bean name="clientBootstrap" class="org.jboss.netty.bootstrap.ClientBootstrap">
 		<constructor-arg ref="clientSocketFactory"/>
 	</bean>
