@@ -190,4 +190,24 @@ public class Chunk implements Serializable{
 			entitys.remove(e);
 		}
 	}
+	
+	/**
+	 * will return the position of the {@link Chunk} containing the {@link Tile}
+	 * at the given {@link TileCoordinate}
+	 * 
+	 * @param coordinate 
+	 * @return the position of the Chunk containing the Tile at the given coordinats
+	 */
+	public static TileCoordinate containingCunk(final TileCoordinate coordinate){
+		int x,y;
+		x= coordinate.getX()/CHUNK_SIZE;
+		y= coordinate.getY()/CHUNK_SIZE;
+		if (x < 0) {
+			x = x - 1;
+		}
+		if (y < 0) {
+			y = y - 1;
+		}
+		return new TileCoordinate(x, y);
+	}
 }

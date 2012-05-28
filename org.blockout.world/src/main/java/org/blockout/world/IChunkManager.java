@@ -1,7 +1,6 @@
 package org.blockout.world;
 
 import org.blockout.common.TileCoordinate;
-import org.blockout.world.state.IStateMachineListener;
 
 /**
  * Interface for the core component for managing the world. A chunk manager

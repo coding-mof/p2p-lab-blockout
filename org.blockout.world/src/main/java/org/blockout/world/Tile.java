@@ -11,6 +11,9 @@ import org.blockout.world.entity.Entity;
  * 
  */
 public class Tile implements Serializable {
+
+	private static final long serialVersionUID = -4169943156533706528L;
+	
 	public static final int	GROUND_HEIGHT	= 0;
 	public static final int	WALL_HEIGHT		= 3;
 
