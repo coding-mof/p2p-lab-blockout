@@ -1,9 +1,7 @@
 package org.blockout.world.messeges;
 
 import org.blockout.common.TileCoordinate;
-import org.blockout.network.MessagePassing;
 import org.blockout.network.message.IMessage;
-import org.blockout.world.Chunk;
 
 /**
  * Message used request {@link Chunk}s through {@link MessagePassing}

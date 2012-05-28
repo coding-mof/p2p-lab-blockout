@@ -2,7 +2,6 @@ package org.blockout.world.messeges;
 
 import org.blockout.network.message.IMessage;
 import org.blockout.world.event.IEvent;
-import org.blockout.world.state.IStateMachine;
 
 /**
  * Message used to deliver IEvents from the {@link IStateMachine} 
