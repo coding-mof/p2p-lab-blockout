@@ -2,7 +2,6 @@ package org.blockout.network.netty;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -37,6 +36,7 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 	private IMessagePassing mp;
 
 	public NettyConnectionManager(int serverPort) {
+
 		this.channels = new HashMap<INodeAddress, Channel>();
 		this.serverPort = serverPort;
 	}
@@ -79,9 +79,8 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 	}
 
 	@Override
-	public Set<Channel> getAllConnections() {
-		HashSet<Channel> set = new HashSet<Channel>(this.channels.values());
-		return set;
+	public Set<INodeAddress> getAllConnections() {
+		return this.channels.keySet();
 	}
 
 	public void setUp() {
@@ -107,7 +106,7 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 			if (chan.isOpen()) {
 				return chan;
 			} else {
-				this.channels.remove(address);
+				this.closeConnection(address);
 				return this.openConnection(address);
 			}
 		} else {
@@ -115,12 +114,12 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 		}
 	}
 
-	private Channel openConnection(INodeAddress address) {
+	synchronized private Channel openConnection(INodeAddress address) {
 		int i = 0;
 		Channel chan;
 		do {
 			chan = this.createConnection(address);
-		} while (!chan.isOpen() || i++ <= 3);
+		} while (!chan.isOpen() && i++ <= 1);
 
 		if (!chan.isOpen()) {
 			return null;
@@ -130,21 +129,23 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 		return chan;
 	}
 
-	private Channel createConnection(INodeAddress address) {
+	synchronized private Channel createConnection(INodeAddress address) {
 		Preconditions.checkNotNull(address);
 		Preconditions.checkNotNull(address.getInetAddress());
 		// Make a new connection.
+		System.out.println("Connecting to: " + address);
 		ChannelFuture connectFuture = this.clientBootstrap.connect(address
 				.getInetAddress());
 
 		// Wait until the connection is made successfully.
 		Channel channel = connectFuture.awaitUninterruptibly().getChannel();
+		System.out.println("Got " + channel);
 
 		return channel;
 	}
 
 	@Override
-	public void closeConnection(INodeAddress address) {
+	synchronized public void closeConnection(INodeAddress address) {
 		Channel chan;
 		if (this.channels.containsKey(address)) {
 			chan = this.channels.get(address);
@@ -156,16 +157,29 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 	}
 
 	@Override
-	public void closeConnection(Channel channel) {
+	synchronized public void closeConnection(Channel channel) {
+		INodeAddress address = null;
 		if (this.channels.containsValue(channel)) {
 			for (Entry<INodeAddress, Channel> entry : this.channels.entrySet()) {
 				if (entry.getValue() == channel) {
-					this.channels.remove(entry.getKey());
+					if (address == null) {
+						address = entry.getKey();
+					}
 				}
 			}
+			this.channels.remove(address);
 		}
 		if (channel.isOpen()) {
 			channel.close();
+		}
+	}
+
+	@Override
+	synchronized public void addConnection(INodeAddress address, Channel channel) {
+		System.out.println("Adding Connection to " + address + " Channel: "
+				+ channel);
+		if (!this.channels.containsKey(address)) {
+			this.channels.put(address, channel);
 		}
 	}
 
@@ -184,6 +198,7 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 				that.mp.messageReceived(e);
 			}
 		};
+
 		Executors.newCachedThreadPool().execute(handleMessage);
 		ctx.sendUpstream(e);
 	}

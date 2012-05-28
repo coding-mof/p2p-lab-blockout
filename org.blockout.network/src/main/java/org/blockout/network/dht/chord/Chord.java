@@ -59,6 +59,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	@Override
 	public void nodeDiscovered(NodeInfo info) {
 		//this.mp.send(new DHTFirstConnectMsg(), info);
+		System.out.println("Discovered Node: " + info);
 		this.mp.send(new DHTLookupMsg(this.ownAddress.getNodeId().getNext()), info);
 	}
 	

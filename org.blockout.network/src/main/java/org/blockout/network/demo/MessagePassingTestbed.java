@@ -1,9 +1,8 @@
 package org.blockout.network.demo;
 
-import java.util.List;
+import java.util.Set;
 
 import org.blockout.network.INodeAddress;
-import org.blockout.network.NodeInfo;
 import org.blockout.network.message.MessageBroker;
 import org.blockout.network.message.MessageReceiver;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,9 +28,9 @@ public class MessagePassingTestbed extends MessageReceiver{
 			e.printStackTrace();
 		}
 
-		List<NodeInfo> nodes = mp.listNodes();
+		Set<INodeAddress> nodes = mp.listNodes();
 		System.out.println(nodes);
-		for(NodeInfo node: nodes){
+		for (INodeAddress node : nodes) {
 			System.out.println(node);
 			mp.send(new DemoMessage("Hi, I'm " + mp.nodeAddress), node);
 		}
@@ -49,7 +48,7 @@ public class MessagePassingTestbed extends MessageReceiver{
 	public void receive(DemoMessage msg, INodeAddress origin) {
 		System.out.println("Received: " + msg);
 		if (msgCounter < 10) {
-			this.sut.send(new DemoMessage("Got Your Message: " + msg), origin);
+			this.sut.send(new DemoMessage(msgCounter + " " + msg), origin);
 			msgCounter++;
 		}
 	}

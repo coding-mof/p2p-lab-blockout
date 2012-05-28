@@ -2,9 +2,7 @@ package org.blockout.network.message;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -49,18 +47,16 @@ public class MessageBroker implements IMessagePassing {
 		this.nodeAddress = new NodeInfo(this.address);
 	}
 
-	public List<NodeInfo> listNodes(){
-		ArrayList<NodeInfo> nodes = new ArrayList<NodeInfo>();
-		for (Channel chan : this.connectionManager.getAllConnections()) {
-			nodes.add(new NodeInfo((InetSocketAddress)chan.getRemoteAddress()));
-		}
-		return nodes;
+	public Set<INodeAddress> listNodes() {
+		return this.connectionManager.getAllConnections();
 	}
 	
 	@Override
 	public void send(final IMessage msg, final INodeAddress recipient) {
 		final IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>(msg, recipient, this.nodeAddress);
 		
+		System.out.println("Sending Envelope: " + envelope);
+
 		Channel chan = this.connectionManager.getConnection(recipient);
 		chan.write(envelope);
 	}
@@ -80,6 +76,12 @@ public class MessageBroker implements IMessagePassing {
 	@Override
 	public void messageReceived(MessageEvent e) {
 		IMessageEnvelope envelope = (IMessageEnvelope) e.getMessage();
+		INodeAddress actualSender = new NodeInfo(((InetSocketAddress) e
+				.getChannel().getRemoteAddress()).getHostName(), envelope
+				.getSender().getInetAddress().getPort());
+		envelope.setSender(actualSender);
+		this.connectionManager.addConnection(envelope.getSender(),
+				e.getChannel());
 		try {
 			this.notify(envelope.getMessage(), envelope.getSender());
 		} catch (Exception e1) {

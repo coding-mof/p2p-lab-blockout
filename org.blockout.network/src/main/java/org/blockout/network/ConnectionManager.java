@@ -14,5 +14,7 @@ public interface ConnectionManager {
 	
 	public InetSocketAddress getAddress();
 
-	public Set<Channel> getAllConnections();
+	public Set<INodeAddress> getAllConnections();
+
+	public void addConnection(INodeAddress address, Channel channel);
 }

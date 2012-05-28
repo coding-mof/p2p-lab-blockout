@@ -5,11 +5,11 @@ import org.blockout.network.INodeAddress;
 public class MessageEnvelope<T extends IMessage> implements IMessageEnvelope<T> {
 	private static final long serialVersionUID = 1808833825449980446L;
 	
-	private T msg;
-	private INodeAddress recipient;
+	private final T msg;
+	private final INodeAddress recipient;
 	private INodeAddress sender;
 
-	public MessageEnvelope(T msg, INodeAddress sender, INodeAddress recipient) {
+	public MessageEnvelope(T msg, INodeAddress recipient, INodeAddress sender) {
 		this.msg = msg;
 		this.recipient = recipient;
 		this.sender = sender;
@@ -30,4 +30,14 @@ public class MessageEnvelope<T extends IMessage> implements IMessageEnvelope<T> 
 		return this.recipient;
 	}
 
+	@Override
+	public String toString() {
+		return "Sender: " + this.getSender() + ", Receiver: "
+				+ this.getRecipient() + ", Message: " + this.getMessage();
+	}
+
+	@Override
+	public void setSender(INodeAddress remoteAddress) {
+		this.sender = remoteAddress;
+	}
 }
