@@ -1,4 +1,4 @@
-package org.blockout.network;
+package org.blockout.network.discovery;
 
 import java.util.ArrayList;
 import java.util.List;

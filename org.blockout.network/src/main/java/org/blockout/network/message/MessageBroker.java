@@ -9,10 +9,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.network.ConnectionManager;
-import org.blockout.network.INodeAddress;
 import org.blockout.network.NodeInfo;
 import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
+import org.blockout.network.discovery.INodeAddress;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.MessageEvent;
 
@@ -54,15 +54,16 @@ public class MessageBroker implements IMessagePassing {
 	@Override
 	public void send(final IMessage msg, final INodeAddress recipient) {
 		final IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>(msg, recipient, this.nodeAddress);
-		
-		System.out.println("Sending Envelope: " + envelope);
-
-		Channel chan = this.connectionManager.getConnection(recipient);
+		final Channel chan = this.connectionManager.getConnection(recipient);
 		chan.write(envelope);
 	}
 
 	@Override
 	public void send(IMessage msg, IHash nodeId) {
+		Channel chan = this.connectionManager.getConnection(nodeId);
+		if (chan == null) {
+			this.dht.connectTo(nodeId);
+		}
 		// TODO: Get Address of Node with nodeID
 		throw new RuntimeException("Not Implemented");
 	}

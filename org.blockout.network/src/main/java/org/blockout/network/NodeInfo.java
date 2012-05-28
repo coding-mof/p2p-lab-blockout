@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 
 import org.blockout.network.dht.Hash;
 import org.blockout.network.dht.IHash;
+import org.blockout.network.discovery.INodeAddress;
 
 public class NodeInfo implements INodeAddress {
 	private static final long serialVersionUID = -8306565426791526847L;

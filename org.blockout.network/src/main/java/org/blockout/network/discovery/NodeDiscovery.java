@@ -1,4 +1,4 @@
-package org.blockout.network;
+package org.blockout.network.discovery;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -6,8 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 
-import javax.inject.Named;
-
+import org.blockout.network.NodeInfo;
 import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -18,26 +17,29 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.socket.DatagramChannel;
 import org.jboss.netty.channel.socket.DatagramChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
 import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.util.CharsetUtil;
 
-@Named
+
 public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscovery {
-	public final int port = 6423;
-	private final DatagramChannelFactory channelFactory;
+	public final int port;
+	private final DatagramChannelFactory factory;
 	private final CopyOnWriteArrayList<INodeAddress> nodes;
 	private final CopyOnWriteArraySet<DiscoveryListener> listeners;
 	
-	public NodeDiscovery(){
-		channelFactory = new NioDatagramChannelFactory(Executors.newCachedThreadPool());
-		nodes = new CopyOnWriteArrayList<INodeAddress>();
-		listeners = new CopyOnWriteArraySet<DiscoveryListener>();
+	private boolean serverStarted;
+
+	public NodeDiscovery(DatagramChannelFactory factory, int port) {
+		this.factory = factory;
+		this.port = port;
+		this.nodes = new CopyOnWriteArrayList<INodeAddress>();
+		this.listeners = new CopyOnWriteArraySet<DiscoveryListener>();
+		this.serverStarted = false;
 	}
 	
 	public void sendDiscoveryMessage(InetSocketAddress ownAddress){
-		ConnectionlessBootstrap b = new ConnectionlessBootstrap(this.channelFactory);
+		ConnectionlessBootstrap b = new ConnectionlessBootstrap(this.factory);
 
 		// Configure the pipeline factory.
 		b.setPipelineFactory(new ChannelPipelineFactory() {
@@ -60,23 +62,25 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 	}
 	
 	public void startDiscoveryServer(){
-		final NodeDiscovery that = this;
-		ConnectionlessBootstrap b = new ConnectionlessBootstrap(this.channelFactory);
-		b.setOption("broadcast", "false");
-		b.setOption("reuseAddress", "true");
-		
-		// Configure the pipeline factory.
-		b.setPipelineFactory(new ChannelPipelineFactory() {
+		if (!this.serverStarted) {
+			final NodeDiscovery that = this;
+			ConnectionlessBootstrap b = new ConnectionlessBootstrap(
+					this.factory);
+			b.setOption("broadcast", "false");
+			b.setOption("reuseAddress", "true");
+
+			// Configure the pipeline factory.
+			b.setPipelineFactory(new ChannelPipelineFactory() {
 				@Override
 				public ChannelPipeline getPipeline() throws Exception {
-					return Channels.pipeline(
-							new StringEncoder(CharsetUtil.ISO_8859_1),
-							new StringDecoder(CharsetUtil.ISO_8859_1),
-							that
-							);
+					return Channels.pipeline(new StringEncoder(
+							CharsetUtil.ISO_8859_1), new StringDecoder(
+							CharsetUtil.ISO_8859_1), that);
 				}
 			});
-		b.bind(new InetSocketAddress(port));
+			b.bind(new InetSocketAddress(port));
+			this.serverStarted = true;
+		}
 	}
 	
 	
@@ -89,8 +93,6 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 				InetSocketAddress address = (InetSocketAddress) e
 						.getRemoteAddress();
 				String port = (String) e.getMessage();
-				System.out.println(address);
-				System.out.println(port);
 				that.addNode(address, port);
 			}
 		};

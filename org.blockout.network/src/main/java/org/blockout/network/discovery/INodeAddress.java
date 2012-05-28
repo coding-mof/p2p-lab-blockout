@@ -1,4 +1,4 @@
-package org.blockout.network;
+package org.blockout.network.discovery;
 
 import java.io.Serializable;
 import java.net.InetSocketAddress;

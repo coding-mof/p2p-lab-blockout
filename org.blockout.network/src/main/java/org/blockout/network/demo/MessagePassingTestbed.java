@@ -2,7 +2,7 @@ package org.blockout.network.demo;
 
 import java.util.Set;
 
-import org.blockout.network.INodeAddress;
+import org.blockout.network.discovery.INodeAddress;
 import org.blockout.network.message.MessageBroker;
 import org.blockout.network.message.MessageReceiver;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

@@ -2,7 +2,7 @@ package org.blockout.network.message;
 
 import java.io.Serializable;
 
-import org.blockout.network.INodeAddress;
+import org.blockout.network.discovery.INodeAddress;
 
 public interface IMessageEnvelope<T extends IMessage> extends Serializable {
 	public INodeAddress getRecipient();

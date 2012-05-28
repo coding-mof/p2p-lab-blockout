@@ -1,4 +1,4 @@
-package org.blockout.network.dht.chord;
+package org.blockout.network.dht.chord.messages;
 
 import org.blockout.network.dht.IHash;
 import org.blockout.network.message.IMessage;

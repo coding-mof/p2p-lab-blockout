@@ -51,6 +51,12 @@
 	</bean>
 	<bean name="serverSocketFactory" class="org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory"></bean>
 	
+	<bean name="connectionlessChannelFactory" class="org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory"></bean>
+	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">
+		<constructor-arg ref="connectionlessChannelFactory" />
+		<constructor-arg type="int" value="6432" />
+	</bean>
+	
 	<bean name="connectionManager" class="org.blockout.network.netty.NettyConnectionManager" init-method="setUp">
 	      <constructor-arg type="int" value="0"/>
 	      <property name="mp" ref="messageBroker" />

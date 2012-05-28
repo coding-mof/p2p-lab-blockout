@@ -1,4 +1,6 @@
-package org.blockout.network;
+package org.blockout.network.discovery;
+
+import org.blockout.network.NodeInfo;
 
 /**
  * Implement this interface to get notified about newly discovered nodes.
