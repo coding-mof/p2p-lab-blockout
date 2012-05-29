@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.inject.Named;
 import org.blockout.common.TileCoordinate;
-import org.blockout.network.INodeAddress;
+import org.blockout.network.discovery.INodeAddress;
 import org.blockout.network.dht.Hash;
 import org.blockout.network.message.IMessagePassing;
 import org.blockout.network.message.MessageReceiver;
