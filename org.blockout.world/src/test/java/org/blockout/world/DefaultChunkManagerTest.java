@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.InvocationTargetException;
 
+import javax.inject.Inject;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.network.INodeAddress;
 import org.blockout.network.message.IMessage;
@@ -24,17 +26,18 @@ import org.junit.Test;
 
 public class DefaultChunkManagerTest {
 	
-	DefaultChunkManager 	manager;
-	WorldAdapter 			worldAdapter;
-	IStateMachine 			iStateMachine;
-	IMessagePassing			messagePassing;
+	DefaultChunkManager 		manager;
+	WorldAdapter 				worldAdapter;
+	IStateMachine 				iStateMachine;
+	IMessagePassing		messagePassing;
 	
 	@Before
 	public void init(){
 		worldAdapter = mock(WorldAdapter.class);
 		iStateMachine = mock(IStateMachine.class);
 		messagePassing = mock(IMessagePassing.class);
-		manager = new DefaultChunkManager(iStateMachine, worldAdapter, messagePassing);
+		manager = new DefaultChunkManager(worldAdapter, messagePassing);
+		manager.init(iStateMachine);
 	}
 	
 	@Test

@@ -3,6 +3,7 @@ package org.blockout.world;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
@@ -25,23 +26,26 @@ import org.blockout.world.state.IStateMachineListener;
 @Named
 public class DefaultChunkManager extends MessageReceiver implements IChunkManager, IStateMachineListener {
 
-	private IStateMachine										stateMachine;
+	private IStateMachine												stateMachine;
 	
-	private final WorldAdapter 										worldAdapter;
+	private final WorldAdapter 											worldAdapter;
 	
-	private final IMessagePassing										messegePassing;
+	@Inject private final IMessagePassing								messegePassing;
 	
 	private final Hashtable<TileCoordinate, ArrayList<INodeAddress>> 	receiver;
 
 	
 	
-	public DefaultChunkManager(IStateMachine stateMachine,
-			WorldAdapter worldAdapter, IMessagePassing network) {
+	public DefaultChunkManager(	WorldAdapter worldAdapter, IMessagePassing network) {
 		super();
-		this.stateMachine = stateMachine;
-		this.worldAdapter = worldAdapter;
-		this.messegePassing = network;
 		receiver = new Hashtable<TileCoordinate, ArrayList<INodeAddress>>();
+		this.worldAdapter = worldAdapter;
+		this.worldAdapter.setManager(this);
+		this.messegePassing = network;
+		network.addReceiver(this, ChuckRequestMessage.class);
+		network.addReceiver(this, ChunkDeliveryMessage.class);
+		network.addReceiver(this, StateMessage.class);
+		network.addReceiver(this, StopUpdatesMessage.class);
 	}
 
 	@Override
