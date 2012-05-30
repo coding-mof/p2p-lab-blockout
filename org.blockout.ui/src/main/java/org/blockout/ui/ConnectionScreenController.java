@@ -10,6 +10,8 @@ import org.blockout.network.INodeAddress;
 import org.blockout.network.NodeInfo;
 import org.blockout.network.discovery.DiscoveryListener;
 import org.blockout.network.discovery.INodeDiscovery;
+import org.blockout.world.IWorld;
+import org.blockout.world.LocalGameState;
 import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;
 import org.newdawn.slick.state.transition.FadeInTransition;
@@ -31,16 +33,21 @@ import de.lessvoid.nifty.screen.Screen;
 public class ConnectionScreenController implements StateBasedScreenController, DiscoveryListener {
 
 	// Own state
-	protected Nifty				nifty;
-	protected Screen			screen;
-	protected StateBasedGame	game;
-	protected INodeDiscovery	discovery;
-	protected List<INodeAddress> knownNodes;
+	protected Nifty					nifty;
+	protected Screen				screen;
+	protected StateBasedGame		game;
+	protected INodeDiscovery		discovery;
+	protected IWorld				world;
+	protected LocalGameState		gameState;
+
+	protected List<INodeAddress>	knownNodes;
 
 	@Inject
-	public ConnectionScreenController(final INodeDiscovery discovery) {
+	public ConnectionScreenController(final LocalGameState gameState, final IWorld world, final INodeDiscovery discovery) {
+		this.gameState = gameState;
+		this.world = world;
 		this.discovery = discovery;
-		knownNodes = new ArrayList<INodeAddress>(discovery.listNodes());
+		knownNodes = new ArrayList<INodeAddress>( discovery.listNodes() );
 	}
 
 	@Override
@@ -67,7 +74,12 @@ public class ConnectionScreenController implements StateBasedScreenController, D
 	}
 
 	public void connectToPeer() {
-		game.enterState( GameStates.InGame.ordinal(), new FadeOutTransition(), new FadeInTransition() );
+		try {
+			world.init( gameState.getPlayer() );
+			game.enterState( GameStates.InGame.ordinal(), new FadeOutTransition(), new FadeInTransition() );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -83,10 +95,9 @@ public class ConnectionScreenController implements StateBasedScreenController, D
 
 	protected void updateNodeList() {
 		@SuppressWarnings("unchecked")
-		ListBox<INodeAddress> listBox = screen.findNiftyControl("listPeers",
-				ListBox.class);
+		ListBox<INodeAddress> listBox = screen.findNiftyControl( "listPeers", ListBox.class );
 		listBox.clear();
 
-		listBox.addAllItems(new ArrayList<INodeAddress>(knownNodes));
+		listBox.addAllItems( new ArrayList<INodeAddress>( knownNodes ) );
 	}
 }
