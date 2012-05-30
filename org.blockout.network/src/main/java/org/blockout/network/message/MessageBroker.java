@@ -66,7 +66,7 @@ public class MessageBroker implements IMessagePassing {
 			this.dht.connectTo(nodeId);
 		}
 		// TODO: Get Address of Node with nodeID
-		throw new RuntimeException("Not Implemented");
+		// throw new RuntimeException("Not Implemented");
 	}
 
 	@Override
