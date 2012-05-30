@@ -12,6 +12,8 @@
         <include>conf/logback.xml</include>
         <include>start.bat</include>
         <include>start.sh</include>
+        <include>background.jpg</include>
+        <include>inventory_01.jpg</include>
         <include>*.jar</include>
         <include>natives/*</include>
         <include>maps/*</include>
