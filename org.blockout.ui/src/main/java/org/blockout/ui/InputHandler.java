@@ -3,6 +3,7 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.common.TileCoordinate;
 import org.blockout.engine.ISpriteManager;
 import org.blockout.engine.SpriteType;
 import org.blockout.world.IWorld;
@@ -159,7 +160,9 @@ public class InputHandler implements InputListener {
 			// Handle Crates
 			if ( tile != null && tile.getEntityOnTile() instanceof Crate
 					&& areNeighbours( tileX, tileY, centerX, centerY ) ) {
-				stateMachine.pushEvent( new CrateOpenedEvent( gameState.getPlayer(), (Crate) tile.getEntityOnTile() ) );
+				TileCoordinate coordinate = world.findTile( tile.getEntityOnTile() );
+				stateMachine.pushEvent( new CrateOpenedEvent( gameState.getPlayer(), (Crate) tile.getEntityOnTile(),
+						coordinate ) );
 				return;
 			}
 
