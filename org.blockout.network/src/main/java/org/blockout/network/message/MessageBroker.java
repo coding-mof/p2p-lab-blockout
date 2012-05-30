@@ -67,6 +67,12 @@ public class MessageBroker implements IMessagePassing {
 		}
 		// TODO: Get Address of Node with nodeID
 		// throw new RuntimeException("Not Implemented");
+		// Just send the Message back to the Sender, he is alone in this world... for now.
+		try {
+			this.notify(msg, nodeAddress);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
