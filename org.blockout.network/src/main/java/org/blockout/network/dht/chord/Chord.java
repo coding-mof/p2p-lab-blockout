@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.network.ConnectionManager;
+import org.blockout.network.INodeAddress;
 import org.blockout.network.NodeInfo;
 import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
@@ -11,7 +12,6 @@ import org.blockout.network.dht.chord.messages.DHTFirstConnectMsg;
 import org.blockout.network.dht.chord.messages.DHTLookupMsg;
 import org.blockout.network.dht.chord.messages.DHTLookupResponse;
 import org.blockout.network.discovery.DiscoveryListener;
-import org.blockout.network.discovery.INodeAddress;
 import org.blockout.network.discovery.NodeDiscovery;
 import org.blockout.network.message.IMessagePassing;
 import org.blockout.network.message.MessageReceiver;

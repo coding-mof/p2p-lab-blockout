@@ -1,6 +1,6 @@
 package org.blockout.network.message;
 
-import org.blockout.network.discovery.INodeAddress;
+import org.blockout.network.INodeAddress;
 
 public class MessageEnvelope<T extends IMessage> implements IMessageEnvelope<T> {
 	private static final long serialVersionUID = 1808833825449980446L;

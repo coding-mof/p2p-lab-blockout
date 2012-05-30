@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
 
+import org.blockout.network.INodeAddress;
 import org.blockout.network.message.IMessagePassing;
 
 /**

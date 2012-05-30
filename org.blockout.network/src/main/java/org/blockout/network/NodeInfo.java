@@ -4,12 +4,11 @@ import java.net.InetSocketAddress;
 
 import org.blockout.network.dht.Hash;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.discovery.INodeAddress;
 
 public class NodeInfo implements INodeAddress {
 	private static final long serialVersionUID = -8306565426791526847L;
 	private InetSocketAddress address;
-	private Hash nodeId;
+	private final Hash nodeId;
 	
 	public NodeInfo(InetSocketAddress sockAddress){
 		this.address = sockAddress;
@@ -38,5 +37,10 @@ public class NodeInfo implements INodeAddress {
 	@Override
 	public String toString() {
 		return "Node[address=" + address + ", hash="+nodeId+"]";
+	}
+
+	@Override
+	public boolean equals(INodeAddress b) {
+		return b.getNodeId() == this.getNodeId();
 	}
 }

@@ -2,7 +2,7 @@ package org.blockout.network.message;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.blockout.network.discovery.INodeAddress;
+import org.blockout.network.INodeAddress;
 
 public class MessageReceiver implements IMessageReceiver {
 

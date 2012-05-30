@@ -7,7 +7,8 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 
 import org.blockout.network.ConnectionManager;
-import org.blockout.network.discovery.INodeAddress;
+import org.blockout.network.INodeAddress;
+import org.blockout.network.dht.IHash;
 import org.blockout.network.message.IMessagePassing;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -112,6 +113,12 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler
 		} else {
 			return this.openConnection(address);
 		}
+	}
+
+	@Override
+	public Channel getConnection(IHash nodeId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	synchronized private Channel openConnection(INodeAddress address) {

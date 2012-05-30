@@ -6,9 +6,9 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.network.INodeAddress;
 import org.blockout.network.NodeInfo;
 import org.blockout.network.discovery.DiscoveryListener;
-import org.blockout.network.discovery.INodeAddress;
 import org.blockout.network.discovery.INodeDiscovery;
 import org.newdawn.slick.state.GameState;
 import org.newdawn.slick.state.StateBasedGame;

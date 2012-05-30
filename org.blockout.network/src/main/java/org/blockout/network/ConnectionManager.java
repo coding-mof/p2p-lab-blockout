@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 
 import org.blockout.network.dht.IHash;
-import org.blockout.network.discovery.INodeAddress;
 import org.jboss.netty.channel.Channel;
 
 public interface ConnectionManager {

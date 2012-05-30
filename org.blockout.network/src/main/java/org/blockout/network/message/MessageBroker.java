@@ -9,10 +9,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.network.ConnectionManager;
+import org.blockout.network.INodeAddress;
 import org.blockout.network.NodeInfo;
 import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.discovery.INodeAddress;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.MessageEvent;
 

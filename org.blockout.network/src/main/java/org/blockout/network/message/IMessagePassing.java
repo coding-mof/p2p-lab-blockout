@@ -3,8 +3,8 @@ package org.blockout.network.message;
 import java.util.Set;
 
 import org.blockout.network.ConnectionManager;
+import org.blockout.network.INodeAddress;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.discovery.INodeAddress;
 import org.jboss.netty.channel.MessageEvent;
 
 public interface IMessagePassing {

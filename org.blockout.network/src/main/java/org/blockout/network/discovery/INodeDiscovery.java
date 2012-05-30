@@ -2,6 +2,8 @@ package org.blockout.network.discovery;
 
 import java.util.List;
 
+import org.blockout.network.INodeAddress;
+
 /**
  * Implementations are responsible for auto detecting other nodes running the
  * same program in the same version.
