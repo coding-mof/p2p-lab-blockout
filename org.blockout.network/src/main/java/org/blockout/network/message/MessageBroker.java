@@ -21,49 +21,49 @@ import com.google.common.collect.Multimap;
 
 @Named
 public class MessageBroker implements IMessagePassing {
-	public InetSocketAddress address;
-	public INodeAddress nodeAddress;
-	protected Multimap<Class<? extends IMessage>, IMessageReceiver> filtredReceivers;
-	
-	private IDistributedHashTable dht;
-	private ConnectionManager connectionManager;
-	
+	public InetSocketAddress										address;
+	public INodeAddress												nodeAddress;
+	protected Multimap<Class<? extends IMessage>, IMessageReceiver>	filtredReceivers;
+
+	private IDistributedHashTable									dht;
+	private ConnectionManager										connectionManager;
+
 	public MessageBroker() {
-		this.filtredReceivers = HashMultimap.create();
+		filtredReceivers = HashMultimap.create();
 	}
-	
+
 	@Inject
-	public void setDHT(IDistributedHashTable dht) {
+	public void setDHT( final IDistributedHashTable dht ) {
 		this.dht = dht;
 	}
 
 	@Override
 	@Inject
-	public void setConnectionManager(ConnectionManager mgr) {
-		this.connectionManager = mgr;
+	public void setConnectionManager( final ConnectionManager mgr ) {
+		connectionManager = mgr;
 	}
 
 	public void setUp() {
-		this.address = this.connectionManager.getAddress();
-		this.nodeAddress = new NodeInfo(this.address);
+		address = connectionManager.getAddress();
+		nodeAddress = new NodeInfo( address );
 	}
 
 	public Set<INodeAddress> listNodes() {
-		return this.connectionManager.getAllConnections();
-	}
-	
-	@Override
-	public void send(final IMessage msg, final INodeAddress recipient) {
-		final IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>(msg, recipient, this.nodeAddress);
-		final Channel chan = this.connectionManager.getConnection(recipient);
-		chan.write(envelope);
+		return connectionManager.getAllConnections();
 	}
 
 	@Override
-	public void send(IMessage msg, IHash nodeId) {
-		Channel chan = this.connectionManager.getConnection(nodeId);
-		if (chan == null) {
-			this.dht.connectTo(nodeId);
+	public void send( final IMessage msg, final INodeAddress recipient ) {
+		final IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>( msg, recipient, nodeAddress );
+		final Channel chan = connectionManager.getConnection( recipient );
+		chan.write( envelope );
+	}
+
+	@Override
+	public void send( final IMessage msg, final IHash nodeId ) {
+		Channel chan = connectionManager.getConnection( nodeId );
+		if ( chan == null ) {
+			dht.connectTo( nodeId );
 		}
 		// TODO: Get Address of Node with nodeID
 		// throw new RuntimeException("Not Implemented");
@@ -77,63 +77,59 @@ public class MessageBroker implements IMessagePassing {
 
 	@Override
 	public INodeAddress getOwnAddress() {
-		return this.nodeAddress;
+		return nodeAddress;
 	}
 
 	// Message Handling
 	@Override
-	public void messageReceived(MessageEvent e) {
+	public void messageReceived( final MessageEvent e ) {
 		IMessageEnvelope envelope = (IMessageEnvelope) e.getMessage();
-		INodeAddress actualSender = new NodeInfo(((InetSocketAddress) e
-				.getChannel().getRemoteAddress()).getHostName(), envelope
-				.getSender().getInetAddress().getPort());
-		envelope.setSender(actualSender);
-		this.connectionManager.addConnection(envelope.getSender(),
-				e.getChannel());
+		INodeAddress actualSender = new NodeInfo(
+				((InetSocketAddress) e.getChannel().getRemoteAddress()).getHostName(), envelope.getSender()
+						.getInetAddress().getPort() );
+		envelope.setSender( actualSender );
+		connectionManager.addConnection( envelope.getSender(), e.getChannel() );
 		try {
-			this.notify(envelope.getMessage(), envelope.getSender());
-		} catch (Exception e1) {
+			this.notify( envelope.getMessage(), envelope.getSender() );
+		} catch ( Exception e1 ) {
 			e1.printStackTrace();
-			this.connectionManager.closeConnection(e.getChannel());
+			connectionManager.closeConnection( e.getChannel() );
 		}
 	}
 
-	private void notify(IMessage message, INodeAddress sender)
-			throws IllegalArgumentException, SecurityException,
-			IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException {
-		Collection<IMessageReceiver> receiverList = this.getReceiver(message
-				.getClass());
-		for (IMessageReceiver receiver : receiverList) {
-			receiver.receive(message, sender);
+	private void notify( final IMessage message, final INodeAddress sender ) throws IllegalArgumentException,
+			SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		Collection<IMessageReceiver> receiverList = getReceiver( message.getClass() );
+		for ( IMessageReceiver receiver : receiverList ) {
+			receiver.receive( message, sender );
 		}
 	}
 
 	// Receiver Handling
-	private Collection<IMessageReceiver> getReceiver(Class<? extends IMessage> filterClass){
+	private Collection<IMessageReceiver> getReceiver( final Class<? extends IMessage> filterClass ) {
 		Collection<IMessageReceiver> currentList;
-		currentList = filtredReceivers.get(filterClass);
+		currentList = filtredReceivers.get( filterClass );
 		return currentList;
 	}
-	
+
 	@Override
-	public void addReceiver(IMessageReceiver receiver, Class<? extends IMessage>... filterClasses) {
-		for(Class<? extends IMessage> clazz: filterClasses){
-			this.getReceiver(clazz).add(receiver);
+	public void addReceiver( final IMessageReceiver receiver, final Class<? extends IMessage>... filterClasses ) {
+		for ( Class<? extends IMessage> clazz : filterClasses ) {
+			getReceiver( clazz ).add( receiver );
 		}
 	}
 
 	@Override
-	public void addReceiver(Set<IMessageReceiver> receiver, Class<? extends IMessage>... filterClasses) {
-		for(Class<? extends IMessage> clazz: filterClasses){
-			this.getReceiver(clazz).addAll(receiver);
+	public void addReceiver( final Set<IMessageReceiver> receiver, final Class<? extends IMessage>... filterClasses ) {
+		for ( Class<? extends IMessage> clazz : filterClasses ) {
+			getReceiver( clazz ).addAll( receiver );
 		}
 	}
-	
+
 	@Override
-	public void removeReceiver(IMessageReceiver receiver, Class<? extends IMessage>... filterClasses) {
-		for(Class<? extends IMessage> clazz: filterClasses){
-			this.filtredReceivers.remove(clazz, receiver);
-		}		
+	public void removeReceiver( final IMessageReceiver receiver, final Class<? extends IMessage>... filterClasses ) {
+		for ( Class<? extends IMessage> clazz : filterClasses ) {
+			filtredReceivers.remove( clazz, receiver );
+		}
 	}
 }
