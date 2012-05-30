@@ -153,7 +153,9 @@ public class InputHandler implements InputListener {
 			// Handle Attacks
 			Tile tile = world.getTile( tileX, tileY );
 			if ( tile != null && tile.getEntityOnTile() instanceof Actor ) {
-				stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile() ) );
+				TileCoordinate coordinate = world.findTile( tile.getEntityOnTile() );
+				stateMachine.pushEvent( new AttackEvent( gameState.getPlayer(), (Actor) tile.getEntityOnTile(),
+						coordinate ) );
 				return;
 			}
 

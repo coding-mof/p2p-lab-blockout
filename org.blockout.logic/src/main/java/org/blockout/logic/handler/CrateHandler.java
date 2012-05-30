@@ -33,6 +33,7 @@ public class CrateHandler implements IEventHandler {
 	@Inject
 	public CrateHandler(final IAudioManager audioManager) {
 		this.audioManager = audioManager;
+
 	}
 
 	@Override

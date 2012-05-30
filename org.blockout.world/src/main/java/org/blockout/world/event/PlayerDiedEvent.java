@@ -3,6 +3,8 @@ package org.blockout.world.event;
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Player;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Events of this class are generated when a player died.
  * 
@@ -13,9 +15,15 @@ public class PlayerDiedEvent extends AbstractEvent<PlayerDiedEvent> {
 
 	private static final long	serialVersionUID	= -5982280022093118648L;
 	protected Player			player;
+	protected TileCoordinate	deathCoord;
 
-	public PlayerDiedEvent(final Player player) {
+	public PlayerDiedEvent(final Player player, final TileCoordinate deathCoord) {
+
+		Preconditions.checkNotNull( player );
+		Preconditions.checkNotNull( deathCoord );
+
 		this.player = player;
+		this.deathCoord = deathCoord;
 	}
 
 	@Override
@@ -25,8 +33,7 @@ public class PlayerDiedEvent extends AbstractEvent<PlayerDiedEvent> {
 
 	@Override
 	public TileCoordinate getResponsibleTile() {
-		// TODO Auto-generated method stub
-		return null;
+		return deathCoord;
 	}
 
 }

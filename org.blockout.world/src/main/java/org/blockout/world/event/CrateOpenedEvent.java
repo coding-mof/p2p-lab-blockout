@@ -4,6 +4,8 @@ import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Player;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Events of this class are created when a {@link Player} opens a {@link Crate}.
  * 
@@ -18,6 +20,11 @@ public class CrateOpenedEvent extends AbstractEvent<CrateOpenedEvent> {
 	protected TileCoordinate	crateCoord;
 
 	public CrateOpenedEvent(final Player player, final Crate crate, final TileCoordinate crateCoord) {
+
+		Preconditions.checkNotNull( player );
+		Preconditions.checkNotNull( crate );
+		Preconditions.checkNotNull( crateCoord );
+
 		this.player = player;
 		this.crate = crate;
 		this.crateCoord = crateCoord;

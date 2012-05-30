@@ -102,6 +102,7 @@ public class PlayerMoveHandler implements IEventHandler {
 	}
 
 	private void raiseEvent( final IStateMachine stateMachine, final Path.Step step, final int oldX, final int oldY ) {
+		System.out.println( "raiseEvent: " + step );
 		if ( step != null ) {
 			synchronized ( posLock ) {
 				lastEvent = new PlayerMoveEvent( gameState.getPlayer(), oldX, oldY, step.getX(), step.getY() );
