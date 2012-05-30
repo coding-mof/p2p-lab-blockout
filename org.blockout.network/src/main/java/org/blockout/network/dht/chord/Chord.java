@@ -34,7 +34,6 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	@Inject
 	public void setMp(IMessagePassing mp) {
 		this.mp = mp;
-		this.ownAddress = this.mp.getOwnAddress();
 	}
 
 	@Override
@@ -44,6 +43,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	}
 
 	public void setUp() {
+		this.ownAddress = new NodeInfo(this.connectionManager.getAddress());
 		// Get Ready to receive Answers
 		this.mp.addReceiver(this, DHTFirstConnectMsg.class, DHTLookupMsg.class,
 				DHTLookupResponse.class
@@ -52,7 +52,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 		discover.addDiscoveryListener(this);
 		
 		// Send out message with my own port
-		this.discover.sendDiscoveryMessage(ownAddress.getInetAddress());	
+		this.discover.sendDiscoveryMessage(ownAddress.getInetAddress());
 		// Start Listener for Discover Requests
 		this.discover.startDiscoveryServer();
 	}

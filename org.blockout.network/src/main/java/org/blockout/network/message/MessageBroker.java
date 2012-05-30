@@ -32,6 +32,7 @@ public class MessageBroker implements IMessagePassing {
 		this.filtredReceivers = HashMultimap.create();
 	}
 	
+	@Inject
 	public void setDHT(IDistributedHashTable dht) {
 		this.dht = dht;
 	}
