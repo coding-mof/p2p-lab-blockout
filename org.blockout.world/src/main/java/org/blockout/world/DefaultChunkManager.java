@@ -36,6 +36,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 
 	
 	
+	@Inject
 	public DefaultChunkManager(	WorldAdapter worldAdapter, IMessagePassing network) {
 		super();
 		receiver = new Hashtable<TileCoordinate, ArrayList<INodeAddress>>();
