@@ -15,10 +15,12 @@ public class CrateOpenedEvent extends AbstractEvent<CrateOpenedEvent> {
 	private static final long	serialVersionUID	= 8321214157754903797L;
 	protected Player			player;
 	protected Crate				crate;
+	protected TileCoordinate	crateCoord;
 
-	public CrateOpenedEvent(final Player player, final Crate crate) {
+	public CrateOpenedEvent(final Player player, final Crate crate, final TileCoordinate crateCoord) {
 		this.player = player;
 		this.crate = crate;
+		this.crateCoord = crateCoord;
 	}
 
 	/**
@@ -46,8 +48,7 @@ public class CrateOpenedEvent extends AbstractEvent<CrateOpenedEvent> {
 
 	@Override
 	public TileCoordinate getResponsibleTile() {
-		// TODO Auto-generated method stub
-		return null;
+		return crateCoord;
 	}
 
 	@Override
