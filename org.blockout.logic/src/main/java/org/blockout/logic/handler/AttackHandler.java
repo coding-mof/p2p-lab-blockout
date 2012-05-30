@@ -6,8 +6,10 @@ import java.util.Random;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.common.TileCoordinate;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
+import org.blockout.world.IWorld;
 import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Monster;
 import org.blockout.world.entity.Player;
@@ -35,11 +37,13 @@ public class AttackHandler implements IEventHandler {
 	}
 
 	protected IAudioManager				audioManager;
+	protected IWorld					world;
+
 	private final ArrayList<AudioType>	attackTypes;
 	private final Random				rand;
 
 	@Inject
-	public AttackHandler(final IAudioManager audioManager) {
+	public AttackHandler(final IAudioManager audioManager, final IWorld world) {
 		this.audioManager = audioManager;
 		attackTypes = new ArrayList<AudioType>();
 		attackTypes.add( AudioType.sfx_sword_clash1 );
@@ -48,6 +52,7 @@ public class AttackHandler implements IEventHandler {
 		attackTypes.add( AudioType.sfx_sword_clash4 );
 		attackTypes.add( AudioType.sfx_sword_clash5 );
 		rand = new Random( System.currentTimeMillis() );
+		this.world = world;
 	}
 
 	@Override
@@ -73,12 +78,14 @@ public class AttackHandler implements IEventHandler {
 			logger.debug( "Doing " + damage + " damage to victim." );
 			int healthLeft = ae.getVictim().getCurrentHealth() - damage;
 			if ( healthLeft <= 0 ) {
+				TileCoordinate victimCoord = world.findTile( ae.getVictim() );
 				if ( ae.getVictim() instanceof Player ) {
 					logger.info( "Player died: " + ae.getVictim() );
-					stateMachine.pushEvent( new PlayerDiedEvent( (Player) ae.getVictim() ) );
+					stateMachine.pushEvent( new PlayerDiedEvent( (Player) ae.getVictim(), victimCoord ) );
 				} else if ( ae.getVictim() instanceof Monster ) {
 					logger.info( "Monster died: " + ae.getVictim() );
-					stateMachine.pushEvent( new MonsterSlayedEvent( ae.getAggressor(), (Monster) ae.getVictim() ) );
+					stateMachine.pushEvent( new MonsterSlayedEvent( ae.getAggressor(), (Monster) ae.getVictim(),
+							victimCoord ) );
 				}
 			} else {
 				ae.getVictim().setCurrentHealth( healthLeft );

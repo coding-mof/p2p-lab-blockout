@@ -14,10 +14,12 @@ public class AttackEvent extends AbstractEvent<AttackEvent> {
 	private static final long	serialVersionUID	= -7611677686159435889L;
 	protected Actor				aggressor;
 	protected Actor				victim;
+	protected TileCoordinate	victimCoord;
 
-	public AttackEvent(final Actor aggressor, final Actor victim) {
+	public AttackEvent(final Actor aggressor, final Actor victim, final TileCoordinate victimCoord) {
 		this.aggressor = aggressor;
 		this.victim = victim;
+		this.victimCoord = victimCoord;
 	}
 
 	/**
@@ -45,7 +47,6 @@ public class AttackEvent extends AbstractEvent<AttackEvent> {
 
 	@Override
 	public TileCoordinate getResponsibleTile() {
-		// TODO Auto-generated method stub
-		return null;
+		return victimCoord;
 	}
 }

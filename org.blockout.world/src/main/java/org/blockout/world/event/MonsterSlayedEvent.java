@@ -4,6 +4,8 @@ import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Monster;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Events of this class are generated when a monster has been slayed by an
  * {@link Actor}.
@@ -16,10 +18,16 @@ public class MonsterSlayedEvent extends AbstractEvent<MonsterSlayedEvent> {
 	private static final long	serialVersionUID	= 5513405449741434082L;
 	protected Monster			monster;
 	protected Actor				actor;
+	protected TileCoordinate	deathCoord;
 
-	public MonsterSlayedEvent(final Actor actor, final Monster monster) {
+	public MonsterSlayedEvent(final Actor actor, final Monster monster, final TileCoordinate deathCoord) {
+
+		Preconditions.checkNotNull( actor );
+		Preconditions.checkNotNull( monster );
+
 		this.actor = actor;
 		this.monster = monster;
+		this.deathCoord = deathCoord;
 	}
 
 	/**
@@ -48,8 +56,7 @@ public class MonsterSlayedEvent extends AbstractEvent<MonsterSlayedEvent> {
 
 	@Override
 	public TileCoordinate getResponsibleTile() {
-		// TODO Auto-generated method stub
-		return null;
+		return deathCoord;
 	}
 
 	@Override

@@ -3,6 +3,8 @@ package org.blockout.world.event;
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Player;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Instances of this class represent a movement of a player. Each event
  * represents only a single step of the movement (between two nearby tiles).
@@ -20,6 +22,9 @@ public class PlayerMoveEvent extends AbstractEvent<PlayerMoveEvent> {
 	protected int				newY;
 
 	public PlayerMoveEvent(final Player player, final int oldX, final int oldY, final int newX, final int newY) {
+
+		Preconditions.checkNotNull( player );
+
 		this.player = player;
 		this.oldX = oldX;
 		this.oldY = oldY;
