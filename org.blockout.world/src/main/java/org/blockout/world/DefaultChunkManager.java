@@ -2,14 +2,19 @@ package org.blockout.world;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+
 import javax.inject.Named;
+
 import org.blockout.common.TileCoordinate;
-import org.blockout.network.discovery.INodeAddress;
+import org.blockout.network.INodeAddress;
 import org.blockout.network.dht.Hash;
 import org.blockout.network.message.IMessagePassing;
 import org.blockout.network.message.MessageReceiver;
 import org.blockout.world.event.IEvent;
-import org.blockout.world.messeges.*;
+import org.blockout.world.messeges.ChuckRequestMessage;
+import org.blockout.world.messeges.ChunkDeliveryMessage;
+import org.blockout.world.messeges.StateMessage;
+import org.blockout.world.messeges.StopUpdatesMessage;
 import org.blockout.world.state.IStateMachine;
 import org.blockout.world.state.IStateMachineListener;
 
@@ -22,11 +27,11 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 
 	private IStateMachine										stateMachine;
 	
-	private WorldAdapter 										worldAdapter;
+	private final WorldAdapter 										worldAdapter;
 	
-	private IMessagePassing										messegePassing;
+	private final IMessagePassing										messegePassing;
 	
-	private Hashtable<TileCoordinate, ArrayList<INodeAddress>> 	receiver;
+	private final Hashtable<TileCoordinate, ArrayList<INodeAddress>> 	receiver;
 
 	
 	

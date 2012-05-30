@@ -1,8 +1,15 @@
 package org.blockout.world;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.stub;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.lang.reflect.InvocationTargetException;
+
 import org.blockout.common.TileCoordinate;
-import org.blockout.network.discovery.INodeAddress;
+import org.blockout.network.INodeAddress;
 import org.blockout.network.message.IMessage;
 import org.blockout.network.message.IMessagePassing;
 import org.blockout.world.entity.Player;
@@ -14,8 +21,6 @@ import org.blockout.world.messeges.StopUpdatesMessage;
 import org.blockout.world.state.IStateMachine;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.mockito.Mockito.*;
 
 public class DefaultChunkManagerTest {
 	
