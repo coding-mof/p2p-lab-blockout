@@ -1,7 +1,7 @@
 package org.blockout.network.dht;
 
-import org.jboss.netty.channel.Channel;
+import org.blockout.network.message.IMessage;
 
 public interface IDistributedHashTable {
-	public Channel connectTo(IHash nodeId);
+	public void sendTo(IMessage msg, IHash nodeId);
 }

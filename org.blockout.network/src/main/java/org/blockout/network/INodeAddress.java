@@ -8,6 +8,4 @@ import org.blockout.network.dht.IHash;
 public interface INodeAddress extends Serializable{
 	public IHash getNodeId();
 	public InetSocketAddress getInetAddress();
-
-	public boolean equals(INodeAddress b);
 }

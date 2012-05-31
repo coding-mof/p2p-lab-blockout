@@ -71,4 +71,6 @@
 	<property name="connectionManager" ref="connectionManager"/>
 	</bean>
 	<bean name="dht" class="org.blockout.network.dht.chord.Chord" init-method="setUp"></bean>
+	
+	<bean name="networkTimer" class="org.jboss.netty.util.HashedWheelTimer"></bean>
 </beans>
