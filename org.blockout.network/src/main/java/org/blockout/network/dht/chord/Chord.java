@@ -63,6 +63,8 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 				e.printStackTrace();
 			}
 		} else {
+			System.out.println("I'm not responsible for " + nodeId
+					+ " my range is " + this.responsibility);
 			this.mp.send(new DHTPassOnMsg(msg, nodeId), this.successor);
 		}
 	}
@@ -121,6 +123,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 			this.mp.send(
 					new DHTJoin(this.ownAddress, this.ownAddress.getNodeId()),
 					origin);
+			this.state = ChordState.SentJoin;
 		}
 	}
 
@@ -138,21 +141,22 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	}
 
 	public void receive(DHTWelcome msg, INodeAddress origin) {
-		INodeAddress successor = origin;
-		INodeAddress predecessor = msg.getPredecessor();
+		if (this.state == ChordState.SentJoin) {
+			INodeAddress successor = origin;
+			INodeAddress predecessor = msg.getPredecessor();
 
-		this.successor = successor;
-		this.predecessor = predecessor;
-		this.responsibility = new HashRange<IHash>(
-				this.predecessor.getNodeId(),
-				this.ownAddress.getNodeId());
+			this.successor = successor;
+			this.predecessor = predecessor;
+			this.responsibility = new HashRange<IHash>(
+					this.predecessor.getNodeId(), this.ownAddress.getNodeId());
 
-		this.mp.send(new DHTNewSuccessor(), this.predecessor);
-		this.mp.send(new DHTNewPredecessor(), this.successor);
+			this.mp.send(new DHTNewSuccessor(), this.predecessor);
+			this.mp.send(new DHTNewPredecessor(), this.successor);
 
-		this.state = ChordState.Joined;
-		System.out.println("Pre:" + this.predecessor + " Succ:"
-				+ this.successor);
+			this.state = ChordState.Joined;
+			System.out.println("Pre:" + this.predecessor + " Succ:"
+					+ this.successor + " Range:" + this.responsibility);
+		}
 	}
 
 	public void receive(DHTNewPredecessor msg, INodeAddress origin) {
@@ -165,7 +169,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 			this.state = ChordState.Joined;
 		}
 		System.out.println("Pre:" + this.predecessor + " Succ:"
-				+ this.successor + "Range:" + this.responsibility);
+				+ this.successor + " Range:" + this.responsibility);
 	}
 
 	public void receive(DHTNewSuccessor msg, INodeAddress origin) {
@@ -176,7 +180,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 			this.state = ChordState.Joined;
 		}
 		System.out.println("Pre:" + this.predecessor + " Succ:"
-				+ this.successor + "Range:" + this.responsibility);
+				+ this.successor + " Range:" + this.responsibility);
 	}
 
 	public void receive(DHTPassOnMsg msg, INodeAddress origin) {

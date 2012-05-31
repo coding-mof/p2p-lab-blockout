@@ -56,6 +56,7 @@ public class MessageBroker implements IMessagePassing {
 
 	@Override
 	public void send( final IMessage msg, final INodeAddress recipient ) {
+		System.out.println("sending: " + msg + " to Address " + recipient);
 		final IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>( msg, recipient, this.nodeAddress );
 		final Channel chan = this.connectionManager.getConnection( recipient );
 		chan.write( envelope );
@@ -63,6 +64,7 @@ public class MessageBroker implements IMessagePassing {
 
 	@Override
 	public void send( final IMessage msg, final IHash nodeId ) {
+		System.out.println("sending: " + msg + " to Node " + nodeId);
 		Channel chan = this.connectionManager.getConnection( nodeId );
 		if ( chan == null ) {
 			this.dht.sendTo(msg, nodeId);
