@@ -119,12 +119,9 @@ public class Chunk implements Serializable {
 	 * @throws NullPointerException
 	 *             if tiles are still null
 	 */
-	public Tile getTile( final int x, final int y ) {
-		int x2 = x % CHUNK_SIZE;
-		int y2 = y % CHUNK_SIZE;
-		x2 = (x < 0) ? CHUNK_SIZE + x2 : x2;
-		y2 = (y < 0) ? CHUNK_SIZE + y2 : y2;
-		return tiles[x2][y2];
+	public Tile getTile( final int x, final int y ) {		
+		TileCoordinate tile = toArrayIndex(new TileCoordinate(x, y));
+		return tiles[tile.getX()][tile.getY()];
 	}
 
 	/**
@@ -152,17 +149,11 @@ public class Chunk implements Serializable {
 	public void setEntityCoordinate( final Entity e, final int x, final int y ) {
 		TileCoordinate coord = entitys.get( e );
 		if ( coord != null ) {
-			int tx = coord.getX() % CHUNK_SIZE;
-			int ty = coord.getY() % CHUNK_SIZE;
-			tx = (tx < 0) ? tx - 1 : tx;
-			ty = (ty < 0) ? ty - 1 : ty;
-			tiles[tx][ty] = new Tile( tiles[tx][ty].getTileType(), tiles[tx][ty].getHeight() );
+			TileCoordinate tile = toArrayIndex(coord);
+			tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(), tiles[tile.getX()][tile.getY()].getHeight() );
 		}
-		int tx = x % CHUNK_SIZE;
-		int ty = y % CHUNK_SIZE;
-		tx = (tx < 0) ? tx - 1 : tx;
-		ty = (ty < 0) ? ty - 1 : ty;
-		tiles[tx][ty] = new Tile( tiles[tx][ty].getTileType(), e );
+		TileCoordinate tile = toArrayIndex(new TileCoordinate(x, y));
+		tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(), e);
 		entitys.put( e, new TileCoordinate( x, y ) );
 	}
 
@@ -176,11 +167,8 @@ public class Chunk implements Serializable {
 	public void removeEntity( final Entity e ) {
 		TileCoordinate coord = entitys.get( e );
 		if ( coord != null ) {
-			int tx = coord.getX() % CHUNK_SIZE;
-			int ty = coord.getY() % CHUNK_SIZE;
-			tx = (tx < 0) ? tx - 1 : tx;
-			ty = (ty < 0) ? ty - 1 : ty;
-			tiles[tx][ty] = new Tile( tiles[tx][ty].getTileType(), tiles[tx][ty].getHeight() );
+			TileCoordinate tile = toArrayIndex(coord);
+			tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(), tiles[tile.getX()][tile.getY()].getHeight() );
 			entitys.remove( e );
 		}
 	}
@@ -204,5 +192,20 @@ public class Chunk implements Serializable {
 			y = y - 1;
 		}
 		return new TileCoordinate( x, y );
+	}
+	
+	/**
+	 * calculates the position of the Tile within this chunk
+	 * from given Coordinates within the world
+	 * 
+	 * @param worldCoordinate
+	 * @return
+	 */
+	private TileCoordinate toArrayIndex(TileCoordinate worldCoordinate){
+		int tx = worldCoordinate.getX() % CHUNK_SIZE;
+		int ty = worldCoordinate.getY() % CHUNK_SIZE;
+		tx = (tx < 0) ? tx + CHUNK_SIZE : tx;
+		ty = (ty < 0) ? ty + CHUNK_SIZE : ty;
+		return new TileCoordinate(tx, ty);
 	}
 }

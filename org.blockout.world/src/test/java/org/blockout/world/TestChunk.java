@@ -60,6 +60,11 @@ public class TestChunk {
 	}
 	
 	@Test
+	public void getTile(){
+		assertEquals(chunk.getTile(1, 1), chunk.getTile(-Chunk.CHUNK_SIZE+1, -Chunk.CHUNK_SIZE+1));
+	}
+	
+	@Test
 	public void serielize() throws IOException, ClassNotFoundException{
 		Zombie e = new Zombie(5);
 		chunk.setEntityCoordinate(e, 0, 0);

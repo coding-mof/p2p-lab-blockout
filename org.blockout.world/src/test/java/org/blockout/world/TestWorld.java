@@ -39,6 +39,7 @@ public class TestWorld {
 		verify(m).requestChunk(new TileCoordinate(coordinate.getX()-1, coordinate.getY()));
 		coordinate = w.findTile(p);
 		assertEquals(p, w.getTile(coordinate.getX(), coordinate.getY()).getEntityOnTile());
+		assertEquals(coordinate, w.findTile(p));
 	}
 	
 	@Test
