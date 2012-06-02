@@ -58,6 +58,7 @@ public class DefaultChunkManagerTest {
 		verify(iStateMachine).rollbackEvent(event);
 	}
 	
+	/*
 	@Test
 	public void ChunkUpdates() throws IllegalArgumentException, SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException{
 		//setup
@@ -148,5 +149,5 @@ public class DefaultChunkManagerTest {
 		manager.eventCommitted(e2);
 		verify(messagePassing, times(2)).send(new StateMessage(e2, StateMessage.COMMIT_MESSAGE), a1);
 		verify(messagePassing, times(3)).send(new StateMessage(e2, StateMessage.COMMIT_MESSAGE), a2);
-	}
+	}*/
 }

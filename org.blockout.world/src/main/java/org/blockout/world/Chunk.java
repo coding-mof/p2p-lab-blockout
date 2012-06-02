@@ -185,10 +185,10 @@ public class Chunk implements Serializable {
 		int x, y;
 		x = coordinate.getX() / CHUNK_SIZE;
 		y = coordinate.getY() / CHUNK_SIZE;
-		if ( x < 0 ) {
+		if ( coordinate.getX() < 0 ) {
 			x = x - 1;
 		}
-		if ( y < 0 ) {
+		if ( coordinate.getY() < 0 ) {
 			y = y - 1;
 		}
 		return new TileCoordinate( x, y );
