@@ -104,6 +104,7 @@ public class Chunk implements Serializable {
 			for ( int j = 0; j < tiles[i].length; j++ ) {
 				if ( tiles[i][j].getEntityOnTile() != null ) {
 					entitys.put( tiles[i][j].getEntityOnTile(), new TileCoordinate( x + i, y + j ) );
+					
 				}
 			}
 		}

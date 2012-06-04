@@ -1,5 +1,6 @@
 package org.blockout.world;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Random;
 import javax.inject.Named;
@@ -74,7 +75,7 @@ public class World implements IWorld, WorldAdapter {
 		if (!pos.equals(newPos)) {
 			view.get(pos).removeEntity(p);
 			pos = newPos;
-			//cleanView();
+			cleanView();
 			updateView();
 		}
 		view.get(pos).setEntityCoordinate(p, coord.getX(), coord.getY());
@@ -228,13 +229,16 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	private void cleanView() {
 		int x, y;
-		for (Chunk chunk : view.values()) {
-			x = Math.abs(pos.getX() - chunk.getX());
-			y = Math.abs(pos.getY() - chunk.getY());
-			if (x > 1 || y > 1) {
-				view.remove(chunk.getPosition());
-				chunkManager.stopUpdating(chunk.getPosition());
+		ArrayList<TileCoordinate> toRemove = new ArrayList<TileCoordinate>();
+		for (TileCoordinate coord : view.keySet()) {
+			x = Math.abs(coord.getX() - pos.getX());
+			y = Math.abs(coord.getY() - pos.getY());
+			if(x > 1 || y > 1){
+				toRemove.add(coord);
 			}
+		}
+		for (TileCoordinate tileCoordinate : toRemove) {
+			view.remove(tileCoordinate);
 		}
 	}
 
