@@ -77,7 +77,6 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		} else {
 			// BUG? doesn't this raise another commitEvent ?
 			stateMachine.commitEvent( event );
-			eventCommitted( event );
 		}
 		// TODO add local connections
 	}

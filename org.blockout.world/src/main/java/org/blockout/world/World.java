@@ -1,5 +1,6 @@
 package org.blockout.world;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Random;
 import javax.inject.Named;
@@ -70,12 +71,10 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public void setPlayerPosition(final Player p, final TileCoordinate coord) {
-		int chunkx, chunky;
-		chunkx = coord.getX() / Chunk.CHUNK_SIZE;
-		chunky = coord.getY() / Chunk.CHUNK_SIZE;
-		if (!pos.equals(new TileCoordinate(chunkx, chunky))) {
+		TileCoordinate newPos = Chunk.containingCunk(coord);
+		if (!pos.equals(newPos)) {
 			view.get(pos).removeEntity(p);
-			pos = new TileCoordinate(chunkx, chunky);
+			pos = newPos;
 			cleanView();
 			updateView();
 		}
@@ -189,6 +188,9 @@ public class World implements IWorld, WorldAdapter {
 			view.put(c.getPosition(), c);
 			pos = c.getPosition();
 		}
+		int cx,cy;
+		cx = c.getX()*Chunk.CHUNK_SIZE;
+		cy= c.getY()*Chunk.CHUNK_SIZE;
 		Random r = new Random();
 		boolean set = false;
 		while (!set) {
@@ -196,11 +198,12 @@ public class World implements IWorld, WorldAdapter {
 			final int y = r.nextInt(Chunk.CHUNK_SIZE);
 			if (c.getTile(x, y).getEntityOnTile() == null
 					&& c.getTile(x, y).getHeight() == Tile.GROUND_HEIGHT) {
-				c.setEntityCoordinate(p, x, y);
+				c.setEntityCoordinate(p, cx+x, cy+y);
 				set = true;
 			}
 		}
 		updateView();
+		
 	}
 
 	/**
@@ -226,13 +229,16 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	private void cleanView() {
 		int x, y;
-		for (Chunk chunk : view.values()) {
-			x = Math.abs(pos.getX() - chunk.getX());
-			y = Math.abs(pos.getY() - chunk.getY());
-			if (x > 1 || y > 1) {
-				view.remove(chunk.getPosition());
-				chunkManager.stopUpdating(chunk.getPosition());
+		ArrayList<TileCoordinate> toRemove = new ArrayList<TileCoordinate>();
+		for (TileCoordinate coord : view.keySet()) {
+			x = Math.abs(coord.getX() - pos.getX());
+			y = Math.abs(coord.getY() - pos.getY());
+			if(x > 1 || y > 1){
+				toRemove.add(coord);
 			}
+		}
+		for (TileCoordinate tileCoordinate : toRemove) {
+			view.remove(tileCoordinate);
 		}
 	}
 

@@ -1,10 +1,16 @@
 package org.blockout.world;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
+import org.blockout.world.event.AttackEvent;
+import org.blockout.world.event.IEvent;
+import org.blockout.world.state.ValidationResult;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -15,6 +21,11 @@ public class TestWorld {
 	
 	World w;
 	IChunkManager m;
+	
+	private static final Logger	logger;
+	static {
+		logger = LoggerFactory.getLogger( World.class );
+	}
 	
 	@Before
 	public void setUp(){
@@ -50,6 +61,7 @@ public class TestWorld {
 		w.setPlayerPosition(p, new TileCoordinate(5, 5));
 		assertNull(w.getTile(coordinate.getX(), coordinate.getY()).getEntityOnTile());
 		assertEquals(p, w.getTile(5, 5).getEntityOnTile());
+		assertEquals(new TileCoordinate(5, 5), w.findTile(p));
 		w.setEnityPosition(p, new TileCoordinate(7, 7));
 		assertNull(w.getTile(5, 5).getEntityOnTile());
 		assertEquals(p, w.getTile(7, 7).getEntityOnTile());
@@ -77,9 +89,29 @@ public class TestWorld {
 		assertNull(w.getTile(coordinate.getX(), coordinate.getY()));
 		w.manageChunk(c);
 		assertEquals(c.getTile(coordinate.getX(), coordinate.getY()), w.getTile(coordinate.getX(), coordinate.getY()));
-		w.unmanageChunk(c.getPosition());
+		assertEquals(c, w.unmanageChunk(c.getPosition()));
 		assertNull(w.getTile(coordinate.getX(), coordinate.getY()));
 		assertNotNull(w.getChunk(c.getPosition()));
+		assertNotSame(c, w.getChunk(c.getPosition()));
 	}
-
+	
+	@Test
+	public void findTile(){
+		
+		Player p = mock(Player.class);
+		for(int i = -2; i< 3; i++){
+			for(int j = -2; j< 3; j++){
+				w.getChunk(new TileCoordinate(i, j));
+			}
+		}
+		
+		w.init(p);
+		TileCoordinate playerOld = w.findTile(p);
+		assertEquals(p, w.getTile(playerOld.getX(), playerOld.getY()).getEntityOnTile());
+		TileCoordinate playerNew = new TileCoordinate(-(Chunk.CHUNK_SIZE+3), -(Chunk.CHUNK_SIZE+7));
+		w.setPlayerPosition(p, playerNew);
+		assertEquals(playerNew, w.findTile(p));
+		assertEquals(p, w.getTile(playerNew.getX(), playerNew.getY()).getEntityOnTile());
+		assertNull(w.getTile(playerOld.getX(), playerOld.getY()).getEntityOnTile());
+	}
 }
