@@ -12,7 +12,7 @@ public interface ConnectionManager {
 	public void closeConnection(INodeAddress address);
 
 	public void closeConnection(Channel channel);
-	
+
 	public InetSocketAddress getAddress();
 
 	public Set<INodeAddress> getAllConnections();

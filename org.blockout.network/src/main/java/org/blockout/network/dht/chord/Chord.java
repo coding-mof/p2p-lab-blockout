@@ -74,8 +74,6 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 		// Get Ready to receive Answers
 		this.mp.addReceiver(this, DHTFirstConnectMsg.class, DHTJoin.class,
 				DHTWelcome.class,
-				DHTLookupMsg.class,
-				DHTLookupResponse.class,
 				DHTNewPredecessor.class, DHTNewSuccessor.class,
 				DHTPassOnMsg.class
 				);

@@ -117,8 +117,7 @@ implements ConnectionManager {
 
 	@Override
 	public Channel getConnection(IHash nodeId) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.channels.get(nodeId);
 	}
 
 	private Channel openConnection(INodeAddress address) {
@@ -162,6 +161,7 @@ implements ConnectionManager {
 				chan.close();
 			}
 		}
+
 	}
 
 	@Override
@@ -176,6 +176,7 @@ implements ConnectionManager {
 					}
 				}
 			}
+
 			this.channels.remove(address);
 		}
 		if (channel.isOpen()) {
