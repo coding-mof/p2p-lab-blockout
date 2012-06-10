@@ -63,6 +63,7 @@ public class World implements IWorld, WorldAdapter {
 				return coordinate;
 			}
 		}
+		System.out.println(entity.getName()+ ": "+coordinate);
 		return null;
 	}
 
@@ -180,6 +181,7 @@ public class World implements IWorld, WorldAdapter {
 		Chunk c;
 		if (managedChunks.size() == 0) {
 			c = chunkGenerator.generateChunk(new TileCoordinate(0, 0));
+			chunkManager.requestChunk(c.getPosition());
 			managedChunks.put(c.getPosition(), c);
 			view.put(c.getPosition(), c);
 			pos = new TileCoordinate(0, 0);
@@ -187,6 +189,7 @@ public class World implements IWorld, WorldAdapter {
 			c = managedChunks.get(managedChunks.keys().nextElement());
 			view.put(c.getPosition(), c);
 			pos = c.getPosition();
+			
 		}
 		int cx,cy;
 		cx = c.getX()*Chunk.CHUNK_SIZE;

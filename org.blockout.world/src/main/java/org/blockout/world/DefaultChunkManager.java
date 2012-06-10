@@ -18,13 +18,14 @@ import org.blockout.world.messeges.StateMessage;
 import org.blockout.world.messeges.StopUpdatesMessage;
 import org.blockout.world.state.IStateMachine;
 import org.blockout.world.state.IStateMachineListener;
+import org.blockout.world.state.ValidationResult;
 
 /**
  * 
  * @author Konstantin Ramig
  */
 @Named
-public class DefaultChunkManager extends MessageReceiver implements IChunkManager, IStateMachineListener {
+public class DefaultChunkManager extends MessageReceiver implements IChunkManager, IStateMachineListener {	
 
 	private IStateMachine												stateMachine;
 
@@ -72,10 +73,9 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	@Override
 	public void eventPushed( final IEvent<?> event ) {
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
-		if ( receiver.containsKey( coordinate ) ) {
-			messagePassing.send( new StateMessage( event, StateMessage.Push_MESSAGE ), new Hash( coordinate ) );
+		if ( !receiver.containsKey( coordinate ) ) {
+			messagePassing.send( new StateMessage( event, StateMessage.PUSH_MESSAGE ), new Hash( coordinate ) );
 		} else {
-			// BUG? doesn't this raise another commitEvent ?
 			stateMachine.commitEvent( event );
 		}
 		// TODO add local connections
@@ -120,8 +120,16 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 			case StateMessage.COMMIT_MESSAGE:
 				stateMachine.commitEvent( msg.getEvent() );
 				break;
-			case StateMessage.Push_MESSAGE:
-				stateMachine.pushEvent( msg.getEvent() );
+			case StateMessage.PUSH_MESSAGE:
+				ValidationResult result = stateMachine.pushEvent( msg.getEvent() );
+				if(result == ValidationResult.Invalid){
+					eventRolledBack(msg.getEvent());
+				}
+				if(receiver.containsKey(Chunk.containingCunk(msg.getEvent().getResponsibleTile()))){
+					if(result == ValidationResult.Valid){
+						stateMachine.commitEvent(msg.getEvent());
+					}
+				}
 				break;
 			default:
 				break;

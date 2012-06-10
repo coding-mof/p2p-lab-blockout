@@ -14,7 +14,7 @@ public class StateMessage implements IMessage{
 	private static final long serialVersionUID = 4413756278358237464L;
 	
 	public static final int COMMIT_MESSAGE	 = 1;
-	public static final int Push_MESSAGE	 = 2;
+	public static final int PUSH_MESSAGE	 = 2;
 	public static final int ROLLBAK_MESSAGE	 = 3;
 	
 	
