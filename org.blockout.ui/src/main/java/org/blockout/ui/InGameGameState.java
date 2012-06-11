@@ -12,6 +12,8 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import de.lessvoid.nifty.Nifty;
@@ -30,6 +32,11 @@ import de.lessvoid.nifty.screen.ScreenController;
 @Named
 public final class InGameGameState extends HUDOverlayGameState implements ScreenController {
 
+	private static final Logger				logger;
+	static {
+		logger = LoggerFactory.getLogger( InGameGameState.class );
+	}
+
 	private Label							lblPlayer;
 	private Label							lblHealth;
 	private Label							lblXP;
@@ -38,9 +45,9 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	private final IWorldRenderer			worldRenderer;
 	private final LocalGameState			gameState;
 	private final InputHandler				inputHandler;
-	private final LocalPlayerMoveHandler			playerController;
+	private final LocalPlayerMoveHandler	playerController;
 
-	private final HealthRenderer			healthRenderer;
+	private IHealthRenderer					healthRenderer;
 	private final IAudioManager				audioManager;
 
 	protected AutowireCapableBeanFactory	beanFactory;
@@ -55,7 +62,8 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		this.worldRenderer = worldRenderer;
 		this.playerController = playerController;
 		this.audioManager = audioManager;
-		healthRenderer = new HealthRenderer( camera, gameState );
+
+		healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
 
 		this.beanFactory = beanFactory;
 	}
@@ -87,7 +95,12 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	protected void renderHUDOverlay( final GameContainer paramGameContainer, final StateBasedGame paramStateBasedGame,
 			final Graphics paramGraphics ) throws SlickException {
 
-		healthRenderer.render();
+		try {
+			healthRenderer.render();
+		} catch ( UnsupportedOperationException e ) {
+			logger.warn( "Failed to render health. Falling back...", e );
+			healthRenderer = new PrimitiveHealthRenderer();
+		}
 	}
 
 	@Override

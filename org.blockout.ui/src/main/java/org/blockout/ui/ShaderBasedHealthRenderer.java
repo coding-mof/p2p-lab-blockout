@@ -11,7 +11,7 @@ import org.newdawn.slick.SlickException;
  * @author Marc-Christian Schulze
  * 
  */
-public class HealthRenderer {
+public class ShaderBasedHealthRenderer implements IHealthRenderer {
 
 	private final static int	MIN_FILL_DISTANCE	= 145 * 145;
 	private final static int	MAX_FILL_DISTANCE	= 245 * 245;
@@ -28,18 +28,24 @@ public class HealthRenderer {
 	private float				currentRadians;
 	private float				currentGlowFactor	= 1.0f;
 
-	public HealthRenderer(final Camera camera, final LocalGameState gameState) {
+	public ShaderBasedHealthRenderer(final Camera camera, final LocalGameState gameState) {
 		this.camera = camera;
 		this.gameState = gameState;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.blockout.ui.IHealthRenderer#init()
+	 */
+	@Override
 	public void init() {
 		if ( healthSphere == null ) {
+			String imgName = "glass-sphere-3.png";
 			try {
-				healthSphere = new Image( "glass-sphere-3.png" );
+				healthSphere = new Image( imgName );
 			} catch ( SlickException e ) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException( "Couldn't load image '" + imgName + "'", e );
 			}
 		}
 
@@ -47,12 +53,17 @@ public class HealthRenderer {
 			try {
 				shader = Shader.makeShader( "plain.vs", "health.fs" );
 			} catch ( SlickException e ) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new UnsupportedOperationException( "Shaders seems to be unavailable.", e );
 			}
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.blockout.ui.IHealthRenderer#update(long)
+	 */
+	@Override
 	public void update( final long deltaMillis ) {
 		float factor = gameState.getPlayer().getCurrentHealth() / (float) gameState.getPlayer().getMaxHealth();
 		currentDistance = MIN_FILL_DISTANCE + (MAX_FILL_DISTANCE - MIN_FILL_DISTANCE) * factor;
@@ -68,6 +79,12 @@ public class HealthRenderer {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.blockout.ui.IHealthRenderer#render()
+	 */
+	@Override
 	public void render() {
 		init();
 		int width = 0;

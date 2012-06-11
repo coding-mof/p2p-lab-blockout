@@ -68,20 +68,22 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 
 		@Override
 		public void beginPass() {
-			if ( shader == null ) {
-				try {
-					shader = Shader.makeShader( "plain.vs", "light.fs" );
-				} catch ( SlickException e ) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if ( Shader.areSupported() ) {
+				if ( shader == null ) {
+					try {
+						shader = Shader.makeShader( "plain.vs", "light.fs" );
+					} catch ( SlickException e ) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-			}
 
-			shader.setUniform2FVariable( "PlayerPos", camera.getHalfWidth(), camera.getHalfHeight() );
-			shader.setUniformFVariable( "OuterSquaredDistance", 64 * 32 * 32 );
-			shader.setUniformFVariable( "InnerSquaredDistance", 49 * 32 * 32 );
-			shader.setUniformFVariable( "MinAlpha", 0 );
-			shader.startShader();
+				shader.setUniform2FVariable( "PlayerPos", camera.getHalfWidth(), camera.getHalfHeight() );
+				shader.setUniformFVariable( "OuterSquaredDistance", 64 * 32 * 32 );
+				shader.setUniformFVariable( "InnerSquaredDistance", 49 * 32 * 32 );
+				shader.setUniformFVariable( "MinAlpha", 0 );
+				shader.startShader();
+			}
 		}
 
 		@Override
@@ -143,7 +145,9 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 
 		@Override
 		public void endPass() {
-			Shader.forceFixedShader();
+			if ( Shader.areSupported() ) {
+				Shader.forceFixedShader();
+			}
 		}
 
 	}
@@ -152,21 +156,25 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 
 		@Override
 		public void beginPass() {
-			if ( shader == null ) {
-				try {
-					shader = Shader.makeShader( "plain.vs", "light.fs" );
-				} catch ( SlickException e ) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if ( Shader.areSupported() ) {
+				if ( shader == null ) {
+					try {
+						shader = Shader.makeShader( "plain.vs", "light.fs" );
+					} catch ( SlickException e ) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 
 			updateFog( camera.getCenterX(), camera.getCenterY() );
-			shader.setUniform2FVariable( "PlayerPos", camera.getHalfWidth(), camera.getHalfHeight() );
-			shader.setUniformFVariable( "OuterSquaredDistance", 64 * 32 * 32 );
-			shader.setUniformFVariable( "InnerSquaredDistance", 36 * 32 * 32 );
-			shader.setUniformFVariable( "MinAlpha", 0.6f );
-			shader.startShader();
+			if ( Shader.areSupported() ) {
+				shader.setUniform2FVariable( "PlayerPos", camera.getHalfWidth(), camera.getHalfHeight() );
+				shader.setUniformFVariable( "OuterSquaredDistance", 64 * 32 * 32 );
+				shader.setUniformFVariable( "InnerSquaredDistance", 36 * 32 * 32 );
+				shader.setUniformFVariable( "MinAlpha", 0.6f );
+				shader.startShader();
+			}
 			spriteManager.startUse();
 		}
 
@@ -197,7 +205,9 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 		@Override
 		public void endPass() {
 			spriteManager.endUse();
-			Shader.forceFixedShader();
+			if ( Shader.areSupported() ) {
+				Shader.forceFixedShader();
+			}
 		}
 	}
 
