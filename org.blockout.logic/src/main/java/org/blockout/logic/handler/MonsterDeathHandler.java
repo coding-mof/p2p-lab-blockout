@@ -1,5 +1,7 @@
 package org.blockout.logic.handler;
 
+import java.util.Random;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -11,6 +13,8 @@ import org.blockout.world.event.MonsterSlayedEvent;
 import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 /**
  * This class handles {@link MonsterSlayedEvent}s and spawns items that get
@@ -27,10 +31,15 @@ public class MonsterDeathHandler implements IEventHandler {
 		logger = LoggerFactory.getLogger( MonsterDeathHandler.class );
 	}
 	protected IWorld			world;
+	private final Random		rand;
 
 	@Inject
 	public MonsterDeathHandler(final IWorld world) {
+
+		Preconditions.checkNotNull( world );
+
 		this.world = world;
+		rand = new Random( System.currentTimeMillis() );
 	}
 
 	@Override
@@ -45,11 +54,16 @@ public class MonsterDeathHandler implements IEventHandler {
 		}
 
 		MonsterSlayedEvent mse = (MonsterSlayedEvent) event;
-		world.removeEntity( mse.getMonster() );
 		TileCoordinate coordinate = world.findTile( mse.getMonster() );
 		if ( coordinate != null ) {
-			logger.info( "Spawning crate on old monster position " + coordinate );
-			world.setEnityPosition( new Crate(), coordinate );
+			world.removeEntity( mse.getMonster() );
+
+			int porbability = 60;
+			logger.info( porbability + "% probability to spawn a crate..." );
+			if ( rand.nextInt( 100 ) < porbability ) {
+				logger.info( "Spawning crate on old monster position " + coordinate );
+				world.setEnityPosition( new Crate(), coordinate );
+			}
 		}
 	}
 }
