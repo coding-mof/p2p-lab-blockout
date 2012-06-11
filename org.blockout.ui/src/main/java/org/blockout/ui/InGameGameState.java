@@ -38,7 +38,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	private final IWorldRenderer			worldRenderer;
 	private final LocalGameState			gameState;
 	private final InputHandler				inputHandler;
-	private final PlayerMoveHandler			playerController;
+	private final LocalPlayerMoveHandler			playerController;
 
 	private final HealthRenderer			healthRenderer;
 	private final IAudioManager				audioManager;
@@ -47,7 +47,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
-			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController,
+			final LocalGameState gameState, final Camera camera, final LocalPlayerMoveHandler playerController,
 			final IAudioManager audioManager, final AutowireCapableBeanFactory beanFactory) {
 		super( inputHandler );
 		this.inputHandler = inputHandler;

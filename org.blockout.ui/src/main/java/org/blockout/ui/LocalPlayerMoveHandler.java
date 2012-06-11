@@ -10,6 +10,7 @@ import org.blockout.common.TileCoordinate;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.logic.handler.IEventHandler;
+import org.blockout.logic.handler.PlayerMoveHandler;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.event.IEvent;
@@ -24,12 +25,13 @@ import org.newdawn.slick.util.pathfinding.Path.Step;
  * player object using floating values between the tiles. Furthermore it allows
  * the {@link InputHandler} to set a desired {@link Path} which then gets
  * translated into several {@link PlayerMoveEvent}s and processed sequentially.
+ * This class is only responsible for the local player.
  * 
  * @author Marc-Christian Schulze
- * 
+ * @see PlayerMoveHandler
  */
 @Named
-public class PlayerMoveHandler implements IEventHandler {
+public class LocalPlayerMoveHandler implements IEventHandler {
 
 	protected final Camera				camera;
 	protected final LocalGameState		gameState;
@@ -53,7 +55,7 @@ public class PlayerMoveHandler implements IEventHandler {
 	private final Random				rand;
 
 	@Inject
-	public PlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world,
+	public LocalPlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world,
 			final IAudioManager audioManager) {
 		this.camera = camera;
 		this.gameState = gameState;
@@ -126,10 +128,14 @@ public class PlayerMoveHandler implements IEventHandler {
 		if ( !(event instanceof PlayerMoveEvent) ) {
 			return;
 		}
+		PlayerMoveEvent pme = (PlayerMoveEvent) event;
+		if ( !pme.getPlayer().equals( gameState.getPlayer() ) ) {
+			// we handle only the movements of our local player
+			return;
+		}
 
 		audioManager.getSound( walkSounds.get( rand.nextInt( walkSounds.size() ) ) ).play();
 
-		PlayerMoveEvent pme = (PlayerMoveEvent) event;
 		synchronized ( posLock ) {
 			desiredX = pme.getNewX();
 			desiredY = pme.getNewY();
@@ -146,6 +152,10 @@ public class PlayerMoveHandler implements IEventHandler {
 			return;
 		}
 		PlayerMoveEvent pme = (PlayerMoveEvent) event;
+		if ( !pme.getPlayer().equals( gameState.getPlayer() ) ) {
+			// we handle only the movements of our local player
+			return;
+		}
 
 		world.setPlayerPosition( pme.getPlayer(), new TileCoordinate( pme.getNewX(), pme.getNewY() ) );
 

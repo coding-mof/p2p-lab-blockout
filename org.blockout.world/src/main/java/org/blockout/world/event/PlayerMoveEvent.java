@@ -57,6 +57,14 @@ public class PlayerMoveEvent extends AbstractEvent<PlayerMoveEvent> {
 		return id.hashCode();
 	}
 
+	public TileCoordinate getNewPos() {
+		return new TileCoordinate( getNewX(), getNewY() );
+	}
+
+	public TileCoordinate getOldPos() {
+		return new TileCoordinate( getOldX(), getOldY() );
+	}
+
 	@Override
 	public boolean equals( final Object obj ) {
 		if ( this == obj ) {

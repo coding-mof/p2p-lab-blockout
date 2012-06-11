@@ -48,7 +48,7 @@ public class InputHandler implements InputListener {
 	protected Camera			camera;
 	protected PathFinder		pathFinder;
 	protected LocalGameState	gameState;
-	protected PlayerMoveHandler	playerController;
+	protected LocalPlayerMoveHandler	playerController;
 	protected IStateMachine		stateMachine;
 	protected IWorld			world;
 	protected GameContainer		container;
@@ -59,7 +59,7 @@ public class InputHandler implements InputListener {
 
 	@Inject
 	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
-			final PlayerMoveHandler playerController, final IStateMachine stateMachine, final IWorld world,
+			final LocalPlayerMoveHandler playerController, final IStateMachine stateMachine, final IWorld world,
 			final ISpriteManager spriteManager) {
 		this.camera = camera;
 		this.pathFinder = pathFinder;
