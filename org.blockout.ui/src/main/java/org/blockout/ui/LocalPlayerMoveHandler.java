@@ -76,18 +76,20 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 
 			float deltaX = desiredX - startX;
 			float deltaY = desiredY - startY;
+			if ( deltaX != 0 || deltaY != 0 ) {
 
-			float timeDelta = (currentTimeMillis - startTime) / ((float) duration);
-			if ( timeDelta > 1 ) {
-				timeDelta = 1;
+				float timeDelta = (currentTimeMillis - startTime) / ((float) duration);
+				if ( timeDelta > 1 ) {
+					timeDelta = 1;
+				}
+
+				float currentX = startX + deltaX * timeDelta;
+				float currentY = startY + deltaY * timeDelta;
+
+				camera.lock();
+				camera.setViewCenter( currentX + 0.5f, currentY + 0.5f );
+				camera.unlock();
 			}
-
-			float currentX = startX + deltaX * timeDelta;
-			float currentY = startY + deltaY * timeDelta;
-
-			camera.lock();
-			camera.setViewCenter( currentX + 0.5f, currentY + 0.5f );
-			camera.unlock();
 		}
 	}
 
@@ -104,7 +106,6 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 	}
 
 	private void raiseEvent( final IStateMachine stateMachine, final Path.Step step, final int oldX, final int oldY ) {
-		System.out.println( "raiseEvent: " + step );
 		if ( step != null ) {
 			synchronized ( posLock ) {
 				lastEvent = new PlayerMoveEvent( gameState.getPlayer(), oldX, oldY, step.getX(), step.getY() );

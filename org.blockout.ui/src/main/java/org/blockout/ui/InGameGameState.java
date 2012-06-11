@@ -3,12 +3,12 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.common.TileCoordinate;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
-import org.blockout.world.items.Elixir;
-import org.blockout.world.items.Elixir.Type;
+import org.blockout.world.entity.Player;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
@@ -54,6 +54,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	protected AutowireCapableBeanFactory	beanFactory;
 	private Label							lblCurrentPos;
 	private final IWorld					world;
+	private final Camera					camera;
 
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
@@ -66,6 +67,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		this.playerController = playerController;
 		this.audioManager = audioManager;
 		this.world = world;
+		this.camera = camera;
 
 		healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
 
@@ -115,12 +117,15 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 
 		inputHandler.setGameContainer( container );
 
-		// TODO: this is just for debugging...
-		// TODO: implement logic to collect items...
-		System.out.println( "-------------- FILLING INEVNTORY ------------------" );
-		gameState.getPlayer().getInventory().setItem( 0, 0, new Elixir( Type.Health, 50 ) );
-		gameState.getPlayer().getInventory().setItem( 1, 1, new Elixir( Type.Health, 10 ) );
-		gameState.getPlayer().getInventory().setItem( 2, 2, new Elixir( Type.Health, 30 ) );
+		// prepare camera
+		Player player = gameState.getPlayer();
+		TileCoordinate playerPos = world.findTile( player );
+		camera.lock();
+		try {
+			camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
+		} finally {
+			camera.unlock();
+		}
 	}
 
 	@Override
@@ -132,7 +137,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		updateHUD();
 
 		playerController.update( container, deltaMillis );
-
 	}
 
 	private void updateHUD() {
