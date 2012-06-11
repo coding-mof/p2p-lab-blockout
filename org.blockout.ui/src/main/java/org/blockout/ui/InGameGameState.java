@@ -5,6 +5,7 @@ import javax.inject.Named;
 
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
+import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.items.Elixir;
 import org.blockout.world.items.Elixir.Type;
@@ -51,17 +52,20 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	private final IAudioManager				audioManager;
 
 	protected AutowireCapableBeanFactory	beanFactory;
+	private Label							lblCurrentPos;
+	private final IWorld					world;
 
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
 			final LocalGameState gameState, final Camera camera, final LocalPlayerMoveHandler playerController,
-			final IAudioManager audioManager, final AutowireCapableBeanFactory beanFactory) {
+			final IAudioManager audioManager, final AutowireCapableBeanFactory beanFactory, final IWorld world) {
 		super( inputHandler );
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
 		this.worldRenderer = worldRenderer;
 		this.playerController = playerController;
 		this.audioManager = audioManager;
+		this.world = world;
 
 		healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
 
@@ -139,11 +143,15 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		lblXP = screen.findNiftyControl( "lblXP", Label.class );
 		lblLevel = screen.findNiftyControl( "lblLevel", Label.class );
 
+		lblCurrentPos = screen.findNiftyControl( "lblCurrentPos", Label.class );
+
 		lblPlayer.setText( gameState.getPlayer().getName() );
 		lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / " + gameState.getPlayer().getMaxHealth() );
 		lblXP.setText( "" + gameState.getPlayer().getExperience() + " / "
 				+ gameState.getPlayer().getRequiredExperience() );
 		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
+
+		lblCurrentPos.setText( "" + (world.findTile( gameState.getPlayer() )) );
 	}
 
 	@Override

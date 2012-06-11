@@ -23,7 +23,9 @@
             backgroundColor="#fff0"
             childLayout="vertical" >
 
-            <panel height="88%" />
+            <panel height="88%" childLayout="horizontal" width="100%">
+            	 <control name="label" id="lblCurrentPos" align="center" textHAlign="center" width="100%"/>   
+            </panel>
 
             <panel
                 backgroundColor="#555A"
