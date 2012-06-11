@@ -8,8 +8,10 @@ import javax.inject.Named;
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.IWorld;
 import org.blockout.world.entity.Crate;
+import org.blockout.world.entity.Player;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.event.MonsterSlayedEvent;
+import org.blockout.world.event.RewardXPEvent;
 import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +56,11 @@ public class MonsterDeathHandler implements IEventHandler {
 		}
 
 		MonsterSlayedEvent mse = (MonsterSlayedEvent) event;
+		if ( mse.getActor() instanceof Player ) {
+			RewardXPEvent xpEvent = new RewardXPEvent( (Player) mse.getActor(), 75 );
+			stateMachine.pushEvent( xpEvent );
+		}
+
 		TileCoordinate coordinate = world.findTile( mse.getMonster() );
 		if ( coordinate != null ) {
 			world.removeEntity( mse.getMonster() );

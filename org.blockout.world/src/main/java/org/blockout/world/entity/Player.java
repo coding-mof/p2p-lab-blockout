@@ -37,6 +37,21 @@ public class Player extends Actor {
 		// just here to let jackson deserialize the object
 	}
 
+	public void rewardXP( final int xp ) {
+		if ( xp <= 0 ) {
+			return;
+		}
+		int left = getRequiredExperience() - getExperience();
+		if ( xp < left ) {
+			setExperience( getExperience() + xp );
+		} else {
+			setExperience( 0 );
+			setLevel( getLevel() + 1 );
+			setCurrentHealth( getMaxHealth() );
+			rewardXP( xp - left );
+		}
+	}
+
 	public Inventory getInventory() {
 		return inventory;
 	}

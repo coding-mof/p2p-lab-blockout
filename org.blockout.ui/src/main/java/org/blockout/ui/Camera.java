@@ -195,7 +195,6 @@ public class Camera {
 
 	public void setViewCenter( final float x, final float y ) {
 		assert lock.isHeldByCurrentThread();
-		System.out.println( "Camera.setViewCenter(" + x + "," + y + ")" );
 		centerX = x;
 		centerY = y;
 		adjustOfsets();
