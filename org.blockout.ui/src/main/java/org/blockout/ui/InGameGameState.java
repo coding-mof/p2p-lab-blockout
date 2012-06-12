@@ -3,15 +3,18 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.common.TileCoordinate;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
+import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
-import org.blockout.world.items.Elixir;
-import org.blockout.world.items.Elixir.Type;
+import org.blockout.world.entity.Player;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import de.lessvoid.nifty.Nifty;
@@ -30,6 +33,11 @@ import de.lessvoid.nifty.screen.ScreenController;
 @Named
 public final class InGameGameState extends HUDOverlayGameState implements ScreenController {
 
+	private static final Logger				logger;
+	static {
+		logger = LoggerFactory.getLogger( InGameGameState.class );
+	}
+
 	private Label							lblPlayer;
 	private Label							lblHealth;
 	private Label							lblXP;
@@ -38,24 +46,30 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	private final IWorldRenderer			worldRenderer;
 	private final LocalGameState			gameState;
 	private final InputHandler				inputHandler;
-	private final PlayerMoveHandler			playerController;
+	private final LocalPlayerMoveHandler	playerController;
 
-	private final HealthRenderer			healthRenderer;
+	private IHealthRenderer					healthRenderer;
 	private final IAudioManager				audioManager;
 
 	protected AutowireCapableBeanFactory	beanFactory;
+	private Label							lblCurrentPos;
+	private final IWorld					world;
+	private final Camera					camera;
 
 	@Inject
 	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
-			final LocalGameState gameState, final Camera camera, final PlayerMoveHandler playerController,
-			final IAudioManager audioManager, final AutowireCapableBeanFactory beanFactory) {
+			final LocalGameState gameState, final Camera camera, final LocalPlayerMoveHandler playerController,
+			final IAudioManager audioManager, final AutowireCapableBeanFactory beanFactory, final IWorld world) {
 		super( inputHandler );
 		this.inputHandler = inputHandler;
 		this.gameState = gameState;
 		this.worldRenderer = worldRenderer;
 		this.playerController = playerController;
 		this.audioManager = audioManager;
-		healthRenderer = new HealthRenderer( camera, gameState );
+		this.world = world;
+		this.camera = camera;
+
+		healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
 
 		this.beanFactory = beanFactory;
 	}
@@ -87,7 +101,12 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	protected void renderHUDOverlay( final GameContainer paramGameContainer, final StateBasedGame paramStateBasedGame,
 			final Graphics paramGraphics ) throws SlickException {
 
-		healthRenderer.render();
+		try {
+			healthRenderer.render();
+		} catch ( UnsupportedOperationException e ) {
+			logger.warn( "Failed to render health. Falling back...", e );
+			healthRenderer = new PrimitiveHealthRenderer();
+		}
 	}
 
 	@Override
@@ -98,12 +117,15 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 
 		inputHandler.setGameContainer( container );
 
-		// TODO: this is just for debugging...
-		// TODO: implement logic to collect items...
-		System.out.println( "-------------- FILLING INEVNTORY ------------------" );
-		gameState.getPlayer().getInventory().setItem( 0, 0, new Elixir( Type.Health, 50 ) );
-		gameState.getPlayer().getInventory().setItem( 1, 1, new Elixir( Type.Health, 10 ) );
-		gameState.getPlayer().getInventory().setItem( 2, 2, new Elixir( Type.Health, 30 ) );
+		// prepare camera
+		Player player = gameState.getPlayer();
+		TileCoordinate playerPos = world.findTile( player );
+		camera.lock();
+		try {
+			camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
+		} finally {
+			camera.unlock();
+		}
 	}
 
 	@Override
@@ -115,7 +137,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		updateHUD();
 
 		playerController.update( container, deltaMillis );
-
 	}
 
 	private void updateHUD() {
@@ -126,11 +147,15 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		lblXP = screen.findNiftyControl( "lblXP", Label.class );
 		lblLevel = screen.findNiftyControl( "lblLevel", Label.class );
 
+		lblCurrentPos = screen.findNiftyControl( "lblCurrentPos", Label.class );
+
 		lblPlayer.setText( gameState.getPlayer().getName() );
 		lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / " + gameState.getPlayer().getMaxHealth() );
 		lblXP.setText( "" + gameState.getPlayer().getExperience() + " / "
 				+ gameState.getPlayer().getRequiredExperience() );
 		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
+
+		lblCurrentPos.setText( "" + (world.findTile( gameState.getPlayer() )) );
 	}
 
 	@Override

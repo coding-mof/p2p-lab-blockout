@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ContextCapabilities;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GLContext;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.ResourceLoader;
 
@@ -53,10 +55,17 @@ public class Shader {
 	public static final int					VERBOSE		= 1024;
 	private static int						logging		= MODERATE;
 
-	private int								programID	= -1;		// ID of the
+	private int								programID	= -1;		// ID
+																	// of
+																	// the
 																	// compiled
 																	// Shader
 																	// program
+
+	public static boolean areSupported() {
+		ContextCapabilities capabilities = GLContext.getCapabilities();
+		return capabilities.GL_ARB_vertex_shader & capabilities.GL_ARB_fragment_shader;
+	}
 
 	private Shader(final ShaderResourceManager srm, final String vertexFileName, final String fragmentFileName)
 			throws SlickException {

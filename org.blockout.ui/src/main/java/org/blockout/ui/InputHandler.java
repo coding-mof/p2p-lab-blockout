@@ -41,25 +41,25 @@ import de.lessvoid.nifty.elements.Element;
 @Named
 public class InputHandler implements InputListener {
 
-	private static final Logger	logger;
+	private static final Logger			logger;
 	static {
 		logger = LoggerFactory.getLogger( InputHandler.class );
 	}
-	protected Camera			camera;
-	protected PathFinder		pathFinder;
-	protected LocalGameState	gameState;
-	protected PlayerMoveHandler	playerController;
-	protected IStateMachine		stateMachine;
-	protected IWorld			world;
-	protected GameContainer		container;
-	protected ISpriteManager	spriteManager;
-	protected Nifty				nifty;
+	protected Camera					camera;
+	protected PathFinder				pathFinder;
+	protected LocalGameState			gameState;
+	protected LocalPlayerMoveHandler	playerController;
+	protected IStateMachine				stateMachine;
+	protected IWorld					world;
+	protected GameContainer				container;
+	protected ISpriteManager			spriteManager;
+	protected Nifty						nifty;
 
-	private Element				exitPopup;
+	private Element						exitPopup;
 
 	@Inject
 	public InputHandler(final Camera camera, final PathFinder pathFinder, final LocalGameState gameState,
-			final PlayerMoveHandler playerController, final IStateMachine stateMachine, final IWorld world,
+			final LocalPlayerMoveHandler playerController, final IStateMachine stateMachine, final IWorld world,
 			final ISpriteManager spriteManager) {
 		this.camera = camera;
 		this.pathFinder = pathFinder;
