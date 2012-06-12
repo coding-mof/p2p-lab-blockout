@@ -2,6 +2,7 @@ package org.blockout.world;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -14,8 +15,11 @@ import org.blockout.network.message.MessageReceiver;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.messeges.ChuckRequestMessage;
 import org.blockout.world.messeges.ChunkDeliveryMessage;
+import org.blockout.world.messeges.IComparator;
+import org.blockout.world.messeges.ManageMessage;
 import org.blockout.world.messeges.StateMessage;
 import org.blockout.world.messeges.StopUpdatesMessage;
+import org.blockout.world.messeges.UnmanageMessage;
 import org.blockout.world.state.IStateMachine;
 import org.blockout.world.state.IStateMachineListener;
 import org.blockout.world.state.ValidationResult;
@@ -158,6 +162,28 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 			receiver.get( msg.getCoordinate() ).remove( origin );
 		}
 		// TODO remove from local connections
+	}
+	
+	public void receive( final UnmanageMessage msg, final INodeAddress origin ) {
+		IComparator comparator = msg.getComparator();
+		ManageMessage manageMessage = new ManageMessage();
+		for (TileCoordinate coordinate : receiver.keySet()) {
+			if(!comparator.compare(coordinate)){
+				manageMessage.add(worldAdapter.unmanageChunk(coordinate), receiver.remove(coordinate));
+			}
+		}
+		messagePassing.send(manageMessage, origin);
+	}
+	
+	public void receive( final ManageMessage msg, final INodeAddress origin ) {
+		ArrayList<Chunk> chunks = msg.getChunks();
+		ArrayList<ArrayList<INodeAddress>> addresses = msg.getReceivers();
+		
+		for (int i = 0; i < chunks.size(); i++) {
+			receiver.put(chunks.get(i).getPosition(), addresses.get(i));
+			worldAdapter.manageChunk(chunks.get(i));
+		}
+	
 	}
 
 }
