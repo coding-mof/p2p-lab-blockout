@@ -14,13 +14,12 @@ import com.google.common.base.Preconditions;
  * Default implementation of the state machine.
  * 
  * @author Marc-Christian Schulze
- * 
+ * @threadSafety unconditionally thread-safe
  */
 @Named
 public class DefaultStateMachine extends AbstractStateMachine {
 
-	protected final Object			lock	= new Object();
-	protected Map<UUID, IEvent<?>>	events;
+	protected final Map<UUID, IEvent<?>>	events;
 
 	public DefaultStateMachine() {
 		events = new HashMap<UUID, IEvent<?>>();
@@ -29,7 +28,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	@Override
 	public ValidationResult pushEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
-		synchronized ( lock ) {
+		synchronized ( events ) {
 			if ( events.containsKey( event.getId() ) ) {
 				return ValidationResult.Invalid;
 			}
@@ -39,7 +38,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 		if ( result == ValidationResult.Invalid ) {
 			return result;
 		} else {
-			synchronized ( lock ) {
+			synchronized ( events ) {
 				events.put( event.getId(), event );
 			}
 			fireEventPushed( event );
@@ -50,7 +49,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	@Override
 	public void commitEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
-		synchronized ( lock ) {
+		synchronized ( events ) {
 			if ( !events.containsKey( event.getId() ) ) {
 				fireEventPushed( event );
 			} else {
@@ -63,7 +62,7 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	@Override
 	public void rollbackEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
-		synchronized ( lock ) {
+		synchronized ( events ) {
 			if ( events.containsKey( event.getId() ) ) {
 				events.remove( event.getId() );
 				fireEventRolledBack( event );

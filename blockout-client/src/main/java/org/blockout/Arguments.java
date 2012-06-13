@@ -9,17 +9,47 @@ import com.beust.jcommander.Parameter;
  * 
  */
 public class Arguments {
-	@Parameter(names = { "--headless" })
-	private boolean	headless;
+	@Parameter(names = { "-h", "--help" }, description = "Prints the help to stdout")
+	private boolean					showHelp;
 
-	@Parameter(names = { "-h", "--help" })
-	private boolean	showHelp;
+	@Parameter(names = { "-l", "--loopback" }, description = "Run all network traffic through the loopback interface")
+	private boolean					loopback;
 
-	public boolean isShowHelp() {
-		return showHelp;
+	private boolean					headless;
+	private final HeadlessCommand	headlessCmd		= new HeadlessCommand();
+
+	private boolean					spectator;
+	private final SpectatorCommand	spectatorCmd	= new SpectatorCommand();
+
+	public boolean isSpectator() {
+		return spectator;
+	}
+
+	public void setSpectator( final boolean spectator ) {
+		this.spectator = spectator;
+	}
+
+	public SpectatorCommand getSpectatorCmd() {
+		return spectatorCmd;
 	}
 
 	public boolean isHeadless() {
 		return headless;
+	}
+
+	public boolean isLoopback() {
+		return loopback;
+	}
+
+	public void setHeadless( final boolean headless ) {
+		this.headless = headless;
+	}
+
+	public HeadlessCommand getHeadlessCmd() {
+		return headlessCmd;
+	}
+
+	public boolean isShowHelp() {
+		return showHelp;
 	}
 }

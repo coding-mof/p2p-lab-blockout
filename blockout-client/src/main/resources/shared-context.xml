@@ -8,7 +8,8 @@
     <context:annotation-config/>
 		
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location" value="network.properties"/>
+        <property name="location" value="conf/network.properties"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
 	<bean name="clientSocketFactory" class="org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory"></bean>

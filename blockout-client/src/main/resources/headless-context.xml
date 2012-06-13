@@ -8,6 +8,15 @@
 		http://schemas.synyx.org/hera http://schemas.synyx.org/hera/hera.xsd">
 
     <import resource="shared-context.xml"/>
-    
 
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="conf/ai.properties"/>
+	</bean>
+    
+    <bean name="aiplayer" class="org.blockout.ai.SimpleAIPlayer"/>
+    
+	<bean class="org.blockout.ai.AIThread" init-method="start">
+		<constructor-arg ref="aiplayer"/>
+		<constructor-arg type="long" value="${responseTime}"/>
+	</bean>
 </beans>

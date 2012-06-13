@@ -55,23 +55,13 @@ public class PathFindingMap implements TileBasedMap {
 
 	@Override
 	public int getHeightInTiles() {
-		try {
-			camera.lock();
 
-			return camera.getNumVerTiles();
-		} finally {
-			camera.unlock();
-		}
+		return camera.getNumVerTiles();
 	}
 
 	@Override
 	public int getWidthInTiles() {
-		try {
-			camera.lock();
-			return camera.getNumHorTiles();
-		} finally {
-			camera.unlock();
-		}
+		return camera.getNumHorTiles();
 	}
 
 	@Override

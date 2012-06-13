@@ -53,40 +53,36 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 	@Override
 	public void render( final Graphics g ) {
 
-		camera.lock();
-		try {
+		Camera localCamera = camera.getReadOnly();
 
-			int tileSize = camera.getTileSize();
-			int startTileX = camera.getStartTileX();
-			int startTileY = camera.getStartTileY();
+		int tileSize = localCamera.getTileSize();
+		int startTileX = localCamera.getStartTileX();
+		int startTileY = localCamera.getStartTileY();
 
-			int curX;
-			int curY;
-			for ( IRenderingPass pass : renderingPass ) {
-				pass.beginPass();
-				curY = -camera.getHeightOfset();
-				for ( int y = 0; y < camera.getNumVerTiles(); y++ ) {
-					curX = -camera.getWidthOfset();
-					for ( int x = 0; x < camera.getNumHorTiles(); x++ ) {
+		int curX;
+		int curY;
+		for ( IRenderingPass pass : renderingPass ) {
+			pass.beginPass();
+			curY = -localCamera.getHeightOfset();
+			for ( int y = 0; y < localCamera.getNumVerTiles(); y++ ) {
+				curX = -localCamera.getWidthOfset();
+				for ( int x = 0; x < localCamera.getNumHorTiles(); x++ ) {
 
-						Tile tile = world.getTile( startTileX + x, startTileY + y );
-						if ( tile != null ) {
-							pass.renderTile( g, tile, startTileX + x, startTileY + y, curX, camera.convertY( curY )
-									- tileSize );
-						} else {
-							pass.renderMissingTile( g, startTileX + x, startTileY + y, curX, camera.convertY( curY )
-									- tileSize );
-						}
-
-						curX += tileSize;
+					Tile tile = world.getTile( startTileX + x, startTileY + y );
+					if ( tile != null ) {
+						pass.renderTile( g, tile, startTileX + x, startTileY + y, curX, localCamera.convertY( curY )
+								- tileSize );
+					} else {
+						pass.renderMissingTile( g, startTileX + x, startTileY + y, curX, localCamera.convertY( curY )
+								- tileSize );
 					}
-					curY += tileSize;
-				}
-				pass.endPass();
-			}
 
-		} finally {
-			camera.unlock();
+					curX += tileSize;
+				}
+				curY += tileSize;
+			}
+			pass.endPass();
 		}
+
 	}
 }

@@ -16,7 +16,6 @@ import org.blockout.world.LocalGameState;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.event.PlayerMoveEvent;
 import org.blockout.world.state.IStateMachine;
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.util.pathfinding.Path;
 import org.newdawn.slick.util.pathfinding.Path.Step;
 
@@ -69,7 +68,7 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 		rand = new Random( System.currentTimeMillis() );
 	}
 
-	public void update( final GameContainer container, final int deltaMillis ) {
+	public void update( final int deltaMillis ) {
 		long currentTimeMillis = System.currentTimeMillis();
 
 		synchronized ( posLock ) {
@@ -86,9 +85,7 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 				float currentX = startX + deltaX * timeDelta;
 				float currentY = startY + deltaY * timeDelta;
 
-				camera.lock();
 				camera.setViewCenter( currentX + 0.5f, currentY + 0.5f );
-				camera.unlock();
 			}
 		}
 	}

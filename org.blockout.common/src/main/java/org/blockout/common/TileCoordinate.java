@@ -2,6 +2,8 @@ package org.blockout.common;
 
 import java.io.Serializable;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Represents a coordinate in a 2 dimensional cartesian coordinate system.
  * 
@@ -10,9 +12,9 @@ import java.io.Serializable;
  * 
  */
 public class TileCoordinate implements Serializable {
-	private static final long serialVersionUID = 7373840209443845396L;
-	private final int	x;
-	private final int	y;
+	private static final long	serialVersionUID	= 7373840209443845396L;
+	private final int			x;
+	private final int			y;
 
 	/**
 	 * Constructs a new coordinate with the given values.
@@ -88,6 +90,11 @@ public class TileCoordinate implements Serializable {
 	 */
 	public static int computeManhattanDistance( final TileCoordinate a, final TileCoordinate b ) {
 		return Math.abs( a.x - b.x ) + Math.abs( a.y - b.y );
+	}
+
+	public TileCoordinate plus( final TileCoordinate coord ) {
+		Preconditions.checkNotNull( coord );
+		return new TileCoordinate( getX() + coord.getX(), getY() + coord.getY() );
 	}
 
 	@Override

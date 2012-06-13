@@ -9,7 +9,7 @@
       <directory>target</directory>
       <outputDirectory></outputDirectory>
       <includes>
-        <include>conf/logback.xml</include>
+        <include>conf/*</include>
         <include>start.bat</include>
         <include>start.sh</include>
         <include>background.jpg</include>

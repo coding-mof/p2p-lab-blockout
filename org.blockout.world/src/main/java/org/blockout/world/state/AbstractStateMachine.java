@@ -3,6 +3,8 @@ package org.blockout.world.state;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
@@ -13,42 +15,55 @@ import org.blockout.world.event.IEvent;
  * listener management support.
  * 
  * @author Marc-Christian Schulze
- * 
+ * @threadSafety unconditionally thread-safe
  */
 public abstract class AbstractStateMachine implements IStateMachine {
 
-	protected List<IEventValidator>			validators;
+	protected final List<IEventValidator>	validators;
 	protected List<IStateMachineListener>	listener;
+	protected ExecutorService				threadPool;
 
 	protected AbstractStateMachine() {
 		validators = new ArrayList<IEventValidator>();
 		listener = new ArrayList<IStateMachineListener>();
+		// required to guarantee "happened-before" relations
+		threadPool = Executors.newSingleThreadExecutor();
 	}
 
 	@Override
 	public void addEventValidator( final IEventValidator validator ) {
-		validators.add( validator );
+		synchronized ( validators ) {
+			validators.add( validator );
+		}
 	}
 
 	@Inject
 	public void addEventValidators( final Set<IEventValidator> validator ) {
-		validators.addAll( validator );
+		synchronized ( validators ) {
+			validators.addAll( validator );
+		}
 	}
 
 	@Override
 	public void removeEventValidator( final IEventValidator validator ) {
-		validators.remove( validator );
+		synchronized ( validators ) {
+			validators.remove( validator );
+		}
 	}
 
 	@Override
 	public void addIStateMachineListener( final IStateMachineListener l ) {
-		listener.add( l );
+		synchronized ( listener ) {
+			listener.add( l );
+		}
 		l.init( this );
 	}
 
 	@Inject
 	public void addIStateMachineListener( final Set<IStateMachineListener> l ) {
-		listener.addAll( l );
+		synchronized ( listener ) {
+			listener.addAll( l );
+		}
 		for ( IStateMachineListener x : l ) {
 			x.init( this );
 		}
@@ -60,29 +75,55 @@ public abstract class AbstractStateMachine implements IStateMachine {
 	}
 
 	protected ValidationResult validateEvent( final IEvent<?> event ) {
-		for ( IEventValidator validator : validators ) {
-			if ( validator.validateEvent( event ) == ValidationResult.Invalid ) {
-				return ValidationResult.Invalid;
+		synchronized ( validators ) {
+			for ( IEventValidator validator : validators ) {
+				if ( validator.validateEvent( event ) == ValidationResult.Invalid ) {
+					return ValidationResult.Invalid;
+				}
 			}
 		}
 		return ValidationResult.Valid;
 	}
 
 	protected void fireEventCommitted( final IEvent<?> event ) {
-		for ( IStateMachineListener l : listener ) {
-			l.eventCommitted( event );
-		}
+		threadPool.execute( new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized ( listener ) {
+					for ( IStateMachineListener l : listener ) {
+						l.eventCommitted( event );
+					}
+				}
+			}
+		} );
 	}
 
 	protected void fireEventPushed( final IEvent<?> event ) {
-		for ( IStateMachineListener l : listener ) {
-			l.eventPushed( event );
-		}
+		threadPool.execute( new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized ( listener ) {
+					for ( IStateMachineListener l : listener ) {
+						l.eventPushed( event );
+					}
+				}
+			}
+		} );
 	}
 
 	protected void fireEventRolledBack( final IEvent<?> event ) {
-		for ( IStateMachineListener l : listener ) {
-			l.eventRolledBack( event );
-		}
+		threadPool.execute( new Runnable() {
+
+			@Override
+			public void run() {
+				synchronized ( listener ) {
+					for ( IStateMachineListener l : listener ) {
+						l.eventRolledBack( event );
+					}
+				}
+			}
+		} );
 	}
 }
