@@ -1,5 +1,5 @@
 package org.blockout.network.dht.chord;
 
 public enum ChordState {
-	Disconnected, SentJoin, Joined, Flux
+	Disconnected, DiscoverySent, FirstContactMade, JoinSent, Welcomed, ContactedNeighbors, WaitingForSecondAck, Connected, Leaving
 }

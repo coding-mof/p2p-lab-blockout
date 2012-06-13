@@ -16,7 +16,7 @@ import org.blockout.network.NodeInfo;
 import org.blockout.network.dht.Hash;
 import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.dht.chord.DHTPassOnMsg;
+import org.blockout.network.dht.chord.messages.DHTPassOnMsg;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.MessageEvent;
 import org.slf4j.Logger;

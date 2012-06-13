@@ -12,8 +12,12 @@ import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
 import org.blockout.network.dht.chord.messages.DHTFirstConnectMsg;
 import org.blockout.network.dht.chord.messages.DHTJoin;
-import org.blockout.network.dht.chord.messages.DHTLookupMsg;
-import org.blockout.network.dht.chord.messages.DHTLookupResponse;
+import org.blockout.network.dht.chord.messages.DHTLeavePredecessor;
+import org.blockout.network.dht.chord.messages.DHTLeaveSuccessor;
+import org.blockout.network.dht.chord.messages.DHTNewPredecessor;
+import org.blockout.network.dht.chord.messages.DHTNewSuccessor;
+import org.blockout.network.dht.chord.messages.DHTPassOnMsg;
+import org.blockout.network.dht.chord.messages.DHTWelcome;
 import org.blockout.network.discovery.DiscoveryListener;
 import org.blockout.network.discovery.DiscoveryMsg;
 import org.blockout.network.discovery.NodeDiscovery;
@@ -65,6 +69,17 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	}
 
 	@Override
+	public void leave() {
+		logger.debug( "Leaving. State: " + state );
+		if ( state == ChordState.Connected ) {
+			mp.send( new DHTLeaveSuccessor( successor ), predecessor );
+			mp.send( new DHTLeavePredecessor( predecessor ), successor );
+			state = ChordState.Disconnected;
+			logger.debug( "State: " + state );
+		}
+	}
+
+	@Override
 	public void sendTo( final IMessage msg, final IHash nodeId ) {
 		// Hello, Is it me you are looking for?
 		if ( responsibility.contains( nodeId ) ) {
@@ -84,12 +99,16 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 		ownAddress = new NodeInfo( connectionManager.getAddress() );
 		// Get Ready to receive Answers
 		mp.addReceiver( this, DHTFirstConnectMsg.class, DHTJoin.class, DHTWelcome.class, DHTNewPredecessor.class,
-				DHTNewSuccessor.class, DHTPassOnMsg.class );
+				DHTNewSuccessor.class, DHTLeaveSuccessor.class, DHTLeavePredecessor.class, DHTPassOnMsg.class );
 
 		discover.addDiscoveryListener( this );
 
 		// Send out message with my own port
 		discover.sendDiscoveryMessage( new DiscoveryMsg( ownAddress.getInetAddress().getPort(), ownAddress.getNodeId() ) );
+
+		state = ChordState.DiscoverySent;
+		logger.debug( "State: " + state );
+
 		// Start Listener for Discover Requests
 		discover.startDiscoveryServer();
 
@@ -104,37 +123,42 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	}
 
 	protected void checkDiscoveryTimeOut() {
-		if ( state == ChordState.Disconnected ) {
+		if ( state == ChordState.DiscoverySent ) {
 			// Assume you are alone in this world
 			responsibility = new HashRange<IHash>();
 			predecessor = ownAddress;
 			successor = ownAddress;
-			state = ChordState.Joined;
-
-			logger.debug( "L'etat ce moi!" );
+			state = ChordState.Connected;
+			logger.debug( "State: " + state + " (Discovery Timed out)" );
 		}
 
 	}
 
 	@Override
 	public void nodeDiscovered( final NodeInfo info ) {
-		// This Method is called when a new Node has Broadcasted its arrival
-		mp.send( new DHTFirstConnectMsg(), info );
+		if ( state == ChordState.Connected ) {
+			// This Method is called when a new Node has Broadcasted its arrival
+			mp.send( new DHTFirstConnectMsg(), info );
+		}
 	}
 
 	public void receive( final DHTFirstConnectMsg msg, final INodeAddress origin ) {
+		logger.debug( "DHTFirstConnect: State: " + state );
 		// This is the first Contact with the Chord Ring
-		if ( state == ChordState.Disconnected ) {
+		if ( state == ChordState.DiscoverySent ) {
 			mp.send( new DHTJoin( ownAddress, ownAddress.getNodeId() ), origin );
-			state = ChordState.SentJoin;
+			state = ChordState.JoinSent;
+			logger.debug( "State: " + state );
 		}
 	}
 
 	public void receive( final DHTJoin msg, final INodeAddress origin ) {
-		if ( state != ChordState.Disconnected ) {
+		logger.debug( "DHTJoin: State: " + state );
+		if ( state == ChordState.Connected ) {
 			if ( responsibility.contains( msg.getNodeId() ) ) {
 				mp.send( new DHTWelcome( predecessor ), msg.getOrigin() );
 			} else {
+				// TODO: Try to Send this via DHT Routing
 				mp.send( msg, successor );
 
 				logger.debug( "Node " + msg.getNodeId() + " is not in " + responsibility );
@@ -144,7 +168,8 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	}
 
 	public void receive( final DHTWelcome msg, final INodeAddress origin ) {
-		if ( state == ChordState.SentJoin ) {
+		logger.debug( "DHTWelcome: State: " + state );
+		if ( state == ChordState.JoinSent ) {
 			INodeAddress successor = origin;
 			INodeAddress predecessor = msg.getPredecessor();
 
@@ -155,44 +180,53 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 			mp.send( new DHTNewSuccessor(), this.predecessor );
 			mp.send( new DHTNewPredecessor(), this.successor );
 
-			state = ChordState.Joined;
+			state = ChordState.Connected;
+			logger.debug( "State: " + state );
 
 			logger.debug( "Pre:" + this.predecessor + " Succ:" + this.successor + " Range:" + responsibility );
 		}
 	}
 
 	public void receive( final DHTNewPredecessor msg, final INodeAddress origin ) {
-		predecessor = origin;
-		responsibility = new HashRange<IHash>( origin.getNodeId(), ownAddress.getNodeId() );
-		if ( state == ChordState.Joined ) {
-			state = ChordState.Flux;
-		} else if ( state == ChordState.Flux ) {
-			state = ChordState.Joined;
-		}
+		logger.debug( "DHTNewPredecessor: State: " + state );
+		if ( state == ChordState.Connected ) {
+			predecessor = origin;
+			responsibility = new HashRange<IHash>( origin.getNodeId(), ownAddress.getNodeId() );
 
-		logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
+			logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
+		}
 	}
 
 	public void receive( final DHTNewSuccessor msg, final INodeAddress origin ) {
-		successor = origin;
-		if ( state == ChordState.Joined ) {
-			state = ChordState.Flux;
-		} else if ( state == ChordState.Flux ) {
-			state = ChordState.Joined;
+		logger.debug( "DHTNewSuccessor: State: " + state );
+		if ( state == ChordState.Connected ) {
+			successor = origin;
+			logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
 		}
 
-		logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
+	}
+
+	public void receive( final DHTLeavePredecessor msg, final INodeAddress origin ) {
+		logger.debug( "DHTLeavePredecessor: State: " + state );
+		if ( state == ChordState.Connected ) {
+			predecessor = msg.getNode();
+			responsibility = new HashRange<IHash>( origin.getNodeId(), ownAddress.getNodeId() );
+
+			logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
+		}
+	}
+
+	public void receive( final DHTLeaveSuccessor msg, final INodeAddress origin ) {
+		logger.debug( "DHTLeaveSuccessor: State: " + state );
+		if ( state == ChordState.Connected ) {
+			successor = msg.getNode();
+			logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
+		}
 	}
 
 	public void receive( final DHTPassOnMsg msg, final INodeAddress origin ) {
+		logger.debug( "DHTPassOnMsg: State: " + state );
 		sendTo( msg.getMessage(), msg.getReceiver() );
 	}
 
-	public void receive( final DHTLookupMsg msg, final INodeAddress origin ) {
-		logger.debug( "" + msg.getHash() );
-	}
-
-	public void receive( final DHTLookupResponse msg, final INodeAddress origin ) {
-		logger.debug( "" + msg );
-	}
 }

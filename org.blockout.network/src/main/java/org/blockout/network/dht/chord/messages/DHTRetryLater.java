@@ -1,4 +1,4 @@
-package org.blockout.network.dht.chord;
+package org.blockout.network.dht.chord.messages;
 
 import java.util.concurrent.TimeUnit;
 
