@@ -17,6 +17,7 @@
         <include>*.jar</include>
         <include>natives/*</include>
         <include>maps/*</include>
+        <include>*.properties</include>
       </includes>
     </fileSet>
   </fileSets>

@@ -3,7 +3,6 @@ package org.blockout.network.dht.chord;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.network.ConnectionManager;
 import org.blockout.network.INodeAddress;
@@ -25,172 +24,157 @@ import org.jboss.netty.util.Timeout;
 import org.jboss.netty.util.Timer;
 import org.jboss.netty.util.TimerTask;
 
-@Named
 public class Chord extends MessageReceiver implements IDistributedHashTable, DiscoveryListener {
-	private IMessagePassing mp;
-	private NodeDiscovery discover;
-	private ConnectionManager connectionManager;
-	private Timer timer;
+	private IMessagePassing		mp;
+	private NodeDiscovery		discover;
+	private ConnectionManager	connectionManager;
+	private Timer				timer;
 
-	private ChordState state;
+	private ChordState			state;
 
-	private HashRange<IHash> responsibility;
-	private INodeAddress ownAddress;
-	private INodeAddress predecessor;
-	private INodeAddress successor;
+	private HashRange<IHash>	responsibility;
+	private INodeAddress		ownAddress;
+	private INodeAddress		predecessor;
+	private INodeAddress		successor;
 
 	@Inject
-	public void setDiscover(NodeDiscovery discover, ConnectionManager mgr,
-			Timer timer) {
+	public void setDiscover( final NodeDiscovery discover, final ConnectionManager mgr, final Timer timer ) {
 		this.discover = discover;
-		this.connectionManager = mgr;
-		this.state = ChordState.Disconnected;
+		connectionManager = mgr;
+		state = ChordState.Disconnected;
 		this.timer = timer;
 	}
 
 	@Inject
-	public void setMp(IMessagePassing mp) {
+	public void setMp( final IMessagePassing mp ) {
 		this.mp = mp;
 	}
 
 	@Override
-	public void sendTo(IMessage msg, IHash nodeId) {
+	public void sendTo( final IMessage msg, final IHash nodeId ) {
 		// Hello, Is it me you are looking for?
-		if (this.responsibility.contains(nodeId)) {
+		if ( responsibility.contains( nodeId ) ) {
 			try {
-				this.mp.notify(msg, this.ownAddress);
-			} catch (Exception e) {
+				mp.notify( msg, ownAddress );
+			} catch ( Exception e ) {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("I'm not responsible for " + nodeId
-					+ " my range is " + this.responsibility);
-			this.mp.send(new DHTPassOnMsg(msg, nodeId), this.successor);
+			System.out.println( "I'm not responsible for " + nodeId + " my range is " + responsibility );
+			mp.send( new DHTPassOnMsg( msg, nodeId ), successor );
 		}
 	}
 
 	public void setUp() {
-		this.ownAddress = new NodeInfo(this.connectionManager.getAddress());
+		ownAddress = new NodeInfo( connectionManager.getAddress() );
 		// Get Ready to receive Answers
-		this.mp.addReceiver(this, DHTFirstConnectMsg.class, DHTJoin.class,
-				DHTWelcome.class,
-				DHTNewPredecessor.class, DHTNewSuccessor.class,
-				DHTPassOnMsg.class
-				);
+		mp.addReceiver( this, DHTFirstConnectMsg.class, DHTJoin.class, DHTWelcome.class, DHTNewPredecessor.class,
+				DHTNewSuccessor.class, DHTPassOnMsg.class );
 
-		this.discover.addDiscoveryListener(this);
+		discover.addDiscoveryListener( this );
 
 		// Send out message with my own port
-		this.discover.sendDiscoveryMessage(new DiscoveryMsg(this.ownAddress
-				.getInetAddress().getPort(), this.ownAddress.getNodeId()));
+		discover.sendDiscoveryMessage( new DiscoveryMsg( ownAddress.getInetAddress().getPort(), ownAddress.getNodeId() ) );
 		// Start Listener for Discover Requests
-		this.discover.startDiscoveryServer();
+		discover.startDiscoveryServer();
 
 		final Chord that = this;
 		TimerTask checkDiscoveryTimeout = new TimerTask() {
 			@Override
-			public void run(Timeout timeout) throws Exception {
+			public void run( final Timeout timeout ) throws Exception {
 				that.checkDiscoveryTimeOut();
 			}
 		};
-		this.timer.newTimeout(checkDiscoveryTimeout, 5, TimeUnit.SECONDS);
+		timer.newTimeout( checkDiscoveryTimeout, 5, TimeUnit.SECONDS );
 	}
 
 	protected void checkDiscoveryTimeOut() {
-		if (this.state == ChordState.Disconnected) {
+		if ( state == ChordState.Disconnected ) {
 			// Assume you are alone in this world
-			this.responsibility = new HashRange<IHash>();
-			this.predecessor = this.ownAddress;
-			this.successor = this.ownAddress;
-			this.state = ChordState.Joined;
+			responsibility = new HashRange<IHash>();
+			predecessor = ownAddress;
+			successor = ownAddress;
+			state = ChordState.Joined;
 
-			System.out.println("L'etat ce moi!");
+			System.out.println( "L'etat ce moi!" );
 		}
 
 	}
 
 	@Override
-	public void nodeDiscovered(NodeInfo info) {
+	public void nodeDiscovered( final NodeInfo info ) {
 		// This Method is called when a new Node has Broadcasted its arrival
-		this.mp.send(new DHTFirstConnectMsg(), info);
+		mp.send( new DHTFirstConnectMsg(), info );
 	}
 
-	public void receive(DHTFirstConnectMsg msg, INodeAddress origin){
+	public void receive( final DHTFirstConnectMsg msg, final INodeAddress origin ) {
 		// This is the first Contact with the Chord Ring
-		if (this.state == ChordState.Disconnected) {
-			this.mp.send(
-					new DHTJoin(this.ownAddress, this.ownAddress.getNodeId()),
-					origin);
-			this.state = ChordState.SentJoin;
+		if ( state == ChordState.Disconnected ) {
+			mp.send( new DHTJoin( ownAddress, ownAddress.getNodeId() ), origin );
+			state = ChordState.SentJoin;
 		}
 	}
 
-	public void receive(DHTJoin msg, INodeAddress origin) {
-		if (this.state != ChordState.Disconnected) {
-			if (this.responsibility.contains(msg.getNodeId())) {
-				this.mp.send(new DHTWelcome(this.predecessor), msg.getOrigin());
+	public void receive( final DHTJoin msg, final INodeAddress origin ) {
+		if ( state != ChordState.Disconnected ) {
+			if ( responsibility.contains( msg.getNodeId() ) ) {
+				mp.send( new DHTWelcome( predecessor ), msg.getOrigin() );
 			} else {
-				this.mp.send(msg, this.successor);
-				System.out.println("Node " + msg.getNodeId() + " is not in "
-						+ this.responsibility);
-				System.out.println("Asking Successor " + this.successor);
+				mp.send( msg, successor );
+				System.out.println( "Node " + msg.getNodeId() + " is not in " + responsibility );
+				System.out.println( "Asking Successor " + successor );
 			}
 		}
 	}
 
-	public void receive(DHTWelcome msg, INodeAddress origin) {
-		if (this.state == ChordState.SentJoin) {
+	public void receive( final DHTWelcome msg, final INodeAddress origin ) {
+		if ( state == ChordState.SentJoin ) {
 			INodeAddress successor = origin;
 			INodeAddress predecessor = msg.getPredecessor();
 
 			this.successor = successor;
 			this.predecessor = predecessor;
-			this.responsibility = new HashRange<IHash>(
-					this.predecessor.getNodeId(), this.ownAddress.getNodeId());
+			responsibility = new HashRange<IHash>( this.predecessor.getNodeId(), ownAddress.getNodeId() );
 
-			this.mp.send(new DHTNewSuccessor(), this.predecessor);
-			this.mp.send(new DHTNewPredecessor(), this.successor);
+			mp.send( new DHTNewSuccessor(), this.predecessor );
+			mp.send( new DHTNewPredecessor(), this.successor );
 
-			this.state = ChordState.Joined;
-			System.out.println("Pre:" + this.predecessor + " Succ:"
-					+ this.successor + " Range:" + this.responsibility);
+			state = ChordState.Joined;
+			System.out.println( "Pre:" + this.predecessor + " Succ:" + this.successor + " Range:" + responsibility );
 		}
 	}
 
-	public void receive(DHTNewPredecessor msg, INodeAddress origin) {
-		this.predecessor = origin;
-		this.responsibility = new HashRange<IHash>(origin.getNodeId(),
-				this.ownAddress.getNodeId());
-		if (this.state == ChordState.Joined) {
-			this.state = ChordState.Flux;
-		} else if (this.state == ChordState.Flux) {
-			this.state = ChordState.Joined;
+	public void receive( final DHTNewPredecessor msg, final INodeAddress origin ) {
+		predecessor = origin;
+		responsibility = new HashRange<IHash>( origin.getNodeId(), ownAddress.getNodeId() );
+		if ( state == ChordState.Joined ) {
+			state = ChordState.Flux;
+		} else if ( state == ChordState.Flux ) {
+			state = ChordState.Joined;
 		}
-		System.out.println("Pre:" + this.predecessor + " Succ:"
-				+ this.successor + " Range:" + this.responsibility);
+		System.out.println( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
 	}
 
-	public void receive(DHTNewSuccessor msg, INodeAddress origin) {
-		this.successor = origin;
-		if (this.state == ChordState.Joined) {
-			this.state = ChordState.Flux;
-		} else if (this.state == ChordState.Flux) {
-			this.state = ChordState.Joined;
+	public void receive( final DHTNewSuccessor msg, final INodeAddress origin ) {
+		successor = origin;
+		if ( state == ChordState.Joined ) {
+			state = ChordState.Flux;
+		} else if ( state == ChordState.Flux ) {
+			state = ChordState.Joined;
 		}
-		System.out.println("Pre:" + this.predecessor + " Succ:"
-				+ this.successor + " Range:" + this.responsibility);
+		System.out.println( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
 	}
 
-	public void receive(DHTPassOnMsg msg, INodeAddress origin) {
-		this.sendTo(msg.getMessage(), msg.getReceiver());
+	public void receive( final DHTPassOnMsg msg, final INodeAddress origin ) {
+		sendTo( msg.getMessage(), msg.getReceiver() );
 	}
 
-	public void receive(DHTLookupMsg msg, INodeAddress origin){
-		System.out.println(msg.getHash());
+	public void receive( final DHTLookupMsg msg, final INodeAddress origin ) {
+		System.out.println( msg.getHash() );
 	}
 
-	public void receive(DHTLookupResponse msg, INodeAddress origin) {
-		System.out.println(msg);
+	public void receive( final DHTLookupResponse msg, final INodeAddress origin ) {
+		System.out.println( msg );
 	}
 
 }

@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 
 import org.blockout.network.ConnectionManager;
 import org.blockout.network.INodeAddress;
@@ -22,142 +22,163 @@ import org.jboss.netty.channel.ChildChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-public class NettyConnectionManager extends SimpleChannelUpstreamHandler
-implements ConnectionManager {
-	private ServerBootstrap serverBootstrap;
-	private ClientBootstrap clientBootstrap;
-	private NettyChannelPipelineFactory pipelineFactory;
+public class NettyConnectionManager extends SimpleChannelUpstreamHandler implements ConnectionManager {
 
-	private ConcurrentHashMap<INodeAddress, Channel> channels;
-	private int serverPort;
-	private InetSocketAddress address;
-	private IMessagePassing mp;
-
-	public NettyConnectionManager(int serverPort) {
-
-		this.channels = new ConcurrentHashMap<INodeAddress, Channel>();
-		this.serverPort = serverPort;
+	private static final Logger								logger;
+	static {
+		logger = LoggerFactory.getLogger( NettyConnectionManager.class );
 	}
 
-	public void setMp(IMessagePassing mp) {
+	private final ServerBootstrap							serverBootstrap;
+	private final ClientBootstrap							clientBootstrap;
+	private final NettyChannelPipelineFactory				pipelineFactory;
+
+	private final ConcurrentHashMap<INodeAddress, Channel>	channels;
+	private int												serverPort;
+	private InetSocketAddress								address;
+	private IMessagePassing									mp;
+
+	private boolean											socketKeepAlive			= true;
+	private boolean											serverSocketKeepAlive	= true;
+	private final ExecutorService							threadPool;
+
+	public NettyConnectionManager(final int serverPort, final ExecutorService threadPool,
+			final NettyChannelPipelineFactory pipelineFactory, final ServerBootstrap serverBootstrap,
+			final ClientBootstrap clientBootstrap) {
+		this.threadPool = threadPool;
+		channels = new ConcurrentHashMap<INodeAddress, Channel>();
+		this.serverPort = serverPort;
+
+		this.pipelineFactory = pipelineFactory;
+		this.serverBootstrap = serverBootstrap;
+		this.clientBootstrap = clientBootstrap;
+
+		setUp();
+	}
+
+	public boolean isSocketKeepAlive() {
+		return socketKeepAlive;
+	}
+
+	public void setSocketKeepAlive( final boolean socketKeepAlive ) {
+		this.socketKeepAlive = socketKeepAlive;
+	}
+
+	public boolean isServerSocketKeepAlive() {
+		return serverSocketKeepAlive;
+	}
+
+	public void setServerSocketKeepAlive( final boolean serverSocketKeepAlive ) {
+		this.serverSocketKeepAlive = serverSocketKeepAlive;
+	}
+
+	public void setMp( final IMessagePassing mp ) {
 		this.mp = mp;
 	}
 
-	public void setPipelineFactory(NettyChannelPipelineFactory pipelineFactory) {
-		this.pipelineFactory = pipelineFactory;
-	}
-
-	public void setServerBootstrap(ServerBootstrap serverBootstrap) {
-		this.serverBootstrap = serverBootstrap;
-	}
-
-	public void setClientBootstrap(ClientBootstrap clientBootstrap) {
-		this.clientBootstrap = clientBootstrap;
-	}
-
 	public NettyChannelPipelineFactory getPipelineFactory() {
-		return this.pipelineFactory;
+		return pipelineFactory;
 	}
 
 	public ServerBootstrap getServerBootstrap() {
-		return this.serverBootstrap;
+		return serverBootstrap;
 	}
 
 	public ClientBootstrap getClientBootstrap() {
-		return this.clientBootstrap;
+		return clientBootstrap;
 	}
 
 	public int getServerPort() {
-		return this.serverPort;
+		return serverPort;
 	}
 
 	@Override
 	public InetSocketAddress getAddress() {
-		return this.address;
+		return address;
 	}
 
 	@Override
 	public Set<INodeAddress> getAllConnections() {
-		return this.channels.keySet();
+		return channels.keySet();
 	}
 
 	public void setUp() {
-		this.serverBootstrap.setOption("child.keepAlive", true);
-		this.serverBootstrap.setOption("keepAlive", true);
+		serverBootstrap.setOption( "child.keepAlive", isSocketKeepAlive() );
+		serverBootstrap.setOption( "keepAlive", isServerSocketKeepAlive() );
 
-		this.pipelineFactory.addLast("NettyConnectionManager", this);
+		pipelineFactory.addLast( "NettyConnectionManager", this );
 
-		this.serverBootstrap.setPipelineFactory(this.pipelineFactory);
-		this.clientBootstrap.setPipelineFactory(this.pipelineFactory);
+		serverBootstrap.setPipelineFactory( pipelineFactory );
+		clientBootstrap.setPipelineFactory( pipelineFactory );
 
 		// Start Server
-		Channel serverChannel = this.serverBootstrap
-				.bind(new InetSocketAddress(this.serverPort));
-		this.address = (InetSocketAddress) serverChannel.getLocalAddress();
-		this.serverPort = this.address.getPort();
+		Channel serverChannel = serverBootstrap.bind( new InetSocketAddress( serverPort ) );
+		address = (InetSocketAddress) serverChannel.getLocalAddress();
+		serverPort = address.getPort();
 	}
 
 	@Override
-	public Channel getConnection(INodeAddress address) {
-		if (this.channels.containsKey(address)) {
-			Channel chan = this.channels.get(address);
-			if (chan.isOpen()) {
+	public Channel getConnection( final INodeAddress address ) {
+		if ( channels.containsKey( address ) ) {
+			Channel chan = channels.get( address );
+			if ( chan.isOpen() ) {
 				return chan;
 			} else {
-				this.closeConnection(address);
-				return this.openConnection(address);
+				this.closeConnection( address );
+				return openConnection( address );
 			}
 		} else {
-			return this.openConnection(address);
+			return openConnection( address );
 		}
 	}
 
 	@Override
-	public Channel getConnection(IHash nodeId) {
-		return this.channels.get(nodeId);
+	public Channel getConnection( final IHash nodeId ) {
+		return channels.get( nodeId );
 	}
 
-	private Channel openConnection(INodeAddress address) {
+	private Channel openConnection( final INodeAddress address ) {
 		int i = 0;
 		Channel chan;
 		do {
-			chan = this.createConnection(address);
-		} while (!chan.isOpen() && i++ <= 1);
+			chan = createConnection( address );
+		} while ( !chan.isOpen() && i++ <= 1 );
 
-		if (!chan.isOpen()) {
+		if ( !chan.isOpen() ) {
 			return null;
 		}
 
-		this.channels.put(address, chan);
+		channels.put( address, chan );
 		return chan;
 	}
 
-	private Channel createConnection(INodeAddress address) {
-		Preconditions.checkNotNull(address);
-		Preconditions.checkNotNull(address.getInetAddress());
+	private Channel createConnection( final INodeAddress address ) {
+		Preconditions.checkNotNull( address );
+		Preconditions.checkNotNull( address.getInetAddress() );
 		// Make a new connection.
-		System.out.println("Connecting to: " + address);
-		ChannelFuture connectFuture = this.clientBootstrap.connect(address
-				.getInetAddress());
+		logger.debug( "Connecting to: " + address );
+		ChannelFuture connectFuture = clientBootstrap.connect( address.getInetAddress() );
 
 		// Wait until the connection is made successfully.
 		Channel channel = connectFuture.awaitUninterruptibly().getChannel();
-		System.out.println("Got " + channel);
+		logger.debug( "Got " + channel );
 
 		return channel;
 	}
 
 	@Override
-	public void closeConnection(INodeAddress address) {
-		System.out.println("Closing Connection to " + address);
+	public void closeConnection( final INodeAddress address ) {
+		logger.debug( "Closing Connection to " + address );
 		Channel chan;
-		if (this.channels.containsKey(address)) {
-			chan = this.channels.get(address);
-			this.channels.remove(address);
-			if (chan.isOpen()) {
+		if ( channels.containsKey( address ) ) {
+			chan = channels.get( address );
+			channels.remove( address );
+			if ( chan.isOpen() ) {
 				chan.close();
 			}
 		}
@@ -165,31 +186,30 @@ implements ConnectionManager {
 	}
 
 	@Override
-	public void closeConnection(Channel channel) {
-		System.out.println("Closing Connection to " + channel);
+	public void closeConnection( final Channel channel ) {
+		logger.debug( "Closing Connection to " + channel );
 		INodeAddress address = null;
-		if (this.channels.containsValue(channel)) {
-			for (Entry<INodeAddress, Channel> entry : this.channels.entrySet()) {
-				if (entry.getValue() == channel) {
-					if (address == null) {
+		if ( channels.containsValue( channel ) ) {
+			for ( Entry<INodeAddress, Channel> entry : channels.entrySet() ) {
+				if ( entry.getValue() == channel ) {
+					if ( address == null ) {
 						address = entry.getKey();
 					}
 				}
 			}
 
-			this.channels.remove(address);
+			channels.remove( address );
 		}
-		if (channel.isOpen()) {
+		if ( channel.isOpen() ) {
 			channel.close();
 		}
 	}
 
 	@Override
-	public void addConnection(INodeAddress address, Channel channel) {
-		if (!this.channels.containsKey(address)) {
-			System.out.println("Adding Connection to " + address + " Channel: "
-					+ channel);
-			this.channels.put(address, channel);
+	public void addConnection( final INodeAddress address, final Channel channel ) {
+		if ( !channels.containsKey( address ) ) {
+			logger.debug( "Adding Connection to " + address + " Channel: " + channel );
+			channels.put( address, channel );
 		}
 	}
 
@@ -199,18 +219,16 @@ implements ConnectionManager {
 	 * from a remote peer.
 	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, final MessageEvent e)
-			throws Exception {
-		final NettyConnectionManager that = this;
+	public void messageReceived( final ChannelHandlerContext ctx, final MessageEvent e ) throws Exception {
 		Runnable handleMessage = new Runnable() {
 			@Override
 			public void run() {
-				that.mp.messageReceived(e);
+				mp.messageReceived( e );
 			}
 		};
 
-		Executors.newCachedThreadPool().execute(handleMessage);
-		ctx.sendUpstream(e);
+		threadPool.execute( handleMessage );
+		ctx.sendUpstream( e );
 	}
 
 	/**
@@ -218,23 +236,21 @@ implements ConnectionManager {
 	 * {@link ChannelHandler}.
 	 */
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
-			throws Exception {
-		if (this == ctx.getPipeline().getLast()) {
+	public void exceptionCaught( final ChannelHandlerContext ctx, final ExceptionEvent e ) throws Exception {
+		if ( this == ctx.getPipeline().getLast() ) {
 			e.getCause().printStackTrace();
-			this.closeConnection(e.getChannel());
+			this.closeConnection( e.getChannel() );
 		}
-		ctx.sendUpstream(e);
+		ctx.sendUpstream( e );
 	}
 
 	/**
 	 * Invoked when a {@link Channel} was disconnected from its remote peer.
 	 */
 	@Override
-	public void channelDisconnected(ChannelHandlerContext ctx,
-			ChannelStateEvent e) throws Exception {
-		this.closeConnection(e.getChannel());
-		ctx.sendUpstream(e);
+	public void channelDisconnected( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
+		this.closeConnection( e.getChannel() );
+		ctx.sendUpstream( e );
 	}
 
 	/**
@@ -242,10 +258,9 @@ implements ConnectionManager {
 	 * were released.
 	 */
 	@Override
-	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e)
-			throws Exception {
-		this.closeConnection(e.getChannel());
-		ctx.sendUpstream(e);
+	public void channelClosed( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
+		this.closeConnection( e.getChannel() );
+		ctx.sendUpstream( e );
 	}
 
 	/**
@@ -253,10 +268,9 @@ implements ConnectionManager {
 	 * connection was closed)
 	 */
 	@Override
-	public void childChannelClosed(ChannelHandlerContext ctx,
-			ChildChannelStateEvent e) throws Exception {
-		this.closeConnection(e.getChannel());
-		ctx.sendUpstream(e);
+	public void childChannelClosed( final ChannelHandlerContext ctx, final ChildChannelStateEvent e ) throws Exception {
+		this.closeConnection( e.getChannel() );
+		ctx.sendUpstream( e );
 	}
 
 }

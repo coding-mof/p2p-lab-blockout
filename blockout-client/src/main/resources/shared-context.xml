@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+		
+    <context:annotation-config/>
+		
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="network.properties"/>
+    </bean>
+
+	<bean name="clientSocketFactory" class="org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory"></bean>
+	<bean name="clientBootstrap" class="org.jboss.netty.bootstrap.ClientBootstrap">
+		<constructor-arg ref="clientSocketFactory"/>
+	</bean>
+	
+	<bean name="serverSocketFactory" class="org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory"></bean>
+	<bean name="serverBootstrap" class="org.jboss.netty.bootstrap.ServerBootstrap">
+		<constructor-arg ref="serverSocketFactory"/>
+	</bean>
+	
+	<bean name="connectionlessChannelFactory" class="org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory"></bean>
+	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">
+		<constructor-arg ref="connectionlessChannelFactory" />
+		<constructor-arg type="int" value="${discoveryPort}" />
+	</bean>
+	
+	<bean name="connectionManager" class="org.blockout.network.netty.NettyConnectionManager">
+	      <constructor-arg type="int" value="${serverPort}"/>
+	      <constructor-arg>
+	      	<bean class="java.util.concurrent.Executors" factory-method="newCachedThreadPool"/>
+	      </constructor-arg>
+	      <constructor-arg>
+	      	<bean class="org.blockout.network.netty.NettyChannelPipelineFactory" />
+	      </constructor-arg>
+	      <constructor-arg ref="serverBootstrap"/>
+	      <constructor-arg ref="clientBootstrap"/>
+	      
+	      <property name="mp" ref="messageBroker" />
+	      <property name="socketKeepAlive" value="${socketKeepAlive}"/>
+	      <property name="serverSocketKeepAlive" value="${serverSocketKeepAlive}"/>
+	</bean>
+	
+	<bean name="messageBroker" class="org.blockout.network.message.MessageBroker">
+		<property name="connectionManager" ref="connectionManager"/>
+	</bean>
+	
+	<bean name="dht" class="org.blockout.network.dht.chord.Chord" init-method="setUp"/>
+	<bean name="networkTimer" class="org.jboss.netty.util.HashedWheelTimer"/>
+</beans>
