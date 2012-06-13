@@ -89,13 +89,11 @@ public class ShaderBasedHealthRenderer implements IHealthRenderer {
 		init();
 		int width = 0;
 		int height = 0;
-		try {
-			camera.lock();
-			width = camera.getWidth();
-			height = camera.getHeight();
-		} finally {
-			camera.unlock();
-		}
+		Camera localCamera = camera.getReadOnly();
+
+		width = localCamera.getWidth();
+		height = localCamera.getHeight();
+
 		shader.setUniform2FVariable( "SphereCenter", width - 10, -150 );
 		shader.setUniformFVariable( "FillSquaredDistance", currentDistance );
 		shader.setUniformFVariable( "GlowSquaredDistance",

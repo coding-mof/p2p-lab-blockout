@@ -9,7 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.network.ConnectionManager;
 import org.blockout.network.INodeAddress;
@@ -37,12 +36,12 @@ import com.google.common.collect.Multimap;
  * 
  */
 
-@Named
 public class MessageBroker implements IMessagePassing, Runnable {
 	private static final Logger										logger;
 	static {
 		logger = LoggerFactory.getLogger( MessageBroker.class );
 	}
+
 	// Own logical and actual address for fast retrieval
 	public InetSocketAddress										address;
 	public INodeAddress												nodeAddress;
@@ -89,8 +88,6 @@ public class MessageBroker implements IMessagePassing, Runnable {
 
 	// Mandatory
 	public void setUp() {
-		address = connectionManager.getAddress();
-		nodeAddress = new NodeInfo( address );
 		exec.execute( this );
 	}
 
@@ -120,7 +117,7 @@ public class MessageBroker implements IMessagePassing, Runnable {
 
 	@Override
 	public INodeAddress getOwnAddress() {
-		return nodeAddress;
+		return new NodeInfo( connectionManager.getAddress() );
 	}
 
 	// Message Handling
@@ -218,6 +215,7 @@ public class MessageBroker implements IMessagePassing, Runnable {
 			this.notify( envelope.getMessage(), envelope.getSender() );
 		} catch ( Exception e1 ) {
 			e1.printStackTrace();
+			logger.warn( "Closing channel " + event.getChannel() + " due to exception.", e1 );
 			connectionManager.closeConnection( event.getChannel() );
 		}
 	}

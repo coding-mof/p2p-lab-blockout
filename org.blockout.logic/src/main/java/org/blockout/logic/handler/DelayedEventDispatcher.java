@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -45,7 +46,15 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 		eventHandler = new CopyOnWriteArrayList<IEventHandler>();
 		activeEvents = Collections.synchronizedMap( new HashMap<IEvent<?>, Long>() );
 		logger.info( "Starting " + getClass().getName() + " with " + THREAD_POOL_SIZE + " threads." );
-		executor = new ScheduledThreadPoolExecutor( THREAD_POOL_SIZE );
+		executor = new ScheduledThreadPoolExecutor( THREAD_POOL_SIZE, new ThreadFactory() {
+
+			private int	threadCount;
+
+			@Override
+			public Thread newThread( final Runnable r ) {
+				return new Thread( r, "DelayedEventDispatchThread#" + (threadCount++) );
+			}
+		} );
 	}
 
 	@Inject

@@ -8,7 +8,16 @@ import org.blockout.world.entity.Player;
 @Named
 public class LocalGameState {
 
-	protected Player	player;
+	protected Player			player;
+	protected volatile boolean	gameInitialized;
+
+	public boolean isGameInitialized() {
+		return gameInitialized;
+	}
+
+	public void setGameInitialized( final boolean gameInitialized ) {
+		this.gameInitialized = gameInitialized;
+	}
 
 	@Inject
 	public LocalGameState(final IWorld world) {

@@ -14,6 +14,16 @@
 			<artifactId>org.blockout.ui</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>a-team</groupId>
+			<artifactId>org.blockout.ai</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+		  <groupId>com.beust</groupId>
+		  <artifactId>jcommander</artifactId>
+		  <version>1.25</version>
+		</dependency>
 	</dependencies>
 
 	<build>

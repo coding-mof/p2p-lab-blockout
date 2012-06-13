@@ -3,7 +3,6 @@ package org.blockout.network.dht.chord;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.network.ConnectionManager;
 import org.blockout.network.INodeAddress;
@@ -34,12 +33,12 @@ import org.slf4j.LoggerFactory;
  * 
  */
 
-@Named
 public class Chord extends MessageReceiver implements IDistributedHashTable, DiscoveryListener {
 	private static final Logger	logger;
 	static {
 		logger = LoggerFactory.getLogger( Chord.class );
 	}
+
 	private IMessagePassing		mp;
 	private NodeDiscovery		discover;
 	private ConnectionManager	connectionManager;
@@ -75,6 +74,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 				e.printStackTrace();
 			}
 		} else {
+
 			logger.debug( "I'm not responsible for " + nodeId + " my range is " + responsibility );
 			mp.send( new DHTPassOnMsg( msg, nodeId ), successor );
 		}
@@ -136,6 +136,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 				mp.send( new DHTWelcome( predecessor ), msg.getOrigin() );
 			} else {
 				mp.send( msg, successor );
+
 				logger.debug( "Node " + msg.getNodeId() + " is not in " + responsibility );
 				logger.debug( "Asking Successor " + successor );
 			}
@@ -155,6 +156,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 			mp.send( new DHTNewPredecessor(), this.successor );
 
 			state = ChordState.Joined;
+
 			logger.debug( "Pre:" + this.predecessor + " Succ:" + this.successor + " Range:" + responsibility );
 		}
 	}
@@ -167,6 +169,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 		} else if ( state == ChordState.Flux ) {
 			state = ChordState.Joined;
 		}
+
 		logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
 	}
 
@@ -177,6 +180,7 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 		} else if ( state == ChordState.Flux ) {
 			state = ChordState.Joined;
 		}
+
 		logger.debug( "Pre:" + predecessor + " Succ:" + successor + " Range:" + responsibility );
 	}
 
@@ -191,5 +195,4 @@ public class Chord extends MessageReceiver implements IDistributedHashTable, Dis
 	public void receive( final DHTLookupResponse msg, final INodeAddress origin ) {
 		logger.debug( "" + msg );
 	}
-
 }

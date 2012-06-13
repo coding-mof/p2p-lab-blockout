@@ -53,15 +53,12 @@ public class FogOfWarWorldRenderer extends AbstractWorldRenderer {
 	@Override
 	public void render( final Graphics g ) {
 
-		camera.lock();
-		try {
-			super.render( g );
+		Camera localCamera = camera.getReadOnly();
 
-			Image player = spriteManager.getSprite( SpriteType.Player, true );
-			player.drawCentered( camera.getHalfWidth(), camera.getHalfHeight() );
-		} finally {
-			camera.unlock();
-		}
+		super.render( g );
+
+		Image player = spriteManager.getSprite( SpriteType.Player, true );
+		player.drawCentered( localCamera.getHalfWidth(), localCamera.getHalfHeight() );
 	}
 
 	private class EntityRenderPass implements IRenderingPass {

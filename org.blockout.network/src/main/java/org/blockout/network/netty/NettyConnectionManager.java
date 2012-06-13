@@ -47,9 +47,9 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler impleme
 	}
 	// Bootstraps and Factory necessary for the creation of listening sockets
 	// and new connections
-	private ServerBootstrap									serverBootstrap;
-	private ClientBootstrap									clientBootstrap;
-	private NettyChannelPipelineFactory						pipelineFactory;
+	private final ServerBootstrap							serverBootstrap;
+	private final ClientBootstrap							clientBootstrap;
+	private final NettyChannelPipelineFactory				pipelineFactory;
 
 	// most accesses will happen more or less concurrently, use a structure that
 	// can live with that
@@ -58,6 +58,8 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler impleme
 	// Where should we listen for new connections?
 	private int												serverPort;
 	private InetSocketAddress								address;
+	private boolean											socketKeepAlive			= true;
+	private boolean											serverSocketKeepAlive	= true;
 
 	// System that will be notified on new Network Messages
 	private IMessagePassing									mp;
@@ -67,29 +69,38 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler impleme
 	 * 
 	 * @param serverPort
 	 */
-	public NettyConnectionManager(final int serverPort) {
+
+	public NettyConnectionManager(final int serverPort, final NettyChannelPipelineFactory pipelineFactory,
+			final ServerBootstrap serverBootstrap, final ClientBootstrap clientBootstrap) {
 		channels = new ConcurrentHashMap<INodeAddress, Channel>();
 		this.serverPort = serverPort;
+
+		this.pipelineFactory = pipelineFactory;
+		this.serverBootstrap = serverBootstrap;
+		this.clientBootstrap = clientBootstrap;
+
+		setUp();
 	}
 
-	// Mandatory
+	// Mandatory!
 	public void setMp( final IMessagePassing mp ) {
 		this.mp = mp;
 	}
 
-	// Mandatory
-	public void setPipelineFactory( final NettyChannelPipelineFactory pipelineFactory ) {
-		this.pipelineFactory = pipelineFactory;
+	public boolean isSocketKeepAlive() {
+		return socketKeepAlive;
 	}
 
-	// Mandatory
-	public void setServerBootstrap( final ServerBootstrap serverBootstrap ) {
-		this.serverBootstrap = serverBootstrap;
+	public void setSocketKeepAlive( final boolean socketKeepAlive ) {
+		this.socketKeepAlive = socketKeepAlive;
 	}
 
-	// Mandatory
-	public void setClientBootstrap( final ClientBootstrap clientBootstrap ) {
-		this.clientBootstrap = clientBootstrap;
+	public boolean isServerSocketKeepAlive() {
+		return serverSocketKeepAlive;
+	}
+
+	public void setServerSocketKeepAlive( final boolean serverSocketKeepAlive ) {
+		this.serverSocketKeepAlive = serverSocketKeepAlive;
 	}
 
 	public NettyChannelPipelineFactory getPipelineFactory() {
@@ -120,8 +131,8 @@ public class NettyConnectionManager extends SimpleChannelUpstreamHandler impleme
 
 	// Also Mandatory
 	public void setUp() {
-		serverBootstrap.setOption( "child.keepAlive", true );
-		serverBootstrap.setOption( "keepAlive", true );
+		serverBootstrap.setOption( "child.keepAlive", isSocketKeepAlive() );
+		serverBootstrap.setOption( "keepAlive", isServerSocketKeepAlive() );
 
 		pipelineFactory.addLast( "NettyConnectionManager", this );
 

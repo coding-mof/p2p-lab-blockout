@@ -120,12 +120,9 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		// prepare camera
 		Player player = gameState.getPlayer();
 		TileCoordinate playerPos = world.findTile( player );
-		camera.lock();
-		try {
-			camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
-		} finally {
-			camera.unlock();
-		}
+		camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
+
+		gameState.setGameInitialized( true );
 	}
 
 	@Override
@@ -136,7 +133,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 
 		updateHUD();
 
-		playerController.update( container, deltaMillis );
+		playerController.update( deltaMillis );
 	}
 
 	private void updateHUD() {

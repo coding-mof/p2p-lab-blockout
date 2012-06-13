@@ -9,7 +9,7 @@
       <directory>target</directory>
       <outputDirectory></outputDirectory>
       <includes>
-        <include>conf/logback.xml</include>
+        <include>conf/*</include>
         <include>start.bat</include>
         <include>start.sh</include>
         <include>background.jpg</include>
@@ -17,6 +17,7 @@
         <include>*.jar</include>
         <include>natives/*</include>
         <include>maps/*</include>
+        <include>*.properties</include>
       </includes>
     </fileSet>
   </fileSets>
