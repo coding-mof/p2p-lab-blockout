@@ -22,7 +22,7 @@ public class MessagePassingTestbed extends MessageReceiver {
 		context = new ClassPathXmlApplicationContext( "testbed.xml" );
 
 		MessageBroker mp = context.getBean( MessageBroker.class );
-		mp.addReceiver( new MessagePassingTestbed( mp ), DemoMessage.class );
+		mp.addReceiver( new MessagePassingTestbed( mp ), DemoMessage.class, ResetMessage.class );
 		//
 		// System.out.println("Done");
 		//
@@ -34,14 +34,6 @@ public class MessagePassingTestbed extends MessageReceiver {
 		}
 
 		mp.send( new DemoMessage( "Hallo :)" ), new Hash( "0000000000000000000000000000000000000000" ) );
-		//
-		// Set<INodeAddress> nodes = mp.listNodes();
-		// System.out.println(nodes);
-		// for (INodeAddress node : nodes) {
-		// System.out.println(node);
-		// mp.send(new DemoMessage("Hi, I'm " + mp.nodeAddress), node);
-		// }
-
 	}
 
 	private final MessageBroker	sut;
@@ -57,7 +49,13 @@ public class MessagePassingTestbed extends MessageReceiver {
 		if ( msgCounter < 10 ) {
 			sut.send( new DemoMessage( msgCounter + " " + msg ), origin );
 			msgCounter++;
+		} else {
+			sut.send( new ResetMessage(), origin );
 		}
+	}
+
+	public void receive( final ResetMessage msg, final INodeAddress origin ) {
+		msgCounter = 0;
 	}
 
 }

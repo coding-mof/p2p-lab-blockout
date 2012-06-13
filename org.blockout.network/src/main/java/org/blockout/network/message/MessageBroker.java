@@ -42,10 +42,6 @@ public class MessageBroker implements IMessagePassing, Runnable {
 		logger = LoggerFactory.getLogger( MessageBroker.class );
 	}
 
-	// Own logical and actual address for fast retrieval
-	public InetSocketAddress										address;
-	public INodeAddress												nodeAddress;
-
 	// Map of registered receivers
 	protected Multimap<Class<? extends IMessage>, IMessageReceiver>	filtredReceivers;
 
@@ -101,7 +97,7 @@ public class MessageBroker implements IMessagePassing, Runnable {
 	 * sender and puts it into the outgoing message queue.
 	 */
 	public void send( final IMessage msg, final INodeAddress recipient ) {
-		IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>( msg, recipient, nodeAddress );
+		IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>( msg, recipient, getOwnAddress() );
 		outgoing.offer( envelope );
 		notifications.offer( MessageType.OUTGOING );
 	}
