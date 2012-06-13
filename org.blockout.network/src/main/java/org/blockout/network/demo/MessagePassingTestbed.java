@@ -4,31 +4,36 @@ import org.blockout.network.INodeAddress;
 import org.blockout.network.dht.Hash;
 import org.blockout.network.message.MessageBroker;
 import org.blockout.network.message.MessageReceiver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-public class MessagePassingTestbed extends MessageReceiver{
+public class MessagePassingTestbed extends MessageReceiver {
+	private static final Logger	logger;
+	static {
+		logger = LoggerFactory.getLogger( MessagePassingTestbed.class );
+	}
 
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main( final String[] args ) {
 		ClassPathXmlApplicationContext context;
-		context = new ClassPathXmlApplicationContext("testbed.xml");
+		context = new ClassPathXmlApplicationContext( "testbed.xml" );
 
-		MessageBroker mp = context.getBean(MessageBroker.class);
-		mp.addReceiver(new MessagePassingTestbed(mp), DemoMessage.class);
+		MessageBroker mp = context.getBean( MessageBroker.class );
+		mp.addReceiver( new MessagePassingTestbed( mp ), DemoMessage.class );
 		//
 		// System.out.println("Done");
 		//
 		try {
-			Thread.sleep(6500);
-		} catch (InterruptedException e) {
+			Thread.sleep( 6500 );
+		} catch ( InterruptedException e ) {
 			// // TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		mp.send(new DemoMessage("Hallo :)"), new Hash(
-				"0000000000000000000000000000000000000000"));
+		mp.send( new DemoMessage( "Hallo :)" ), new Hash( "0000000000000000000000000000000000000000" ) );
 		//
 		// Set<INodeAddress> nodes = mp.listNodes();
 		// System.out.println(nodes);
@@ -39,19 +44,19 @@ public class MessagePassingTestbed extends MessageReceiver{
 
 	}
 
-	private final MessageBroker sut;
-	private int msgCounter;
+	private final MessageBroker	sut;
+	private int					msgCounter;
 
-	public MessagePassingTestbed(MessageBroker sut){
+	public MessagePassingTestbed(final MessageBroker sut) {
 		this.sut = sut;
-		this.msgCounter = 0;
+		msgCounter = 0;
 	}
 
-	public void receive(DemoMessage msg, INodeAddress origin) {
-		System.out.println("Received: " + msg);
-		if (this.msgCounter < 10) {
-			this.sut.send(new DemoMessage(this.msgCounter + " " + msg), origin);
-			this.msgCounter++;
+	public void receive( final DemoMessage msg, final INodeAddress origin ) {
+		logger.debug( "Received: " + msg );
+		if ( msgCounter < 10 ) {
+			sut.send( new DemoMessage( msgCounter + " " + msg ), origin );
+			msgCounter++;
 		}
 	}
 
