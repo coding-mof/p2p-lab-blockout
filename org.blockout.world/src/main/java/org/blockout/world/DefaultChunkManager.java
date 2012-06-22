@@ -218,10 +218,17 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 			if(set) break;
 		}
 		
+		if(!receiver.containsKey(c.getPosition())){
+			receiver.put(c.getPosition(), new ArrayList<INodeAddress>());
+		}
+		receiver.get(c.getPosition()).add(origin);
 		messagePassing.send(new GameEnteredMessage(c), origin);
 	}
 	
 	public void receive( final GameEnteredMessage msg, final INodeAddress origin ) {
+		if(receiver.containsKey(msg.getChunk().getPosition())){
+			receiver.get(msg.getChunk().getPosition()).remove(origin);
+		}
 		worldAdapter.gameEntered(msg.getChunk());
 	}
 	
