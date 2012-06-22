@@ -10,7 +10,6 @@ public class StopUpdatesMessage implements IMessage {
 	private TileCoordinate coordinate;
 
 	public StopUpdatesMessage(TileCoordinate coordinate) {
-		super();
 		this.coordinate = coordinate;
 	}
 

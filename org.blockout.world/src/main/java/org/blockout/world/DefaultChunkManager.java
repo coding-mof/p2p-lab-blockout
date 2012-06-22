@@ -1,5 +1,6 @@
 package org.blockout.world;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -10,11 +11,17 @@ import javax.inject.Named;
 import org.blockout.common.TileCoordinate;
 import org.blockout.network.INodeAddress;
 import org.blockout.network.dht.Hash;
+import org.blockout.network.message.IMessage;
 import org.blockout.network.message.IMessagePassing;
 import org.blockout.network.message.MessageReceiver;
+import org.blockout.world.entity.Player;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.messeges.ChuckRequestMessage;
 import org.blockout.world.messeges.ChunkDeliveryMessage;
+import org.blockout.world.messeges.DefaultComparator;
+import org.blockout.world.messeges.EnterGameMessage;
+import org.blockout.world.messeges.EntityAddedMessage;
+import org.blockout.world.messeges.GameEnteredMessage;
 import org.blockout.world.messeges.IComparator;
 import org.blockout.world.messeges.ManageMessage;
 import org.blockout.world.messeges.StateMessage;
@@ -35,7 +42,6 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 
 	private final WorldAdapter											worldAdapter;
 
-	@Inject
 	private final IMessagePassing										messagePassing;
 
 	private final Hashtable<TileCoordinate, ArrayList<INodeAddress>>	receiver;
@@ -47,10 +53,11 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		this.worldAdapter = worldAdapter;
 		this.worldAdapter.setManager( this );
 		messagePassing = network;
-		network.addReceiver( this, ChuckRequestMessage.class );
-		network.addReceiver( this, ChunkDeliveryMessage.class );
-		network.addReceiver( this, StateMessage.class );
-		network.addReceiver( this, StopUpdatesMessage.class );
+		network.addReceiver(this, ChuckRequestMessage.class,
+				ChunkDeliveryMessage.class, StateMessage.class,
+				StopUpdatesMessage.class, EnterGameMessage.class,
+				ManageMessage.class, UnmanageMessage.class,
+				GameEnteredMessage.class, EntityAddedMessage.class);
 	}
 
 	@Override
@@ -115,6 +122,14 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	public void stopUpdating( final TileCoordinate position ) {
 		messagePassing.send( new StopUpdatesMessage( position ), new Hash( position ) );
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void enterGame(Player player) {
+		messagePassing.send(new EnterGameMessage(player), new Hash(new TileCoordinate(0, 0)));
+	}
 
 	public void receive( final StateMessage msg, final INodeAddress origin ) {
 		switch ( msg.getType() ) {
@@ -176,6 +191,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	}
 	
 	public void receive( final ManageMessage msg, final INodeAddress origin ) {
+
 		ArrayList<Chunk> chunks = msg.getChunks();
 		ArrayList<ArrayList<INodeAddress>> addresses = msg.getReceivers();
 		
@@ -185,5 +201,32 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		}
 	
 	}
-
+	
+	public void receive( final EnterGameMessage msg, final INodeAddress origin ) {
+		Chunk c = worldAdapter.getChunk(new TileCoordinate(0, 0));
+		
+		//TODO better player placement
+		boolean set  = false;
+		for (int i = 1; i < Chunk.CHUNK_SIZE-1; i++) {
+			for (int j = 1; j < Chunk.CHUNK_SIZE-1; j++) {
+				if(c.getTile(i, j).getEntityOnTile() == null){
+					c.setEntityCoordinate(msg.getPlayer(), i, j);
+					set= true;
+					break;
+				}
+			}
+			if(set) break;
+		}
+		
+		messagePassing.send(new GameEnteredMessage(c), origin);
+	}
+	
+	public void receive( final GameEnteredMessage msg, final INodeAddress origin ) {
+		worldAdapter.gameEntered(msg.getChunk());
+	}
+	
+	public void receive( final EntityAddedMessage msg, final INodeAddress origin ) {
+		//TODO
+		System.err.println("EntityAddedMessage: "+msg.getEntity());
+	}
 }

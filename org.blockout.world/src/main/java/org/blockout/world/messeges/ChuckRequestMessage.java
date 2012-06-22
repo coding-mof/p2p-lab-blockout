@@ -16,7 +16,6 @@ public class ChuckRequestMessage implements IMessage{
 	private TileCoordinate coordinate;
 	
 	public ChuckRequestMessage(TileCoordinate coordinate) {
-		super();
 		this.coordinate = coordinate;
 	}
 

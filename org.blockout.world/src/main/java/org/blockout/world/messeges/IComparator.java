@@ -1,5 +1,7 @@
 package org.blockout.world.messeges;
 
+import java.io.Serializable;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.network.dht.IHash;
 
@@ -13,7 +15,7 @@ import org.blockout.network.dht.IHash;
  * @author key3
  *
  */
-public interface IComparator {
+public interface IComparator extends Serializable {
 
 	/**
 	 * Determines whether the given coordinate is still within

@@ -1,6 +1,7 @@
 package org.blockout.world;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.world.entity.Player;
 
 /**
  * Interface for the core component for managing the world. A chunk manager
@@ -28,5 +29,5 @@ public interface IChunkManager {
 	 */
 	public void stopUpdating(TileCoordinate position);
 	
-	
+	public void enterGame(Player player);
 }

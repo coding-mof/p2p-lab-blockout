@@ -66,7 +66,6 @@ public class World implements IWorld, WorldAdapter {
 				return coordinate;
 			}
 		}
-		System.out.println( entity.getName() + ": " + coordinate );
 		return null;
 	}
 
@@ -76,7 +75,7 @@ public class World implements IWorld, WorldAdapter {
 	@Override
 	public void setPlayerPosition( final Player p, final TileCoordinate coord ) {
 		TileCoordinate newPos = Chunk.containingCunk( coord );
-		if ( !pos.equals( newPos ) ) {
+		if ( !newPos.equals(pos)) {
 			view.get( pos ).removeEntity( p );
 			pos = newPos;
 			cleanView();
@@ -180,34 +179,7 @@ public class World implements IWorld, WorldAdapter {
 	@Override
 	public void init( final Player p ) {
 		// TODO networking version!
-		Chunk c;
-		if ( managedChunks.size() == 0 ) {
-			c = chunkGenerator.generateChunk( new TileCoordinate( 0, 0 ) );
-			chunkManager.requestChunk( c.getPosition() );
-			managedChunks.put( c.getPosition(), c );
-			view.put( c.getPosition(), c );
-			pos = new TileCoordinate( 0, 0 );
-		} else {
-			c = managedChunks.get( managedChunks.keys().nextElement() );
-			view.put( c.getPosition(), c );
-			pos = c.getPosition();
-
-		}
-		int cx, cy;
-		cx = c.getX() * Chunk.CHUNK_SIZE;
-		cy = c.getY() * Chunk.CHUNK_SIZE;
-		Random r = new Random();
-		boolean set = false;
-		while ( !set ) {
-			final int x = r.nextInt( Chunk.CHUNK_SIZE );
-			final int y = r.nextInt( Chunk.CHUNK_SIZE );
-			if ( c.getTile( x, y ).getEntityOnTile() == null && c.getTile( x, y ).getHeight() == Tile.GROUND_HEIGHT ) {
-				c.setEntityCoordinate( p, cx + x, cy + y );
-				set = true;
-			}
-		}
-		updateView();
-
+		chunkManager.enterGame(p);
 	}
 
 	/**
@@ -251,6 +223,13 @@ public class World implements IWorld, WorldAdapter {
 	@Override
 	public void setManager( final IChunkManager chunkManager ) {
 		this.chunkManager = chunkManager;
+	}
+
+	@Override
+	public void gameEntered(Chunk c) {
+		pos = c.getPosition();
+		view.put(pos, c);
+		updateView();
 	}
 
 }

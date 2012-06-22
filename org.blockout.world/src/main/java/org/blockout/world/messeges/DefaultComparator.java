@@ -11,7 +11,7 @@ import org.blockout.network.dht.IHash;
  * 
  * @author key3
  */
-public class DefaultComparator implements IComparator, Serializable {
+public class DefaultComparator implements IComparator {
 	
 	private String hash;
 	

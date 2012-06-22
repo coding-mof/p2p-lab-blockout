@@ -48,4 +48,11 @@ public interface WorldAdapter {
 	 * @param chunkManager
 	 */
 	public void setManager(IChunkManager chunkManager);
+	
+	/**
+	 * method called after the game was entered 
+	 * 
+	 * @param c the Chunk containing the local Player
+	 */
+	public void gameEntered(Chunk c);
 }

@@ -24,7 +24,6 @@ public class StateMessage implements IMessage{
 	
 	
 	public StateMessage(IEvent<?> event, int type) {
-		super();
 		this.event = event;
 		this.type = type;
 	}

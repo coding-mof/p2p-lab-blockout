@@ -3,23 +3,21 @@ package org.blockout.world.messeges;
 import org.blockout.network.message.IMessage;
 import org.blockout.world.Chunk;
 
-public class ChunkDeliveryMessage implements IMessage {
-	
-	private static final long serialVersionUID = -1551603331409674760L;
+public class GameEnteredMessage implements IMessage {
+
+	private static final long serialVersionUID = -1263905655275809964L;
 	
 	private Chunk chunk;
-
 	
-	
-	public ChunkDeliveryMessage(Chunk chunk) {
+	public GameEnteredMessage(Chunk chunk) {
 		this.chunk = chunk;
 	}
-
 
 	public Chunk getChunk() {
 		return chunk;
 	}
-	
+
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -28,11 +26,11 @@ public class ChunkDeliveryMessage implements IMessage {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ChunkDeliveryMessage other = (ChunkDeliveryMessage) obj;
+		GameEnteredMessage other = (GameEnteredMessage) obj;
 		if (chunk == null) {
 			if (other.chunk != null)
 				return false;
-		} else if (!chunk.getPosition().equals(other.chunk.getPosition()))
+		} else if (!chunk.equals(other.chunk))
 			return false;
 		return true;
 	}

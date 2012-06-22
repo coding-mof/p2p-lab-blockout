@@ -34,12 +34,19 @@ public class TestWorld {
 		w.setManager(m);
 	}
 	
+	
 	@Test
 	public void init(){
+		
 		Player p = mock(Player.class);
 		w.init(p);
-		TileCoordinate coordinate = Chunk.containingCunk(w.findTile(p));
-		verify(m, never()).requestChunk(coordinate);
+		verify(m).enterGame(p);
+		
+		Chunk c = w.getChunk(new TileCoordinate(0, 0));
+		c.setEntityCoordinate(p, 0, 0);
+		
+		w.gameEntered(c);
+		TileCoordinate coordinate = c.getPosition();
 		verify(m).requestChunk(new TileCoordinate(coordinate.getX(), coordinate.getY()+1));
 		verify(m).requestChunk(new TileCoordinate(coordinate.getX(), coordinate.getY()-1));
 		verify(m).requestChunk(new TileCoordinate(coordinate.getX()+1, coordinate.getY()+1));
@@ -53,10 +60,18 @@ public class TestWorld {
 		assertEquals(coordinate, w.findTile(p));
 	}
 	
+	private Player initW(){
+		Player p = mock(Player.class);
+		Chunk c = w.getChunk(new TileCoordinate(0, 0));
+		c.setEntityCoordinate(p, 0, 0);
+		w.gameEntered(c);
+		return p;
+	}
+	
 	@Test
 	public void movePlayerEntity(){
-		Player p = mock(Player.class);
-		w.init(p);
+		Player p = initW();
+		
 		TileCoordinate coordinate = w.findTile(p);
 		w.setPlayerPosition(p, new TileCoordinate(5, 5));
 		assertNull(w.getTile(coordinate.getX(), coordinate.getY()).getEntityOnTile());
@@ -69,9 +84,9 @@ public class TestWorld {
 	
 	@Test
 	public void removeEntity(){
-		Player p = mock(Player.class);
+		Player p = initW();
 		Entity e = mock(Entity.class);
-		w.init(p);
+		
 		TileCoordinate pt = w.findTile(p);
 		TileCoordinate et = new TileCoordinate(pt.getX()+1, pt.getX()+1);
 		w.setEnityPosition(e, et);
@@ -98,14 +113,13 @@ public class TestWorld {
 	@Test
 	public void findTile(){
 		
-		Player p = mock(Player.class);
+		Player p = initW();
 		for(int i = -2; i< 3; i++){
 			for(int j = -2; j< 3; j++){
 				w.getChunk(new TileCoordinate(i, j));
 			}
 		}
 		
-		w.init(p);
 		TileCoordinate playerOld = w.findTile(p);
 		assertEquals(p, w.getTile(playerOld.getX(), playerOld.getY()).getEntityOnTile());
 		TileCoordinate playerNew = new TileCoordinate(-(Chunk.CHUNK_SIZE+3), -(Chunk.CHUNK_SIZE+7));
