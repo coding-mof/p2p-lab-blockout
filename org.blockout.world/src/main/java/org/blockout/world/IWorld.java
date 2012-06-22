@@ -27,6 +27,8 @@ public interface IWorld {
 	 */
 	public Tile getTile( int x, int y );
 
+	public Tile getTile( TileCoordinate coord );
+
 	/**
 	 * Returns the position of the tile containing the given entity
 	 * 
@@ -38,45 +40,48 @@ public interface IWorld {
 	public TileCoordinate findTile( Entity entity );
 
 	/**
-	 * Sets the position of the given player to the given coordinates
-	 * should only used when moving the local player
-	 * calling this method could result in moving the current view on the world
+	 * Sets the position of the given player to the given coordinates should
+	 * only used when moving the local player calling this method could result
+	 * in moving the current view on the world
 	 * 
-	 * @param p the player which should be moved
-	 * @param coord the new coordinates of he player
+	 * @param p
+	 *            the player which should be moved
+	 * @param coord
+	 *            the new coordinates of he player
 	 */
 	public void setPlayerPosition( Player p, TileCoordinate coord );
-	
+
 	/**
-	 * Sets the position of the given entity to the given coordinates
-	 * should not be used when moving the local player
+	 * Sets the position of the given entity to the given coordinates should not
+	 * be used when moving the local player
 	 * 
-	 * if the given entity is not found within the current world 
-	 * 	it will be created at the given coordinates
-	 * if the given coordinates are not found within the current world
-	 * 	the given entity will be removed from the world
-	 * else the given entity will be moved from its original position
-	 * 	to the given coordinates
-	 *  
+	 * if the given entity is not found within the current world it will be
+	 * created at the given coordinates if the given coordinates are not found
+	 * within the current world the given entity will be removed from the world
+	 * else the given entity will be moved from its original position to the
+	 * given coordinates
 	 * 
-	 * @param e the entity which should be moved
-	 * @param coord the new coordinates of he player
+	 * 
+	 * @param e
+	 *            the entity which should be moved
+	 * @param coord
+	 *            the new coordinates of he player
 	 */
 	public void setEnityPosition( Entity e, TileCoordinate coord );
-	
+
 	/**
-	 *	Removes the given entity from the World
-	 *	no actions will be taken i the given entity is 
-	 *	not found within the world
-	 *
-	 * @param e the entity which should be moved
+	 * Removes the given entity from the World no actions will be taken i the
+	 * given entity is not found within the world
+	 * 
+	 * @param e
+	 *            the entity which should be moved
 	 */
-	public void removeEntity( Entity e);
-	
+	public void removeEntity( Entity e );
+
 	/**
 	 * Will position the given Player within the World
-	 *  
+	 * 
 	 * @param p
 	 */
-	public void init(Player p);
+	public void init( Player p );
 }

@@ -3,6 +3,15 @@ package org.blockout.ai;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class manages the thread responsible for the {@link AIPlayer}. The
+ * underlying thread polls the player instance calling
+ * {@link AIPlayer#doNextStep()} and then sleeps until the response time has
+ * passed.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public final class AIThread {
 
 	private static final Logger	logger;

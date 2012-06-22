@@ -53,34 +53,7 @@ public class StaticTMXWorld implements IWorld {
 
 	@Override
 	public Tile getTile( final int x, final int y ) {
-		if ( x <= -50 || y <= -50 ) {
-			return null;
-		}
-		Tile t = tileCache.get( new TileCoordinate( x, y ) );
-		if ( t == null ) {
-			int spriteId = map.getTileId( x + 50, y + 50, 0 ) - 1;
-			if ( spriteId < 0 ) {
-				return null;
-			}
-			int objectId = map.getTileId( x + 50, y + 50, 1 ) - 1;
-			if ( objectId == 586 ) {
-				Crate entity = new Crate();
-				t = new Tile( spriteId, entity );
-				putEntity( entity, x, y );
-			} else if ( objectId == 249 ) {
-				Zombie entity = new Zombie( 1 );
-				t = new Tile( spriteId, entity );
-				putEntity( entity, x, y );
-			} else if ( objectId == 250 ) {
-				Monster entity = new Monster( "Skeleton", 1, 100, 25 );
-				t = new Tile( spriteId, entity );
-				putEntity( entity, x, y );
-			} else {
-				t = new Tile( spriteId, (spriteId == 849 /* StoneGround Dark */) ? Tile.WALL_HEIGHT : Tile.GROUND_HEIGHT );
-			}
-		}
-		tileCache.put( new TileCoordinate( x, y ), t );
-		return t;
+		return getTile( new TileCoordinate( x, y ) );
 	}
 
 	protected void putEntity( final Entity e, final int x, final int y ) {
@@ -104,14 +77,46 @@ public class StaticTMXWorld implements IWorld {
 	}
 
 	@Override
-	public void removeEntity(Entity e) {
+	public void removeEntity( final Entity e ) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void init(Player p) {
+	public void init( final Player p ) {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public Tile getTile( final TileCoordinate coord ) {
+		if ( coord.getX() <= -50 || coord.getY() <= -50 ) {
+			return null;
+		}
+		Tile t = tileCache.get( coord );
+		if ( t == null ) {
+			int spriteId = map.getTileId( coord.getX() + 50, coord.getY() + 50, 0 ) - 1;
+			if ( spriteId < 0 ) {
+				return null;
+			}
+			int objectId = map.getTileId( coord.getX() + 50, coord.getY() + 50, 1 ) - 1;
+			if ( objectId == 586 ) {
+				Crate entity = new Crate();
+				t = new Tile( spriteId, entity );
+				putEntity( entity, coord.getX(), coord.getY() );
+			} else if ( objectId == 249 ) {
+				Zombie entity = new Zombie( 1 );
+				t = new Tile( spriteId, entity );
+				putEntity( entity, coord.getX(), coord.getY() );
+			} else if ( objectId == 250 ) {
+				Monster entity = new Monster( "Skeleton", 1, 100, 25 );
+				t = new Tile( spriteId, entity );
+				putEntity( entity, coord.getX(), coord.getY() );
+			} else {
+				t = new Tile( spriteId, (spriteId == 849 /* StoneGround Dark */) ? Tile.WALL_HEIGHT : Tile.GROUND_HEIGHT );
+			}
+		}
+		tileCache.put( coord, t );
+		return t;
 	}
 }
