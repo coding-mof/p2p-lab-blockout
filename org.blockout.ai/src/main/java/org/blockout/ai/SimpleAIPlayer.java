@@ -12,59 +12,38 @@ import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.state.IStateMachine;
-import org.newdawn.slick.util.pathfinding.Path;
-import org.newdawn.slick.util.pathfinding.Path.Step;
 import org.newdawn.slick.util.pathfinding.PathFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
 /**
  * Implementation of a simple artificial intelligence (AI). It searches the
  * terrain for enemies and crates.
- * 
+ *
  * @author Marc-Christian Schulze
- * 
+ *
  */
-public class SimpleAIPlayer implements AIPlayer {
+public class SimpleAIPlayer extends AbstractAIPlayer {
 
 	private static final Logger				logger;
 	static {
 		logger = LoggerFactory.getLogger( SimpleAIPlayer.class );
 	}
 
-	private final IWorld					world;
-	private final LocalGameState			gameState;
-	private final Camera					camera;
-	private final LocalPlayerMoveHandler	playerController;
-	private final PathFinder				pathFinder;
-	private final IStateMachine				stateMachine;
-
-	private ITarget							currentTarget;
 
 	@Inject
-	public SimpleAIPlayer(final IWorld world, final LocalGameState gameState, final Camera camera,
-			final LocalPlayerMoveHandler playerController, final PathFinder pathFinder, final IStateMachine stateMachine) {
+    public SimpleAIPlayer( final IWorld world, final LocalGameState gameState,
+            final Camera camera, final LocalPlayerMoveHandler playerController,
+            final PathFinder pathFinder, final IStateMachine stateMachine ) {
 
-		Preconditions.checkNotNull( world );
-		Preconditions.checkNotNull( gameState );
-		Preconditions.checkNotNull( camera );
-		Preconditions.checkNotNull( playerController );
-		Preconditions.checkNotNull( pathFinder );
-		Preconditions.checkNotNull( stateMachine );
-
-		this.world = world;
-		this.gameState = gameState;
-		this.camera = camera;
-		this.playerController = playerController;
-		this.pathFinder = pathFinder;
-		this.stateMachine = stateMachine;
+        super( world, gameState, camera, playerController, pathFinder,
+                stateMachine );
 	}
 
 	@Override
 	public void doNextStep() {
-		if ( gameState.isGameInitialized() ) {
+        if( getGameState().isGameInitialized() ) {
+
 
 			if ( currentTarget == null || currentTarget.achieved() ) {
 				currentTarget = findTarget();
@@ -182,6 +161,5 @@ public class SimpleAIPlayer implements AIPlayer {
 						step.getY() + localCamera.getStartTileY() );
 			}
 		}
-		playerController.setPath( stateMachine, worldPath );
 	}
 }
