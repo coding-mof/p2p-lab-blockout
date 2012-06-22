@@ -97,6 +97,10 @@ public class TileCoordinate implements Serializable {
 		return new TileCoordinate( getX() + coord.getX(), getY() + coord.getY() );
 	}
 
+	public TileCoordinate plus( final int x, final int y ) {
+		return new TileCoordinate( getX() + x, getY() + y );
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

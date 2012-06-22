@@ -39,13 +39,18 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public Tile getTile( final int x, final int y ) {
-		TileCoordinate coordinate = Chunk.containingCunk( new TileCoordinate( x, y ) );
+		return getTile( new TileCoordinate( x, y ) );
+	}
+
+	@Override
+	public Tile getTile( final TileCoordinate coord ) {
+		TileCoordinate coordinate = Chunk.containingCunk( coord );
 		Chunk chunk;
 		if ( (chunk = view.get( coordinate )) != null ) {
-			return chunk.getTile( x, y );
+			return chunk.getTile( coord.getX(), coord.getY() );
 		}
 		if ( (chunk = managedChunks.get( coordinate )) != null ) {
-			return chunk.getTile( x, y );
+			return chunk.getTile( coord.getX(), coord.getY() );
 		}
 		return null;
 	}
