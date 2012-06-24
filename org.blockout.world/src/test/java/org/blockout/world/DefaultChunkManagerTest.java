@@ -7,6 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 import javax.inject.Inject;
 
@@ -78,6 +79,17 @@ public class DefaultChunkManagerTest {
 		stub(e4.getResponsibleTile()).toReturn(new TileCoordinate(-4*Chunk.CHUNK_SIZE+3, -4*Chunk.CHUNK_SIZE+3));
 	}
 	
+	private void addreceivers() throws IllegalArgumentException, SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException{
+		IMessage msg = new ChuckRequestMessage(coord1);
+		manager.receive(msg, a1);
+		msg = new ChuckRequestMessage(coord2);
+		manager.receive(msg, a1);
+		msg = new ChuckRequestMessage(coord2);
+		manager.receive(msg, a2);
+		msg = new ChuckRequestMessage(coord3);
+		manager.receive(msg, a2);
+	}
+	
 	@Test
 	public void receiveState() throws IllegalArgumentException, SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException{
 		IEvent<?> event = mock(IEvent.class);
@@ -102,26 +114,30 @@ public class DefaultChunkManagerTest {
 		IMessage msg = new ChuckRequestMessage(coord1);
 		manager.receive(msg, a1);
 		verify(worldAdapter).getChunk(coord1);
-		verify(messagePassing).send(new ChunkDeliveryMessage(chunk1), a1);
+		ArrayList<INodeAddress> addresses = new ArrayList<INodeAddress>();
+		verify(messagePassing).send(new ChunkDeliveryMessage(chunk1, addresses), a1);
 		//coord2
 		msg = new ChuckRequestMessage(coord2);
 		manager.receive(msg, a1);
 		verify(worldAdapter).getChunk(coord2);
-		verify(messagePassing).send(new ChunkDeliveryMessage(chunk2), a1);
+		addresses = new ArrayList<INodeAddress>();
+		verify(messagePassing).send(new ChunkDeliveryMessage(chunk2, addresses), a1);
+		addresses.add(a1);
 		msg = new ChuckRequestMessage(coord2);
 		manager.receive(msg, a2);
-		verify(messagePassing).send(new ChunkDeliveryMessage(chunk2), a2);
+		verify(messagePassing).send(new ChunkDeliveryMessage(chunk2, addresses), a2);
 		//coord3
 		msg = new ChuckRequestMessage(coord3);
 		manager.receive(msg, a2);
 		verify(worldAdapter).getChunk(coord3);
-		verify(messagePassing).send(new ChunkDeliveryMessage(chunk3), a2);
+		verify(messagePassing).send(new ChunkDeliveryMessage(chunk3, new ArrayList<INodeAddress>()), a2);
 	}
+	
 	
 	@Test
 	public void pushedEvents() throws IllegalArgumentException, SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException{
 		//adding requests to manager so that actually there is done something....
-		chunkRequest();
+		addreceivers();
 		
 		manager.eventPushed(e1);
 		verify(iStateMachine).commitEvent(e1);
@@ -138,7 +154,7 @@ public class DefaultChunkManagerTest {
 	public void commitedEvents() throws IllegalArgumentException,
 			SecurityException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
-		chunkRequest();
+		addreceivers();
 
 		// commit
 		manager.eventCommitted(e1);
@@ -164,7 +180,7 @@ public class DefaultChunkManagerTest {
 			InvocationTargetException, NoSuchMethodException {
 		// adding requests to manager so that actually there is done
 		// something....
-		chunkRequest();
+		addreceivers();
 
 		manager.eventRolledBack(e1);
 		verify(messagePassing).send(
@@ -189,7 +205,7 @@ public class DefaultChunkManagerTest {
 			InvocationTargetException, NoSuchMethodException {
 		// adding requests to manager so that actually there is done
 		// something....
-		chunkRequest();
+		addreceivers();
 
 		// stopUpdate
 		IMessage msg = new StopUpdatesMessage(coord2);

@@ -137,7 +137,11 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public Chunk getChunk( final TileCoordinate coord ) {
-		Chunk c = managedChunks.get( coord );
+		Chunk c = view.get( coord );
+		if(c != null){
+			return c;
+		}
+		c = managedChunks.get(coord);
 		if ( c == null ) {
 			c = chunkGenerator.generateChunk( coord );
 			managedChunks.put( coord, c );
@@ -183,7 +187,6 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public void init( final Player p ) {
-		// TODO networking version!
 		chunkManager.enterGame(p);
 	}
 
