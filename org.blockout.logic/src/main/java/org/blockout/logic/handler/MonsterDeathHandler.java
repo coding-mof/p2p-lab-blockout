@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.IWorld;
 import org.blockout.world.entity.Crate;
+import org.blockout.world.entity.Monster;
 import org.blockout.world.entity.Player;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.event.MonsterSlayedEvent;
@@ -54,14 +55,22 @@ public class MonsterDeathHandler implements IEventHandler {
 		}
 
 		MonsterSlayedEvent mse = (MonsterSlayedEvent) event;
+
 		if ( mse.getActor() instanceof Player ) {
-			RewardXPEvent xpEvent = new RewardXPEvent( (Player) mse.getActor(), 75 );
+
+			// activate player object
+			Player player = world.findEntity( mse.getActor().getId(), Player.class );
+
+			RewardXPEvent xpEvent = new RewardXPEvent( player, 75 );
 			stateMachine.pushEvent( xpEvent );
 		}
 
-		TileCoordinate coordinate = world.findTile( mse.getMonster() );
+		// activate monster object
+		Monster monster = world.findEntity( mse.getMonster().getId(), Monster.class );
+
+		TileCoordinate coordinate = world.findTile( monster );
 		if ( coordinate != null ) {
-			world.removeEntity( mse.getMonster() );
+			world.removeEntity( monster );
 
 			int porbability = 60;
 			logger.info( porbability + "% probability to spawn a crate..." );

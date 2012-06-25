@@ -76,22 +76,25 @@ public class AttackHandler implements IEventHandler {
 
 		AttackEvent ae = (AttackEvent) event;
 
-		int damage = ae.getAggressor().getStrength() - ae.getVictim().getArmor();
+		// activate objects
+		Actor aggressor = world.findEntity( ae.getAggressor().getId(), Actor.class );
+		Actor victim = world.findEntity( ae.getVictim().getId(), Actor.class );
+
+		int damage = aggressor.getStrength() - victim.getArmor();
 		if ( damage > 0 ) {
 			logger.debug( "Doing " + damage + " damage to victim." );
-			int healthLeft = ae.getVictim().getCurrentHealth() - damage;
+			int healthLeft = victim.getCurrentHealth() - damage;
 			if ( healthLeft <= 0 ) {
-				TileCoordinate victimCoord = world.findTile( ae.getVictim() );
+				TileCoordinate victimCoord = world.findTile( victim );
 				if ( ae.getVictim() instanceof Player ) {
-					logger.info( "Player died: " + ae.getVictim() );
-					stateMachine.pushEvent( new PlayerDiedEvent( (Player) ae.getVictim(), victimCoord ) );
-				} else if ( ae.getVictim() instanceof Monster ) {
-					logger.info( "Monster died: " + ae.getVictim() );
-					stateMachine.pushEvent( new MonsterSlayedEvent( ae.getAggressor(), (Monster) ae.getVictim(),
-							victimCoord ) );
+					logger.info( "Player died: " + victim );
+					stateMachine.pushEvent( new PlayerDiedEvent( (Player) victim, victimCoord ) );
+				} else if ( victim instanceof Monster ) {
+					logger.info( "Monster died: " + victim );
+					stateMachine.pushEvent( new MonsterSlayedEvent( aggressor, (Monster) victim, victimCoord ) );
 				}
 			} else {
-				ae.getVictim().setCurrentHealth( healthLeft );
+				victim.setCurrentHealth( healthLeft );
 			}
 		}
 	}

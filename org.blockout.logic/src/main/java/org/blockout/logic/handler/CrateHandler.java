@@ -58,6 +58,7 @@ public class CrateHandler implements IEventHandler {
 		}
 		CrateOpenedEvent coa = (CrateOpenedEvent) event;
 
+		// activate objects
 		Crate crate = world.findEntity( coa.getCrate().getId(), Crate.class );
 		Player player = world.findEntity( coa.getPlayer().getId(), Player.class );
 

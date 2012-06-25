@@ -35,6 +35,15 @@ public class OpenCrateTarget implements ITarget {
 	@Override
 	public void approach() {
 
+		// activate crate
+		crate = context.getWorld().findEntity( crate.getId(), Crate.class );
+		if ( crate == null ) {
+			// Who stole the crate?
+			logger.warn( "Crate " + crate + " disappeared." );
+			achieved = true;
+			return;
+		}
+
 		TileCoordinate playerPos = context.getWorld().findTile( context.getGameState().getPlayer() );
 		TileCoordinate tile = context.getWorld().findTile( crate );
 		if ( tile == null ) {
@@ -44,6 +53,9 @@ public class OpenCrateTarget implements ITarget {
 		}
 		if ( playerPos.isNeighbour( tile ) ) {
 			if ( crate.getItem() != null ) {
+
+				logger.debug( "Taking " + crate.getItem() + " out of crate " + crate );
+
 				CrateOpenedEvent event = new CrateOpenedEvent( context.getGameState().getPlayer(), crate, tile );
 				context.getStateMachine().pushEvent( event );
 			} else {

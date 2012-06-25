@@ -59,15 +59,12 @@ public class Main {
 		java.util.logging.Logger.getLogger( "de.lessvoid.nifty.*" ).setLevel( java.util.logging.Level.SEVERE );
 
 		ClassPathXmlApplicationContext context;
-		context = new ClassPathXmlApplicationContext( "application.xml" );
+		context = new ClassPathXmlApplicationContext( "spectator-context.xml" );
 
 		Log.setLogSystem( new SLF4JLogSystem() );
 		AppGameContainer app = context.getBean( AppGameContainer.class );
 
 		SlickRenderImageLoaders.getInstance().loadDefaultLoaders( SlickAddLoaderLocation.last );
-
-		// Create sub-context providing the AI aspects
-		new ClassPathXmlApplicationContext( new String[] { "headless-context.xml" }, context );
 
 		app.setDisplayMode( 1024, 768, false );
 		app.setAlwaysRender( true );

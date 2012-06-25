@@ -10,6 +10,7 @@
 		<config>src/main/resources/application.xml</config>
 		<config>src/main/resources/shared-context.xml</config>
 		<config>src/main/resources/headless-context.xml</config>
+		<config>src/main/resources/spectator-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

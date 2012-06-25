@@ -1,10 +1,17 @@
 package org.blockout.ai;
 
 import org.blockout.common.TileCoordinate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
 public class WalkToPositionTarget implements ITarget {
+
+	private static final Logger		logger;
+	static {
+		logger = LoggerFactory.getLogger( WalkToPositionTarget.class );
+	}
 
 	protected final TileCoordinate	coord;
 	protected AIContext				context;
@@ -32,6 +39,7 @@ public class WalkToPositionTarget implements ITarget {
 		if ( !initiated ) {
 			if ( !AIUtils.gotoTile( context, coord ) ) {
 				// no way to get to destination
+				logger.debug( "Aborted walking since there is no way to get to " + coord );
 				aborted = true;
 			}
 			initiated = true;
