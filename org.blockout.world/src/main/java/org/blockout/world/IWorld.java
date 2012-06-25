@@ -1,5 +1,7 @@
 package org.blockout.world;
 
+import java.util.UUID;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
@@ -50,6 +52,8 @@ public interface IWorld {
 	 *            the new coordinates of he player
 	 */
 	public void setPlayerPosition( Player p, TileCoordinate coord );
+
+	public <T extends Entity> T findEntity( UUID id, Class<T> clazz );
 
 	/**
 	 * Sets the position of the given entity to the given coordinates should not

@@ -1,7 +1,10 @@
 package org.blockout.world;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
+import java.util.UUID;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
@@ -234,6 +237,23 @@ public class World implements IWorld, WorldAdapter {
 		pos = c.getPosition();
 		view.put( pos, c );
 		updateView();
+	}
+
+	@Override
+	public <T extends Entity> T findEntity( final UUID id, final Class<T> clazz ) {
+
+		Set<Chunk> chunks = new HashSet<Chunk>();
+		chunks.addAll( view.values() );
+		chunks.addAll( managedChunks.values() );
+
+		for ( Chunk c : chunks ) {
+			T entity = c.findEntity( id, clazz );
+			if ( entity != null ) {
+				return entity;
+			}
+		}
+
+		return null;
 	}
 
 }

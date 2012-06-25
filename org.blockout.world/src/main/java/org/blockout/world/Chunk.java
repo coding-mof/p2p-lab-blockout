@@ -2,6 +2,7 @@ package org.blockout.world;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
@@ -18,7 +19,7 @@ public class Chunk implements Serializable {
 
 	public static final int							CHUNK_SIZE			= 48;
 
-	private final HashMap<Entity, TileCoordinate>	entitys;
+	private final HashMap<Entity, TileCoordinate>	entities;
 	private final TileCoordinate					pos;
 	private Tile[][]								tiles;
 
@@ -34,7 +35,7 @@ public class Chunk implements Serializable {
 	 *             if tiles is not a NxN matrix or null
 	 */
 	public Chunk(final int x, final int y, final Tile[][] tiles) throws IllegalArgumentException {
-		entitys = new HashMap<Entity, TileCoordinate>();
+		entities = new HashMap<Entity, TileCoordinate>();
 		pos = new TileCoordinate( x, y );
 		setTiles( tiles );
 	}
@@ -49,7 +50,7 @@ public class Chunk implements Serializable {
 	 *             if tiles is not a NxN matrix or null
 	 */
 	public Chunk(final TileCoordinate position, final Tile[][] tiles) throws IllegalArgumentException {
-		entitys = new HashMap<Entity, TileCoordinate>();
+		entities = new HashMap<Entity, TileCoordinate>();
 		pos = position;
 		setTiles( tiles );
 	}
@@ -103,8 +104,8 @@ public class Chunk implements Serializable {
 		for ( int i = 0; i < tiles.length; i++ ) {
 			for ( int j = 0; j < tiles[i].length; j++ ) {
 				if ( tiles[i][j].getEntityOnTile() != null ) {
-					entitys.put( tiles[i][j].getEntityOnTile(), new TileCoordinate( x + i, y + j ) );
-					
+					entities.put( tiles[i][j].getEntityOnTile(), new TileCoordinate( x + i, y + j ) );
+
 				}
 			}
 		}
@@ -120,8 +121,8 @@ public class Chunk implements Serializable {
 	 * @throws NullPointerException
 	 *             if tiles are still null
 	 */
-	public Tile getTile( final int x, final int y ) {		
-		TileCoordinate tile = toArrayIndex(new TileCoordinate(x, y));
+	public Tile getTile( final int x, final int y ) {
+		TileCoordinate tile = toArrayIndex( new TileCoordinate( x, y ) );
 		return tiles[tile.getX()][tile.getY()];
 	}
 
@@ -134,7 +135,17 @@ public class Chunk implements Serializable {
 	 *         entity is not found within this chunk
 	 */
 	public TileCoordinate getEntityCoordinate( final Entity e ) {
-		return entitys.get( e );
+		return entities.get( e );
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends Entity> T findEntity( final UUID id, final Class<T> clazz ) {
+		for ( Entity e : entities.keySet() ) {
+			if ( e.getId().equals( id ) && clazz.isInstance( e ) ) {
+				return (T) e;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -148,14 +159,15 @@ public class Chunk implements Serializable {
 	 * @param y
 	 */
 	public void setEntityCoordinate( final Entity e, final int x, final int y ) {
-		TileCoordinate coord = entitys.get( e );
+		TileCoordinate coord = entities.get( e );
 		if ( coord != null ) {
-			TileCoordinate tile = toArrayIndex(coord);
-			tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(), tiles[tile.getX()][tile.getY()].getHeight() );
+			TileCoordinate tile = toArrayIndex( coord );
+			tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(),
+					tiles[tile.getX()][tile.getY()].getHeight() );
 		}
-		TileCoordinate tile = toArrayIndex(new TileCoordinate(x, y));
-		tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(), e);
-		entitys.put( e, new TileCoordinate( x, y ) );
+		TileCoordinate tile = toArrayIndex( new TileCoordinate( x, y ) );
+		tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(), e );
+		entities.put( e, new TileCoordinate( x, y ) );
 	}
 
 	/**
@@ -166,11 +178,12 @@ public class Chunk implements Serializable {
 	 *            entity which should be moved
 	 */
 	public void removeEntity( final Entity e ) {
-		TileCoordinate coord = entitys.get( e );
+		TileCoordinate coord = entities.get( e );
 		if ( coord != null ) {
-			TileCoordinate tile = toArrayIndex(coord);
-			tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(), tiles[tile.getX()][tile.getY()].getHeight() );
-			entitys.remove( e );
+			TileCoordinate tile = toArrayIndex( coord );
+			tiles[tile.getX()][tile.getY()] = new Tile( tiles[tile.getX()][tile.getY()].getTileType(),
+					tiles[tile.getX()][tile.getY()].getHeight() );
+			entities.remove( e );
 		}
 	}
 
@@ -194,19 +207,19 @@ public class Chunk implements Serializable {
 		}
 		return new TileCoordinate( x, y );
 	}
-	
+
 	/**
-	 * calculates the position of the Tile within this chunk
-	 * from given Coordinates within the world
+	 * calculates the position of the Tile within this chunk from given
+	 * Coordinates within the world
 	 * 
 	 * @param worldCoordinate
 	 * @return
 	 */
-	private TileCoordinate toArrayIndex(TileCoordinate worldCoordinate){
+	private TileCoordinate toArrayIndex( final TileCoordinate worldCoordinate ) {
 		int tx = worldCoordinate.getX() % CHUNK_SIZE;
 		int ty = worldCoordinate.getY() % CHUNK_SIZE;
 		tx = (tx < 0) ? tx + CHUNK_SIZE : tx;
 		ty = (ty < 0) ? ty + CHUNK_SIZE : ty;
-		return new TileCoordinate(tx, ty);
+		return new TileCoordinate( tx, ty );
 	}
 }

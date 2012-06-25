@@ -3,6 +3,7 @@ package org.blockout.world;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Crate;
@@ -118,5 +119,11 @@ public class StaticTMXWorld implements IWorld {
 		}
 		tileCache.put( coord, t );
 		return t;
+	}
+
+	@Override
+	public <T extends Entity> T findEntity( final UUID id, final Class<T> clazz ) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -1,7 +1,12 @@
 package org.blockout.logic.handler;
 
+import javax.inject.Inject;
+
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
+import org.blockout.world.IWorld;
+import org.blockout.world.entity.Crate;
+import org.blockout.world.entity.Player;
 import org.blockout.world.event.CrateOpenedEvent;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.items.Item;
@@ -25,6 +30,12 @@ public class CrateHandler implements IEventHandler {
 	}
 
 	protected IAudioManager		audioManager;
+	protected IWorld			world;
+
+	@Inject
+	public CrateHandler(final IWorld world) {
+		this.world = world;
+	}
 
 	public void setAudioManager( final IAudioManager audioManager ) {
 		this.audioManager = audioManager;
@@ -35,7 +46,9 @@ public class CrateHandler implements IEventHandler {
 		if ( !(event instanceof CrateOpenedEvent) ) {
 			return;
 		}
-		audioManager.getSound( AudioType.sfx_open_chest ).play();
+		if ( audioManager != null ) {
+			audioManager.getSound( AudioType.sfx_open_chest ).play();
+		}
 	}
 
 	@Override
@@ -45,16 +58,19 @@ public class CrateHandler implements IEventHandler {
 		}
 		CrateOpenedEvent coa = (CrateOpenedEvent) event;
 
-		logger.info( "Crate " + coa.getCrate() + " opened by " + coa.getPlayer() );
-		Item item = coa.getCrate().getItem();
+		Crate crate = world.findEntity( coa.getCrate().getId(), Crate.class );
+		Player player = world.findEntity( coa.getPlayer().getId(), Player.class );
+
+		logger.info( "Crate " + crate + " opened by " + player );
+		Item item = crate.getItem();
 		if ( item == null ) {
-			logger.info( "Crate " + coa.getCrate() + " was empty." );
+			logger.info( "Crate " + crate + " was empty." );
 		} else {
-			if ( coa.getPlayer().getInventory().storeItem( item ) ) {
-				coa.getCrate().removeItem();
-				logger.info( "Player " + coa.getPlayer() + " got " + item );
+			if ( player.getInventory().storeItem( item ) ) {
+				crate.removeItem();
+				logger.info( "Player " + player + " got " + item );
 			} else {
-				logger.info( "Player " + coa.getPlayer() + " has no free slot in his inventory." );
+				logger.info( "Player " + player + " has no free slot in his inventory." );
 			}
 		}
 	}

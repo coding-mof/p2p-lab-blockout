@@ -65,7 +65,6 @@ public class SlayEnemyTarget implements ITarget {
 
 	@Override
 	public void approach() {
-		logger.debug( "Attacking enemy " + enemy );
 
 		TileCoordinate playerPos = context.getWorld().findTile( context.getGameState().getPlayer() );
 		TileCoordinate tile = context.getWorld().findTile( enemy );
@@ -75,6 +74,7 @@ public class SlayEnemyTarget implements ITarget {
 			return;
 		}
 		if ( playerPos.isNeighbour( tile ) ) {
+			logger.debug( "Attacking enemy " + enemy + " at " + tile );
 			AttackEvent event = new AttackEvent( context.getGameState().getPlayer(), enemy, tile );
 			context.getStateMachine().pushEvent( event );
 		} else {

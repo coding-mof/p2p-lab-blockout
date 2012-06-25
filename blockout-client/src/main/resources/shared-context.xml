@@ -79,6 +79,7 @@
 	
 	<bean class="org.blockout.logic.validator.AttackValidator"/>
 	<bean class="org.blockout.logic.validator.CollisionDetectionEventValidator"/>
+	<bean class="org.blockout.logic.validator.CrateValidator"/>
 	
 	<bean name="pathFindingMap" class="org.blockout.ui.PathFindingMap"/>
 	
