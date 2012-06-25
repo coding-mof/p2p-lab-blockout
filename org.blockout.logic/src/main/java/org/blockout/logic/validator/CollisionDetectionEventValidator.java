@@ -2,6 +2,7 @@ package org.blockout.logic.validator;
 
 import javax.inject.Inject;
 
+import org.blockout.common.TileCoordinate;
 import org.blockout.world.IWorld;
 import org.blockout.world.Tile;
 import org.blockout.world.event.IEvent;
@@ -40,10 +41,11 @@ public class CollisionDetectionEventValidator implements IEventValidator {
 			if ( tile == null ) {
 				return ValidationResult.Invalid;
 			}
+			TileCoordinate coord = new TileCoordinate( playerMoveEvent.getNewX(), playerMoveEvent.getNewY() );
 			// Player can't walk on walls
 			if ( tile.getHeight() > Tile.GROUND_HEIGHT ) {
 				if ( logger.isDebugEnabled() ) {
-					logger.debug( "Tile to high: " + tile.getHeight() + ", Id: " + tile.getTileType() );
+					logger.debug( "Tile " + coord + " to high: " + tile.getHeight() + ", Id: " + tile.getTileType() );
 				}
 				return ValidationResult.Invalid;
 			}
@@ -51,7 +53,7 @@ public class CollisionDetectionEventValidator implements IEventValidator {
 			// etc.)
 			if ( tile.getEntityOnTile() != null ) {
 				if ( logger.isDebugEnabled() ) {
-					logger.debug( "Tile blocked by object: " + tile.getEntityOnTile() );
+					logger.debug( "Tile " + coord + " blocked by object: " + tile.getEntityOnTile() );
 				}
 				return ValidationResult.Invalid;
 			}

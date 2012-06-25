@@ -8,6 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * The {@link AIPlayer} currently wants to open a crate.
+ * 
+ * @author Marc-Christian Schulze
+ * 
+ */
 public class OpenCrateTarget implements ITarget {
 	private static final Logger	logger;
 	static {

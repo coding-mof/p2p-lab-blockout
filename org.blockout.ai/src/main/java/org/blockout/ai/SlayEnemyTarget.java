@@ -3,15 +3,13 @@ package org.blockout.ai;
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Actor;
 import org.blockout.world.event.AttackEvent;
-import org.blockout.world.state.IStateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
 /**
- * AI task that slays a monster. This task internally acts as a listener to the
- * {@link IStateMachine} and blocks until the monster has been slayed.
+ * The {@link AIPlayer} currently wants to slay a monster.
  * 
  * @author Marc-Christian Schulze
  * 
