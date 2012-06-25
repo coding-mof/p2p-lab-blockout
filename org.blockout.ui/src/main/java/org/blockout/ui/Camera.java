@@ -1,5 +1,7 @@
 package org.blockout.ui;
 
+import org.blockout.common.TileCoordinate;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -29,6 +31,12 @@ public final class Camera {
 		Camera cam = new Camera();
 		cam.data = data;
 		return cam;
+	}
+
+	public boolean isInFrustum( final TileCoordinate coord ) {
+		boolean inHorRange = coord.getX() >= data.startTileX && coord.getX() <= data.startTileX + data.numHorTiles;
+		boolean inVerRange = coord.getY() >= data.startTileY && coord.getY() <= data.startTileY + data.numVerTiles;
+		return inHorRange && inVerRange;
 	}
 
 	public void setBounds( final int displayWidth, final int displayHeight ) {

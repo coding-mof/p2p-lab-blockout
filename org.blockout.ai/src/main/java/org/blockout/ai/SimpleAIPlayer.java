@@ -19,31 +19,29 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of a simple artificial intelligence (AI). It searches the
  * terrain for enemies and crates.
- *
+ * 
  * @author Marc-Christian Schulze
- *
+ * 
  */
 public class SimpleAIPlayer extends AbstractAIPlayer {
 
-	private static final Logger				logger;
+	private static final Logger	logger;
 	static {
 		logger = LoggerFactory.getLogger( SimpleAIPlayer.class );
 	}
 
+	private ITarget				currentTarget;
 
 	@Inject
-    public SimpleAIPlayer( final IWorld world, final LocalGameState gameState,
-            final Camera camera, final LocalPlayerMoveHandler playerController,
-            final PathFinder pathFinder, final IStateMachine stateMachine ) {
+	public SimpleAIPlayer(final IWorld world, final LocalGameState gameState, final Camera camera,
+			final LocalPlayerMoveHandler playerController, final PathFinder pathFinder, final IStateMachine stateMachine) {
 
-        super( world, gameState, camera, playerController, pathFinder,
-                stateMachine );
+		super( world, gameState, camera, playerController, pathFinder, stateMachine );
 	}
 
 	@Override
 	public void doNextStep() {
-        if( getGameState().isGameInitialized() ) {
-
+		if ( getGameState().isGameInitialized() ) {
 
 			if ( currentTarget == null || currentTarget.achieved() ) {
 				currentTarget = findTarget();
@@ -57,48 +55,79 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 				}
 			}
 
+			logger.debug( "Current target: " + currentTarget );
 			currentTarget.approach();
 		}
 	}
 
 	private ITarget findTarget() {
-		TileCoordinate currentPos = world.findTile( gameState.getPlayer() );
+		TileCoordinate currentPos = getWorld().findTile( getGameState().getPlayer() );
 		//
 		// 1. Slay nearby enemy - if found
 		//
 		Actor enemy = findNearbyEntity( currentPos, Actor.class );
 		if ( enemy != null ) {
-			return new SlayEnemyTarget( enemy );
+			return new SlayEnemyTarget( enemy, this );
 		}
 		//
 		// 2. Open nearby crate - if found
 		//
 		Crate crate = findNearbyEntity( currentPos, Crate.class );
 		if ( crate != null && crate.getItem() != null ) {
-			return new OpenCrateTarget( crate );
+			return new OpenCrateTarget( crate, this );
 		}
 		//
 		// 3. Walk to closest crate - if any visible
 		//
 		crate = findNearestEntity( currentPos, Crate.class );
 		if ( crate != null && crate.getItem() != null ) {
-			return new OpenCrateTarget( crate );
+			TileCoordinate tile = getWorld().findTile( crate );
+			TileCoordinate coordinate = AIUtils.findWalkableTileNextTo( this, tile );
+			if ( coordinate != null ) {
+				return new WalkToPositionTarget( coordinate, this );
+			} else {
+				// Crate is unreachable
+			}
 		}
 		//
 		// 4. Walk to closest enemy - if any visible
 		//
 		enemy = findNearestEntity( currentPos, Actor.class );
 		if ( enemy != null ) {
-			return new SlayEnemyTarget( enemy );
+			TileCoordinate tile = getWorld().findTile( enemy );
+			TileCoordinate coordinate = AIUtils.findWalkableTileNextTo( this, tile );
+			if ( coordinate != null ) {
+				return new WalkToPositionTarget( coordinate, this );
+			} else {
+				// Enemy is unreachable
+			}
 		}
 		//
 		// 5. Walk to random position
 		//
-		return new WalkToPositionTarget( currentPos );
+		return new WalkToPositionTarget( currentPos, this );
 	}
 
 	private <T extends Entity> T findNearestEntity( final TileCoordinate center, final Class<T> clazz ) {
-		return null;
+		// locks the camera state
+		Camera localCamera = getCamera().getReadOnly();
+		double distance = Double.MAX_VALUE;
+		T result = null;
+
+		for ( int y = 0; y < localCamera.getNumVerTiles(); y++ ) {
+			for ( int x = 0; x < localCamera.getNumHorTiles(); x++ ) {
+				TileCoordinate currentTile = center.plus( x, y );
+				T entity = getEntityOrNull( currentTile, clazz );
+				if ( entity != null ) {
+					double dist = TileCoordinate.computeSquaredEuclidianDistance( center, currentTile );
+					if ( dist < distance ) {
+						distance = dist;
+						result = entity;
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	private <T extends Entity> T findNearbyEntity( final TileCoordinate center, final Class<T> clazz ) {
@@ -128,38 +157,11 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 	}
 
 	private <T extends Entity> T getEntityOrNull( final TileCoordinate coord, final Class<T> clazz ) {
-		Tile tile = world.getTile( coord );
+		Tile tile = getWorld().getTile( coord );
 		Entity entity = tile.getEntityOnTile();
 		if ( entity == null || !clazz.isInstance( entity ) ) {
 			return null;
 		}
 		return clazz.cast( entity );
-	}
-
-	private void gotoTile( final TileCoordinate coord ) {
-		Camera localCamera = camera.getReadOnly();
-
-		float cameraCenterX = localCamera.getCenterX();
-		float cameraCenterY = localCamera.getCenterY();
-
-		int tileX = Camera.worldToTile( coord.getX() );
-		int tileY = Camera.worldToTile( coord.getY() );
-		int centerX = Camera.worldToTile( cameraCenterX );
-		int centerY = Camera.worldToTile( cameraCenterY );
-
-		int fromX = centerX - localCamera.getStartTileX();
-		int fromY = centerY - localCamera.getStartTileY();
-		int toX = tileX - localCamera.getStartTileX();
-		int toY = tileY - localCamera.getStartTileY();
-
-		Path path = pathFinder.findPath( gameState.getPlayer(), fromX, fromY, toX, toY );
-		Path worldPath = new Path();
-		if ( path != null ) {
-			for ( int i = 0; i < path.getLength(); i++ ) {
-				Step step = path.getStep( i );
-				worldPath.appendStep( step.getX() + localCamera.getStartTileX(),
-						step.getY() + localCamera.getStartTileY() );
-			}
-		}
 	}
 }

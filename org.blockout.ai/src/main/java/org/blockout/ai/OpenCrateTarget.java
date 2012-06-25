@@ -1,29 +1,65 @@
 package org.blockout.ai;
 
+import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Crate;
+import org.blockout.world.event.CrateOpenedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 public class OpenCrateTarget implements ITarget {
+	private static final Logger	logger;
+	static {
+		logger = LoggerFactory.getLogger( OpenCrateTarget.class );
+	}
 
-	public OpenCrateTarget(final Crate crate) {
+	protected Crate				crate;
+	protected AIContext			context;
+	protected boolean			achieved;
 
+	public OpenCrateTarget(final Crate crate, final AIContext context) {
+
+		Preconditions.checkNotNull( crate );
+		Preconditions.checkNotNull( context );
+
+		this.crate = crate;
+		this.context = context;
 	}
 
 	@Override
 	public int getPriority() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 3;
 	}
 
 	@Override
 	public void approach() {
-		// TODO Auto-generated method stub
 
+		TileCoordinate playerPos = context.getWorld().findTile( context.getGameState().getPlayer() );
+		TileCoordinate tile = context.getWorld().findTile( crate );
+		if ( tile == null ) {
+			// Who stole the crate?
+			logger.warn( "Crate " + crate + " disappeared." );
+			achieved = true;
+		}
+		if ( playerPos.isNeighbour( tile ) ) {
+			if ( crate.getItem() != null ) {
+				CrateOpenedEvent event = new CrateOpenedEvent( context.getGameState().getPlayer(), crate, tile );
+				context.getStateMachine().pushEvent( event );
+			} else {
+				logger.debug( "Ignoring empty crate." );
+				achieved = true;
+			}
+		} else {
+			// Why has the crate been moved?
+			logger.warn( "Crate " + crate + " has been moved to " + tile );
+			achieved = true;
+		}
 	}
 
 	@Override
 	public boolean achieved() {
-		// TODO Auto-generated method stub
-		return false;
+		return achieved;
 	}
 
 }

@@ -101,6 +101,12 @@ public class TileCoordinate implements Serializable {
 		return new TileCoordinate( getX() + x, getY() + y );
 	}
 
+	public boolean isNeighbour( final TileCoordinate coord ) {
+		int diffX = Math.abs( getX() - coord.getX() );
+		int diffY = Math.abs( getY() - coord.getY() );
+		return diffX <= 1 && diffY <= 1;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
