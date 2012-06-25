@@ -2,11 +2,17 @@ package org.blockout;
 
 import java.text.ParseException;
 
+import org.blockout.common.TileCoordinate;
+import org.blockout.ui.Camera;
+import org.blockout.world.IWorld;
+import org.blockout.world.LocalGameState;
+import org.blockout.world.entity.Player;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.beust.jcommander.JCommander;
@@ -70,7 +76,21 @@ public class Main {
 
 	private static void runInHeadlessMode( final Arguments arguments ) {
 		logger.info( "Starting in headless mode..." );
-		new ClassPathXmlApplicationContext( "headless-context.xml" );
+		ApplicationContext context = new ClassPathXmlApplicationContext( "headless-context.xml" );
+
+		Player player = new Player( arguments.getHeadlessCmd().getPlayerName() );
+
+		LocalGameState gameState = context.getBean( LocalGameState.class );
+		IWorld world = context.getBean( IWorld.class );
+		Camera camera = context.getBean( Camera.class );
+
+		gameState.setPlayer( player );
+		world.init( player );
+
+		TileCoordinate playerPos = world.findTile( player );
+		camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
+
+		gameState.setGameInitialized( true );
 	}
 
 	private static void runInUIMode( final Arguments arguments ) throws SlickException {
