@@ -9,25 +9,31 @@ public class WalkToPositionTarget implements ITarget {
 	protected final TileCoordinate	coord;
 	protected AIContext				context;
 	protected boolean				initiated;
+	protected boolean				aborted;
+	protected int					priority;
 
-	public WalkToPositionTarget(final TileCoordinate coord, final AIContext context) {
+	public WalkToPositionTarget(final TileCoordinate coord, final AIContext context, final int priority) {
 
 		Preconditions.checkNotNull( coord );
 		Preconditions.checkNotNull( context );
 
 		this.coord = coord;
 		this.context = context;
+		this.priority = priority;
 	}
 
 	@Override
 	public int getPriority() {
-		return 0;
+		return priority;
 	}
 
 	@Override
 	public void approach() {
 		if ( !initiated ) {
-			AIUtils.gotoTile( context, coord );
+			if ( !AIUtils.gotoTile( context, coord ) ) {
+				// no way to get to destination
+				aborted = true;
+			}
 			initiated = true;
 		}
 	}
@@ -35,7 +41,7 @@ public class WalkToPositionTarget implements ITarget {
 	@Override
 	public boolean achieved() {
 		TileCoordinate playerPos = context.getWorld().findTile( context.getGameState().getPlayer() );
-		return playerPos.equals( coord );
+		return aborted || playerPos.equals( coord );
 	}
 
 	@Override

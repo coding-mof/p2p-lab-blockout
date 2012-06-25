@@ -19,12 +19,16 @@ public class AIUtils {
 	 * @throws NullPointerException
 	 *             If context or coord are null
 	 */
-	public static void gotoTile( final AIContext context, final TileCoordinate coord ) {
+	public static boolean gotoTile( final AIContext context, final TileCoordinate coord ) {
 		Preconditions.checkNotNull( context );
 		Preconditions.checkNotNull( coord );
 
 		Path worldPath = findPathTo( context, coord );
+		if ( worldPath == null ) {
+			return false;
+		}
 		context.getPlayerController().setPath( context.getStateMachine(), worldPath );
+		return true;
 	}
 
 	private static Path findPathTo( final AIContext context, final TileCoordinate coord ) {
@@ -45,6 +49,9 @@ public class AIUtils {
 		int toY = tileY - localCamera.getStartTileY();
 
 		Path path = context.getPathfinder().findPath( context.getGameState().getPlayer(), fromX, fromY, toX, toY );
+		if ( path == null || path.getLength() == 0 ) {
+			return null;
+		}
 		Path worldPath = new Path();
 		if ( path != null ) {
 			for ( int i = 0; i < path.getLength(); i++ ) {

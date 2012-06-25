@@ -1,5 +1,7 @@
 package org.blockout.ai;
 
+import java.util.Random;
+
 import javax.inject.Inject;
 
 import org.blockout.common.TileCoordinate;
@@ -31,12 +33,14 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 	}
 
 	private ITarget				currentTarget;
+	private final Random		rand;
 
 	@Inject
 	public SimpleAIPlayer(final IWorld world, final LocalGameState gameState, final Camera camera,
 			final LocalPlayerMoveHandler playerController, final PathFinder pathFinder, final IStateMachine stateMachine) {
 
 		super( world, gameState, camera, playerController, pathFinder, stateMachine );
+		rand = new Random( System.currentTimeMillis() );
 	}
 
 	@Override
@@ -84,7 +88,7 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 			TileCoordinate tile = getWorld().findTile( crate );
 			TileCoordinate coordinate = AIUtils.findWalkableTileNextTo( this, tile );
 			if ( coordinate != null ) {
-				return new WalkToPositionTarget( coordinate, this );
+				return new WalkToPositionTarget( coordinate, this, 2 );
 			} else {
 				// Crate is unreachable
 			}
@@ -97,7 +101,7 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 			TileCoordinate tile = getWorld().findTile( enemy );
 			TileCoordinate coordinate = AIUtils.findWalkableTileNextTo( this, tile );
 			if ( coordinate != null ) {
-				return new WalkToPositionTarget( coordinate, this );
+				return new WalkToPositionTarget( coordinate, this, 1 );
 			} else {
 				// Enemy is unreachable
 			}
@@ -105,7 +109,11 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 		//
 		// 5. Walk to random position
 		//
-		return new WalkToPositionTarget( currentPos, this );
+		Camera localCamera = getCamera().getReadOnly();
+		int halfWidth = localCamera.getNumHorTiles() / 2;
+		int halfHeight = localCamera.getNumVerTiles() / 2;
+		return new WalkToPositionTarget( currentPos.plus( rand.nextInt( localCamera.getNumHorTiles() ) - halfWidth,
+				rand.nextInt( localCamera.getNumVerTiles() ) - halfHeight ), this, 0 );
 	}
 
 	private <T extends Entity> T findNearestEntity( final TileCoordinate center, final Class<T> clazz ) {
