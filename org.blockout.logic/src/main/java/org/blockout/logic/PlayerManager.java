@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Named;
-
 import org.blockout.common.IOUtils;
 import org.blockout.world.entity.Player;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
@@ -28,7 +26,6 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
 public class PlayerManager {
 	protected File	profileDirectory;
 

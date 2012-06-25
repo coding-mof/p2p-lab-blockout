@@ -1,8 +1,5 @@
 package org.blockout.logic.handler;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.event.CrateOpenedEvent;
@@ -20,7 +17,6 @@ import org.slf4j.LoggerFactory;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
 public class CrateHandler implements IEventHandler {
 
 	private static final Logger	logger;
@@ -30,10 +26,8 @@ public class CrateHandler implements IEventHandler {
 
 	protected IAudioManager		audioManager;
 
-	@Inject
-	public CrateHandler(final IAudioManager audioManager) {
+	public void setAudioManager( final IAudioManager audioManager ) {
 		this.audioManager = audioManager;
-
 	}
 
 	@Override

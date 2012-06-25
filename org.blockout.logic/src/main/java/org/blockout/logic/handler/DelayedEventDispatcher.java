@@ -11,7 +11,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.world.event.IEvent;
 import org.blockout.world.state.IStateMachine;
@@ -28,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
 public class DelayedEventDispatcher implements IStateMachineListener {
 
 	private static final Logger				logger;

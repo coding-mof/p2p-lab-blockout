@@ -1,7 +1,6 @@
 package org.blockout.logic.handler;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
  * @author Marc-Christian Schulze
  * @see LocalPlayerMoveHandler
  */
-@Named
 public class PlayerMoveHandler implements IEventHandler {
 
 	private static final Logger	logger;

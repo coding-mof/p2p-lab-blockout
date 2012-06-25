@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.sfx.AudioType;
@@ -29,7 +28,6 @@ import org.newdawn.slick.util.pathfinding.Path.Step;
  * @author Marc-Christian Schulze
  * @see PlayerMoveHandler
  */
-@Named
 public class LocalPlayerMoveHandler implements IEventHandler {
 
 	protected final Camera				camera;
@@ -54,18 +52,20 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 	private final Random				rand;
 
 	@Inject
-	public LocalPlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world,
-			final IAudioManager audioManager) {
+	public LocalPlayerMoveHandler(final Camera camera, final LocalGameState gameState, final IWorld world) {
 		this.camera = camera;
 		this.gameState = gameState;
 		this.world = world;
-		this.audioManager = audioManager;
 
 		walkSounds = new ArrayList<AudioType>();
 		walkSounds.add( AudioType.sfx_stonestep1 );
 		walkSounds.add( AudioType.sfx_stonestep2 );
 		walkSounds.add( AudioType.sfx_stonestep3 );
 		rand = new Random( System.currentTimeMillis() );
+	}
+
+	public void setAudioManager( final IAudioManager audioManager ) {
+		this.audioManager = audioManager;
 	}
 
 	public void update( final int deltaMillis ) {
@@ -132,7 +132,9 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 			return;
 		}
 
-		audioManager.getSound( walkSounds.get( rand.nextInt( walkSounds.size() ) ) ).play();
+		if ( audioManager != null ) {
+			audioManager.getSound( walkSounds.get( rand.nextInt( walkSounds.size() ) ) ).play();
+		}
 
 		synchronized ( posLock ) {
 			desiredX = pme.getNewX();

@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.inject.Named;
-
 import org.blockout.world.event.IEvent;
 
 import com.google.common.base.Preconditions;
@@ -16,7 +14,6 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * @threadSafety unconditionally thread-safe
  */
-@Named
 public class DefaultStateMachine extends AbstractStateMachine {
 
 	protected final Map<UUID, IEvent<?>>	events;

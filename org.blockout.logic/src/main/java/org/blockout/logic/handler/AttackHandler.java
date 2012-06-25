@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.sfx.AudioType;
@@ -28,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
 public class AttackHandler implements IEventHandler {
 
 	private static final Logger			logger;
@@ -43,8 +41,7 @@ public class AttackHandler implements IEventHandler {
 	private final Random				rand;
 
 	@Inject
-	public AttackHandler(final IAudioManager audioManager, final IWorld world) {
-		this.audioManager = audioManager;
+	public AttackHandler(final IWorld world) {
 		attackTypes = new ArrayList<AudioType>();
 		attackTypes.add( AudioType.sfx_sword_clash1 );
 		attackTypes.add( AudioType.sfx_sword_clash2 );
@@ -55,14 +52,20 @@ public class AttackHandler implements IEventHandler {
 		this.world = world;
 	}
 
+	public void setAudioManager( final IAudioManager audioManager ) {
+		this.audioManager = audioManager;
+	}
+
 	@Override
 	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
 		if ( !(event instanceof AttackEvent) ) {
 			return;
 		}
 
-		int index = rand.nextInt( attackTypes.size() );
-		audioManager.getSound( attackTypes.get( index ) ).play();
+		if ( audioManager != null ) {
+			int index = rand.nextInt( attackTypes.size() );
+			audioManager.getSound( attackTypes.get( index ) ).play();
+		}
 	}
 
 	@Override

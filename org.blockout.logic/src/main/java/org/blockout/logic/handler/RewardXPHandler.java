@@ -1,12 +1,9 @@
 package org.blockout.logic.handler;
 
-import javax.inject.Named;
-
 import org.blockout.world.event.IEvent;
 import org.blockout.world.event.RewardXPEvent;
 import org.blockout.world.state.IStateMachine;
 
-@Named
 public class RewardXPHandler implements IEventHandler {
 
 	@Override

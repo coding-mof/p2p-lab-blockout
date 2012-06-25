@@ -2,9 +2,6 @@ package org.blockout.world;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Random;
-
-import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
@@ -19,7 +16,6 @@ import org.blockout.world.entity.Player;
  * @author key3
  * 
  */
-@Named
 public class World implements IWorld, WorldAdapter {
 
 	private TileCoordinate							pos;
@@ -80,7 +76,7 @@ public class World implements IWorld, WorldAdapter {
 	@Override
 	public void setPlayerPosition( final Player p, final TileCoordinate coord ) {
 		TileCoordinate newPos = Chunk.containingCunk( coord );
-		if ( !newPos.equals(pos)) {
+		if ( !newPos.equals( pos ) ) {
 			view.get( pos ).removeEntity( p );
 			pos = newPos;
 			cleanView();
@@ -138,10 +134,10 @@ public class World implements IWorld, WorldAdapter {
 	@Override
 	public Chunk getChunk( final TileCoordinate coord ) {
 		Chunk c = view.get( coord );
-		if(c != null){
+		if ( c != null ) {
 			return c;
 		}
-		c = managedChunks.get(coord);
+		c = managedChunks.get( coord );
 		if ( c == null ) {
 			c = chunkGenerator.generateChunk( coord );
 			managedChunks.put( coord, c );
@@ -187,7 +183,7 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public void init( final Player p ) {
-		chunkManager.enterGame(p);
+		chunkManager.enterGame( p );
 	}
 
 	/**
@@ -234,9 +230,9 @@ public class World implements IWorld, WorldAdapter {
 	}
 
 	@Override
-	public void gameEntered(Chunk c) {
+	public void gameEntered( final Chunk c ) {
 		pos = c.getPosition();
-		view.put(pos, c);
+		view.put( pos, c );
 		updateView();
 	}
 

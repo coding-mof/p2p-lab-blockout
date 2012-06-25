@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.text.SimpleDateFormat;
 
-import javax.inject.Named;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -20,7 +19,6 @@ import org.blockout.world.event.IEvent;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
 public class StateMachineMonitorFrame extends JFrame implements IStateMachineListener {
 
 	private static final long	serialVersionUID	= -4664022344505802407L;

@@ -54,4 +54,40 @@
 	
 	<bean name="dht" class="org.blockout.network.dht.chord.Chord" init-method="setUp"/>
 	<bean name="networkTimer" class="org.jboss.netty.util.HashedWheelTimer"/>
+	
+	<bean class="org.blockout.ui.Camera">
+		<constructor-arg value="32" type="int"/>
+		<constructor-arg value="1024" type="int"/>
+		<constructor-arg value="768" type="int"/>
+	</bean>
+	
+	<!-- World -->
+	<bean class="org.blockout.world.BasicChunkGenerator"/>
+	<bean class="org.blockout.world.BasicChunkLoader"/>
+	<bean class="org.blockout.world.DefaultChunkManager"/>
+	<bean class="org.blockout.world.LocalGameState"/>
+	<bean class="org.blockout.world.World"/>
+	<bean class="org.blockout.logic.PlayerManager"/>
+	<bean class="org.blockout.logic.FogOfWar"/>
+	
+	<bean class="org.blockout.world.state.DefaultStateMachine"/>
+	<bean class="org.blockout.logic.handler.DelayedEventDispatcher"/>
+	
+	<bean class="org.blockout.logic.handler.MonsterDeathHandler"/>
+	<bean class="org.blockout.logic.handler.PlayerMoveHandler"/>
+	<bean class="org.blockout.logic.handler.RewardXPHandler"/>
+	
+	<bean class="org.blockout.logic.validator.AttackValidator"/>
+	<bean class="org.blockout.logic.validator.CollisionDetectionEventValidator"/>
+	
+	<bean name="pathFindingMap" class="org.blockout.ui.PathFindingMap"/>
+	
+	<bean class="org.newdawn.slick.util.pathfinding.AStarPathFinder">
+		<constructor-arg ref="pathFindingMap"/>
+		<constructor-arg value="80"/>
+		<constructor-arg value="true"/>
+		<constructor-arg>
+			<bean class="org.newdawn.slick.util.pathfinding.heuristics.ClosestSquaredHeuristic"/>
+		</constructor-arg>
+	</bean>
 </beans>

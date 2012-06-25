@@ -3,7 +3,6 @@ package org.blockout.logic.handler;
 import java.util.Random;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.IWorld;
@@ -25,7 +24,6 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
 public class MonsterDeathHandler implements IEventHandler {
 
 	private static final Logger	logger;

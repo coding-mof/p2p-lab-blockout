@@ -2,8 +2,6 @@ package org.blockout.engine.sfx;
 
 import java.util.HashMap;
 
-import javax.inject.Named;
-
 import org.newdawn.slick.Music;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.Sound;
@@ -17,7 +15,6 @@ import com.google.common.base.Preconditions;
  * @author Florian Müller
  * 
  */
-@Named
 public class AudioManagerImpl implements IAudioManager {
 	private final HashMap<AudioType, Sound>	soundCache;
 	private final HashMap<AudioType, Music>	musicCache;

@@ -1,7 +1,6 @@
 package org.blockout.logic.validator;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.IWorld;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
  * @author Marc-Christian Schulze
  * 
  */
-@Named
 public class AttackValidator implements IEventValidator {
 
 	private static final Logger	logger;
