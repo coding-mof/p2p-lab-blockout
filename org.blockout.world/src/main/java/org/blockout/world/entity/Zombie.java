@@ -14,4 +14,8 @@ public class Zombie extends Monster {
 		super( "Zombie", level, 10, 15 );
 	}
 
+	@Override
+	public String toString() {
+		return "Zombie[id=" + id + "]";
+	}
 }

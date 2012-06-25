@@ -34,8 +34,8 @@ public final class Camera {
 	}
 
 	public boolean isInFrustum( final TileCoordinate coord ) {
-		boolean inHorRange = coord.getX() >= data.startTileX && coord.getX() <= data.startTileX + data.numHorTiles;
-		boolean inVerRange = coord.getY() >= data.startTileY && coord.getY() <= data.startTileY + data.numVerTiles;
+		boolean inHorRange = coord.getX() >= data.startTileX && coord.getX() < data.startTileX + data.numHorTiles;
+		boolean inVerRange = coord.getY() >= data.startTileY && coord.getY() < data.startTileY + data.numVerTiles;
 		return inHorRange && inVerRange;
 	}
 
