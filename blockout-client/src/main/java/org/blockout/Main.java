@@ -83,9 +83,19 @@ public class Main {
 		LocalGameState gameState = context.getBean( LocalGameState.class );
 		IWorld world = context.getBean( IWorld.class );
 		Camera camera = context.getBean( Camera.class );
-
+		try {
+			Thread.sleep( 6000 );
+		} catch ( InterruptedException e ) {
+			logger.warn( "Interrupted during network initialization. Network might not be initialized.", e );
+		}
 		gameState.setPlayer( player );
 		world.init( player );
+
+		try {
+			Thread.sleep( 1000 );
+		} catch ( InterruptedException e ) {
+			logger.warn( "Interrupted during world initialization. World might not be initialized.", e );
+		}
 
 		TileCoordinate playerPos = world.findTile( player );
 		camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
