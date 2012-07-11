@@ -88,4 +88,10 @@ public interface IWorld {
 	 * @param p
 	 */
 	public void init( Player p );
+	
+	/**
+	 * 
+	 * @return true if initialization is finished
+	 */
+	public boolean isReady();
 }
