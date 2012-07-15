@@ -4,6 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.engine.Shader;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.IWorld;
@@ -69,7 +70,11 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		this.world = world;
 		this.camera = camera;
 
-		healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
+//        try {
+//            healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
+//        } catch ( Exception e ) {
+//            healthRenderer = new PrimitiveHealthRenderer();
+//        }
 
 		this.beanFactory = beanFactory;
 	}
@@ -101,12 +106,13 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	protected void renderHUDOverlay( final GameContainer paramGameContainer, final StateBasedGame paramStateBasedGame,
 			final Graphics paramGraphics ) throws SlickException {
 
-		try {
-			healthRenderer.render();
-		} catch ( UnsupportedOperationException e ) {
-			logger.warn( "Failed to render health. Falling back...", e );
-			healthRenderer = new PrimitiveHealthRenderer();
-		}
+        // try {
+        // healthRenderer.render();
+        // } catch ( UnsupportedOperationException e ) {
+        // logger.warn( "Failed to render health. Falling back...", e );
+        // healthRenderer = new PrimitiveHealthRenderer();
+        // }
+        getHealthRenderer().render();
 	}
 
 	@Override
@@ -153,6 +159,19 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
 
 		lblCurrentPos.setText( "" + (world.findTile( gameState.getPlayer() )) );
+	}
+	
+    private IHealthRenderer getHealthRenderer() {
+	    if(null == healthRenderer){
+	        if(Shader.areSupported()){
+	            healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
+	        }
+	        else{
+	            healthRenderer = new PrimitiveHealthRenderer();
+	        }
+	    }
+	
+        return healthRenderer;
 	}
 
 	@Override
