@@ -1,7 +1,7 @@
 package org.blockout.network.demo;
 
-import org.blockout.network.INodeAddress;
 import org.blockout.network.dht.Hash;
+import org.blockout.network.dht.IHash;
 import org.blockout.network.message.MessageBroker;
 import org.blockout.network.message.MessageReceiver;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class MessagePassingTestbed extends MessageReceiver {
 		msgCounter = 0;
 	}
 
-	public void receive( final DemoMessage msg, final INodeAddress origin ) {
+	public void receive( final DemoMessage msg, final IHash origin ) {
 		logger.debug( "Received: " + msg );
 		if ( msgCounter < 10 ) {
 			sut.send( new DemoMessage( msgCounter + " " + msg ), origin );
@@ -54,7 +54,7 @@ public class MessagePassingTestbed extends MessageReceiver {
 		}
 	}
 
-	public void receive( final ResetMessage msg, final INodeAddress origin ) {
+	public void receive( final ResetMessage msg, final IHash origin ) {
 		msgCounter = 0;
 	}
 

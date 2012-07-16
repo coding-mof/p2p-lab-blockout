@@ -1,13 +1,20 @@
 package org.blockout.network.message;
 
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 
-import org.blockout.network.INodeAddress;
+import org.blockout.network.dht.IHash;
 
 public interface IMessageEnvelope<T extends IMessage> extends Serializable {
-	public INodeAddress getRecipient();
-	public INodeAddress getSender();
+	public IHash getRecipient();
+
+	public IHash getSender();
+
+	public InetSocketAddress getReceiverAddress();
+
+	public InetSocketAddress getSenderAddress();
+
 	public T getMessage();
 
-	public void setSender(INodeAddress remoteAddress);
+	public void setSender( IHash remoteAddress );
 }

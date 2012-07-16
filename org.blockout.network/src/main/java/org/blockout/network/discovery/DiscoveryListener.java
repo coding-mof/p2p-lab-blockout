@@ -1,6 +1,6 @@
 package org.blockout.network.discovery;
 
-import org.blockout.network.NodeInfo;
+import java.net.SocketAddress;
 
 /**
  * Implement this interface to get notified about newly discovered nodes.
@@ -15,5 +15,5 @@ public interface DiscoveryListener {
 	 * @param info
 	 *            The information about the new node.
 	 */
-	public void nodeDiscovered( NodeInfo info );
+	public void nodeDiscovered( SocketAddress nodeAddress );
 }

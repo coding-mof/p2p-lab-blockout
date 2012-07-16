@@ -1,8 +1,7 @@
 package org.blockout.network.discovery;
 
+import java.net.SocketAddress;
 import java.util.List;
-
-import org.blockout.network.INodeAddress;
 
 /**
  * Implementations are responsible for auto detecting other nodes running the
@@ -19,7 +18,7 @@ public interface INodeDiscovery {
 	 * @return A list of known nodes in the network or an empty list if no nodes
 	 *         are currently known.
 	 */
-	public List<INodeAddress> listNodes();
+	public List<SocketAddress> listNodes();
 
 	/**
 	 * Attaches a new listener.

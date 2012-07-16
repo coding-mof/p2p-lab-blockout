@@ -1,94 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
-		
-    <context:annotation-config/>
-		
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location" value="conf/network.properties"/>
-        <property name="ignoreUnresolvablePlaceholders" value="true"/>
-    </bean>
 
-	<bean name="clientSocketFactory" class="org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory"></bean>
-	<bean name="clientBootstrap" class="org.jboss.netty.bootstrap.ClientBootstrap">
-		<constructor-arg ref="clientSocketFactory"/>
+	<context:annotation-config />
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="conf/network.properties" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
 	</bean>
 	
-	<bean name="serverSocketFactory" class="org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory"></bean>
-	<bean name="serverBootstrap" class="org.jboss.netty.bootstrap.ServerBootstrap">
-		<constructor-arg ref="serverSocketFactory"/>
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="conf/project.properties" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
+
+	<bean id="threadPool" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+		<property name="poolSize" value="10" />
 	</bean>
 	
-	<bean name="connectionlessChannelFactory" class="org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory"></bean>
+	<bean name="connectionMgr" class="org.blockout.network.reworked.ConnectionManager"/>
+
 	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">
-		<constructor-arg ref="connectionlessChannelFactory" />
+		<constructor-arg ref="threadPool" />
 		<constructor-arg type="int" value="${discoveryPort}" />
+		<constructor-arg type="int" value="${discoveryDelay}" />
+		<constructor-arg ref="connectionMgr"/>
 	</bean>
+
+	<bean name="localNode" class="org.blockout.network.LocalNode"/>
 	
-	<bean name="connectionManager" class="org.blockout.network.netty.NettyConnectionManager">
-	      <constructor-arg type="int" value="${serverPort}"/>
-	      <constructor-arg>
-	      	<bean class="org.blockout.network.netty.NettyChannelPipelineFactory" />
-	      </constructor-arg>
-	      <constructor-arg ref="serverBootstrap"/>
-	      <constructor-arg ref="clientBootstrap"/>
-	      
-	      <property name="mp" ref="messageBroker" />
-	      <property name="socketKeepAlive" value="${socketKeepAlive}"/>
-	      <property name="serverSocketKeepAlive" value="${serverSocketKeepAlive}"/>
+	<bean name="chordOverlay" class="org.blockout.network.reworked.ChordOverlayChannelHandler">
+		<constructor-arg ref="localNode"/>
+		<constructor-arg ref="threadPool"/>
+		<constructor-arg ref="connectionMgr"/>
 	</bean>
-	
-	<bean id="messageBrokerExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-		<property name="corePoolSize" value="1" />
-		<property name="maxPoolSize" value="1" />
-		<property name="queueCapacity" value="1" />
+
+	<bean name="messageBroker" class="org.blockout.network.message.MessageBroker">
+		<constructor-arg ref="threadPool" />
+		<constructor-arg ref="chordOverlay"/>
 	</bean>
-	
-	<bean name="messageBroker" class="org.blockout.network.message.MessageBroker" init-method="setUp">
-	<constructor-arg ref="messageBrokerExecutor" />
-	<property name="connectionManager" ref="connectionManager"/>
-	</bean>
-	
-	<bean name="dht" class="org.blockout.network.dht.chord.Chord" init-method="setUp"/>
-	<bean name="networkTimer" class="org.jboss.netty.util.HashedWheelTimer"/>
-	
+
 	<bean class="org.blockout.ui.Camera">
-		<constructor-arg value="32" type="int"/>
-		<constructor-arg value="1024" type="int"/>
-		<constructor-arg value="768" type="int"/>
+		<constructor-arg value="32" type="int" />
+		<constructor-arg value="1024" type="int" />
+		<constructor-arg value="768" type="int" />
 	</bean>
-	
+
 	<!-- World -->
-	<bean class="org.blockout.world.BasicChunkGenerator"/>
-	<bean class="org.blockout.world.BasicChunkLoader"/>
-	<bean class="org.blockout.world.DefaultChunkManager"/>
-	<bean class="org.blockout.world.LocalGameState"/>
-	<bean class="org.blockout.world.World"/>
-	<bean class="org.blockout.logic.PlayerManager"/>
-	<bean class="org.blockout.logic.FogOfWar"/>
-	
-	<bean class="org.blockout.world.state.DefaultStateMachine"/>
-	<bean class="org.blockout.logic.handler.DelayedEventDispatcher"/>
-	
-	<bean class="org.blockout.logic.handler.MonsterDeathHandler"/>
-	<bean class="org.blockout.logic.handler.PlayerMoveHandler"/>
-	<bean class="org.blockout.logic.handler.RewardXPHandler"/>
-	
-	<bean class="org.blockout.logic.validator.AttackValidator"/>
-	<bean class="org.blockout.logic.validator.CollisionDetectionEventValidator"/>
-	<bean class="org.blockout.logic.validator.CrateValidator"/>
-	
-	<bean name="pathFindingMap" class="org.blockout.ui.PathFindingMap"/>
-	
+	<bean class="org.blockout.world.BasicChunkGenerator" />
+	<bean class="org.blockout.world.BasicChunkLoader" />
+	<bean class="org.blockout.world.DefaultChunkManager" />
+	<bean class="org.blockout.world.LocalGameState" />
+	<bean class="org.blockout.world.World" />
+	<bean class="org.blockout.logic.PlayerManager" />
+	<bean class="org.blockout.logic.FogOfWar" />
+
+	<bean class="org.blockout.world.state.DefaultStateMachine" />
+	<bean class="org.blockout.logic.handler.DelayedEventDispatcher" />
+
+	<bean class="org.blockout.logic.handler.MonsterDeathHandler" />
+	<bean class="org.blockout.logic.handler.PlayerMoveHandler" />
+	<bean class="org.blockout.logic.handler.RewardXPHandler" />
+
+	<bean class="org.blockout.logic.validator.AttackValidator" />
+	<bean class="org.blockout.logic.validator.CollisionDetectionEventValidator" />
+	<bean class="org.blockout.logic.validator.CrateValidator" />
+
+	<bean name="pathFindingMap" class="org.blockout.ui.PathFindingMap" />
+
 	<bean class="org.newdawn.slick.util.pathfinding.AStarPathFinder">
-		<constructor-arg ref="pathFindingMap"/>
-		<constructor-arg value="80"/>
-		<constructor-arg value="true"/>
+		<constructor-arg ref="pathFindingMap" />
+		<constructor-arg value="80" />
+		<constructor-arg value="true" />
 		<constructor-arg>
-			<bean class="org.newdawn.slick.util.pathfinding.heuristics.ClosestSquaredHeuristic"/>
+			<bean
+				class="org.newdawn.slick.util.pathfinding.heuristics.ClosestSquaredHeuristic" />
 		</constructor-arg>
 	</bean>
 </beans>

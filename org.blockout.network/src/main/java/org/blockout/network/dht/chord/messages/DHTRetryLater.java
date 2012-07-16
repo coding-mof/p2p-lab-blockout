@@ -1,32 +1,32 @@
 package org.blockout.network.dht.chord.messages;
 
+import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import org.blockout.network.INodeAddress;
 import org.blockout.network.message.IMessage;
 
 public class DHTRetryLater implements IMessage {
 
-	private static final long serialVersionUID = -7192042080060206269L;
-	public final int maxCount;
-	private IMessage orig;
-	private INodeAddress receiver;
-	private long delay;
-	private TimeUnit unit;
-	private int count;
+	private static final long	serialVersionUID	= -7192042080060206269L;
+	public final int			maxCount;
+	private final IMessage		orig;
+	private final SocketAddress	receiver;
+	private final long			delay;
+	private final TimeUnit		unit;
+	private final int			count;
 
-	public DHTRetryLater(IMessage orig, INodeAddress receiver, int maxCount,
-			long delay, TimeUnit unit) {
+	public DHTRetryLater(final IMessage orig, final SocketAddress receiver, final int maxCount, final long delay,
+			final TimeUnit unit) {
 		this.maxCount = maxCount;
 		this.orig = orig;
 		this.receiver = receiver;
 		this.delay = delay;
 		this.unit = unit;
-		this.count = 0;
+		count = 0;
 	}
 
-	protected DHTRetryLater(IMessage orig, INodeAddress receiver, int maxCount,
-			long delay, TimeUnit unit, int count) {
+	protected DHTRetryLater(final IMessage orig, final SocketAddress receiver, final int maxCount, final long delay,
+			final TimeUnit unit, final int count) {
 		this.maxCount = maxCount;
 		this.orig = orig;
 		this.receiver = receiver;
@@ -36,28 +36,27 @@ public class DHTRetryLater implements IMessage {
 	}
 
 	public int getCount() {
-		return this.count;
+		return count;
 	}
 
 	public IMessage getOriginalMessage() {
-		return this.orig;
+		return orig;
 	}
 
-	public INodeAddress getOriginalReceiver() {
-		return this.receiver;
+	public SocketAddress getOriginalReceiver() {
+		return receiver;
 	}
 
 	public long getDelay() {
-		return this.delay;
+		return delay;
 	}
 
 	public TimeUnit getUnit() {
-		return this.unit;
+		return unit;
 	}
 
 	public DHTRetry getRetryMessage() {
-		return new DHTRetry(this.orig, this.receiver, this.delay, this.unit,
-				this.maxCount, this.count + 1);
+		return new DHTRetry( orig, receiver, delay, unit, maxCount, count + 1 );
 	}
 
 }

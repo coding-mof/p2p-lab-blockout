@@ -6,8 +6,8 @@ import java.util.Hashtable;
 import javax.inject.Inject;
 
 import org.blockout.common.TileCoordinate;
-import org.blockout.network.INodeAddress;
 import org.blockout.network.dht.Hash;
+import org.blockout.network.dht.IHash;
 import org.blockout.network.message.IMessagePassing;
 import org.blockout.network.message.MessageReceiver;
 import org.blockout.world.entity.Player;
@@ -32,21 +32,21 @@ import org.blockout.world.state.ValidationResult;
  */
 public class DefaultChunkManager extends MessageReceiver implements IChunkManager, IStateMachineListener {
 
-	private IStateMachine												stateMachine;
+	private IStateMachine										stateMachine;
 
-	private final WorldAdapter											worldAdapter;
+	private final WorldAdapter									worldAdapter;
 
-	private final IMessagePassing										messagePassing;
+	private final IMessagePassing								messagePassing;
 
-	private final Hashtable<TileCoordinate, ArrayList<INodeAddress>>	receiver;
+	private final Hashtable<TileCoordinate, ArrayList<IHash>>	receiver;
 
-	private final Hashtable<TileCoordinate, ArrayList<INodeAddress>>	local;
+	private final Hashtable<TileCoordinate, ArrayList<IHash>>	local;
 
 	@Inject
 	public DefaultChunkManager(final WorldAdapter worldAdapter, final IMessagePassing network) {
 		super();
-		receiver = new Hashtable<TileCoordinate, ArrayList<INodeAddress>>();
-		local = new Hashtable<TileCoordinate, ArrayList<INodeAddress>>();
+		receiver = new Hashtable<TileCoordinate, ArrayList<IHash>>();
+		local = new Hashtable<TileCoordinate, ArrayList<IHash>>();
 		this.worldAdapter = worldAdapter;
 		this.worldAdapter.setManager( this );
 		messagePassing = network;
@@ -67,7 +67,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	public void eventCommitted( final IEvent<?> event ) {
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
-			for ( INodeAddress address : receiver.get( coordinate ) ) {
+			for ( IHash address : receiver.get( coordinate ) ) {
 				messagePassing.send( new StateMessage( event, StateMessage.COMMIT_MESSAGE ), address );
 			}
 		}
@@ -82,7 +82,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		if ( !receiver.containsKey( coordinate ) ) {
 			messagePassing.send( new StateMessage( event, StateMessage.PUSH_MESSAGE ), new Hash( coordinate ) );
 			if ( local.containsKey( coordinate ) ) {
-				for ( INodeAddress address : local.get( coordinate ) ) {
+				for ( IHash address : local.get( coordinate ) ) {
 					messagePassing.send( new StateMessage( event, StateMessage.PUSH_MESSAGE ), address );
 				}
 			}
@@ -99,12 +99,12 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	public void eventRolledBack( final IEvent<?> event ) {
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
-			for ( INodeAddress address : receiver.get( coordinate ) ) {
+			for ( IHash address : receiver.get( coordinate ) ) {
 				messagePassing.send( new StateMessage( event, StateMessage.ROLLBAK_MESSAGE ), address );
 			}
 		}
 		if ( local.contains( coordinate ) ) {
-			for ( INodeAddress address : local.get( coordinate ) ) {
+			for ( IHash address : local.get( coordinate ) ) {
 				messagePassing.send( new StateMessage( event, StateMessage.ROLLBAK_MESSAGE ), address );
 			}
 		}
@@ -115,7 +115,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	 */
 	@Override
 	public void requestChunk( final TileCoordinate position ) {
-		local.put( position, new ArrayList<INodeAddress>() );
+		local.put( position, new ArrayList<IHash>() );
 		messagePassing.send( new ChuckRequestMessage( position ), new Hash( position ) );
 	}
 
@@ -126,7 +126,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	public void stopUpdating( final TileCoordinate position ) {
 		messagePassing.send( new StopUpdatesMessage( position ), new Hash( position ) );
 		if ( local.containsKey( position ) ) {
-			for ( INodeAddress address : local.get( position ) ) {
+			for ( IHash address : local.get( position ) ) {
 				messagePassing.send( new StopUpdatesMessage( position ), address );
 			}
 		}
@@ -141,7 +141,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		messagePassing.send( new EnterGameMessage( player ), new Hash( new TileCoordinate( 0, 0 ) ) );
 	}
 
-	public void receive( final StateMessage msg, final INodeAddress origin ) {
+	public void receive( final StateMessage msg, final IHash origin ) {
 		switch ( msg.getType() ) {
 			case StateMessage.ROLLBAK_MESSAGE:
 				stateMachine.rollbackEvent( msg.getEvent() );
@@ -165,18 +165,18 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		}
 	}
 
-	public void receive( final ChuckRequestMessage msg, final INodeAddress origin ) {
+	public void receive( final ChuckRequestMessage msg, final IHash origin ) {
 		Chunk c = worldAdapter.getChunk( msg.getCoordinate() );
 		if ( !receiver.containsKey( c.getPosition() ) ) {
-			receiver.put( c.getPosition(), new ArrayList<INodeAddress>() );
+			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
-		messagePassing.send( new ChunkDeliveryMessage( c, (ArrayList<INodeAddress>) receiver.get( msg.getCoordinate() )
+		messagePassing.send( new ChunkDeliveryMessage( c, (ArrayList<IHash>) receiver.get( msg.getCoordinate() )
 				.clone() ), origin );
 		receiver.get( c.getPosition() ).add( origin );
 
 	}
 
-	public void receive( final ChunkDeliveryMessage msg, final INodeAddress origin ) {
+	public void receive( final ChunkDeliveryMessage msg, final IHash origin ) {
 		Chunk c = msg.getChunk();
 		if ( receiver.containsKey( c.getPosition() ) ) {
 			receiver.get( c.getPosition() ).remove( origin );
@@ -187,7 +187,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		worldAdapter.responseChunk( c );
 	}
 
-	public void receive( final StopUpdatesMessage msg, final INodeAddress origin ) {
+	public void receive( final StopUpdatesMessage msg, final IHash origin ) {
 		if ( receiver.containsKey( msg.getCoordinate() ) ) {
 			receiver.get( msg.getCoordinate() ).remove( origin );
 		}
@@ -196,7 +196,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		}
 	}
 
-	public void receive( final UnmanageMessage msg, final INodeAddress origin ) {
+	public void receive( final UnmanageMessage msg, final IHash origin ) {
 		IComparator comparator = msg.getComparator();
 		ManageMessage manageMessage = new ManageMessage();
 		for ( TileCoordinate coordinate : receiver.keySet() ) {
@@ -207,10 +207,10 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		messagePassing.send( manageMessage, origin );
 	}
 
-	public void receive( final ManageMessage msg, final INodeAddress origin ) {
+	public void receive( final ManageMessage msg, final IHash origin ) {
 
 		ArrayList<Chunk> chunks = msg.getChunks();
-		ArrayList<ArrayList<INodeAddress>> addresses = msg.getReceivers();
+		ArrayList<ArrayList<IHash>> addresses = msg.getReceivers();
 
 		for ( int i = 0; i < chunks.size(); i++ ) {
 			receiver.put( chunks.get( i ).getPosition(), addresses.get( i ) );
@@ -219,34 +219,22 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 
 	}
 
-	public void receive( final EnterGameMessage msg, final INodeAddress origin ) {
+	public void receive( final EnterGameMessage msg, final IHash origin ) {
 		Chunk c = worldAdapter.getChunk( new TileCoordinate( 0, 0 ) );
 
 		// TODO better player placement
-		boolean set = false;
-		for ( int i = 1; i < Chunk.CHUNK_SIZE - 1; i++ ) {
-			for ( int j = 1; j < Chunk.CHUNK_SIZE - 1; j++ ) {
-				if ( c.getTile( i, j ).getEntityOnTile() == null ) {
-					c.setEntityCoordinate( msg.getPlayer(), i, j );
-					set = true;
-					break;
-				}
-			}
-			if ( set ) {
-				break;
-			}
-		}
+		TileCoordinate coord = c.findFreeTile();
+		c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
 
 		if ( !receiver.containsKey( c.getPosition() ) ) {
-			receiver.put( c.getPosition(), new ArrayList<INodeAddress>() );
+			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
-		messagePassing.send( new GameEnteredMessage( c, (ArrayList<INodeAddress>) receiver.get( c.getPosition() )
-				.clone() ), origin );
+		messagePassing.send( new GameEnteredMessage( c, (ArrayList<IHash>) receiver.get( c.getPosition() ).clone() ),
+				origin );
 		receiver.get( c.getPosition() ).add( origin );
-
 	}
 
-	public void receive( final GameEnteredMessage msg, final INodeAddress origin ) {
+	public void receive( final GameEnteredMessage msg, final IHash origin ) {
 		if ( receiver.containsKey( msg.getChunk().getPosition() ) ) {
 			receiver.get( msg.getChunk().getPosition() ).remove( origin );
 		}
@@ -254,7 +242,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		local.put( msg.getChunk().getPosition(), msg.getLocalPlayer() );
 	}
 
-	public void receive( final EntityAddedMessage msg, final INodeAddress origin ) {
+	public void receive( final EntityAddedMessage msg, final IHash origin ) {
 		TileCoordinate coordinate = Chunk.containingCunk( msg.getCoordinate() );
 		if ( local.containsKey( coordinate ) ) {
 			worldAdapter.getChunk( coordinate ).setEntityCoordinate( msg.getEntity(), msg.getCoordinate().getX(),

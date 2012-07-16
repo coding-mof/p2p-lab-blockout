@@ -1,13 +1,14 @@
 package org.blockout.network.discovery;
 
-import java.util.ArrayList;
+import java.net.SocketAddress;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
 
-import org.blockout.network.INodeAddress;
-import org.blockout.network.message.IMessagePassing;
+import org.blockout.network.LocalNode;
+
+import com.google.common.collect.Lists;
 
 /**
  * Trivial implementation of the node discovery.
@@ -19,18 +20,18 @@ import org.blockout.network.message.IMessagePassing;
 public class DiscoveryStub implements INodeDiscovery {
 
 	protected CopyOnWriteArrayList<DiscoveryListener>	listener;
-	protected List<INodeAddress> knownNodes;
+	protected List<SocketAddress>						knownNodes;
 
 	@Inject
-	public DiscoveryStub(IMessagePassing mp) {
+	public DiscoveryStub(final LocalNode localNode) {
 		listener = new CopyOnWriteArrayList<DiscoveryListener>();
-		knownNodes = new ArrayList<INodeAddress>();
+		knownNodes = Lists.newArrayList();
 
-		knownNodes.add(mp.getOwnAddress());
+		// knownNodes.add( localNode.getInfo() );
 	}
 
 	@Override
-	public List<INodeAddress> listNodes() {
+	public List<SocketAddress> listNodes() {
 		return knownNodes;
 	}
 

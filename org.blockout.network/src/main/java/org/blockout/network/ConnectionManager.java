@@ -1,6 +1,7 @@
 package org.blockout.network;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Set;
 
 import org.blockout.network.dht.IHash;
@@ -26,16 +27,15 @@ import org.jboss.netty.channel.Channel;
 public interface ConnectionManager {
 	public InetSocketAddress getAddress();
 
-	public Set<INodeAddress> getAllConnections();
+	public Set<SocketAddress> getAllConnections();
 
-	public void addConnection( INodeAddress address, Channel channel );
+	public void addConnection( SocketAddress nodeInfo, Channel channel );
 
-	public Channel getConnection( INodeAddress address );
+	public Channel getConnection( SocketAddress nodeInfo );
 
 	public Channel getConnection( IHash nodeId );
 
-	public void closeConnection( INodeAddress address );
+	public void closeConnection( SocketAddress nodeInfo );
 
 	public void closeConnection( Channel channel );
-
 }
