@@ -1,6 +1,7 @@
 package org.blockout.network.dht;
 
 import java.net.InetSocketAddress;
+import java.util.UUID;
 
 import org.blockout.common.TileCoordinate;
 
@@ -20,6 +21,12 @@ public class Hash implements IHash {
 
 	public Hash(final String hash) {
 		value = hash;
+	}
+
+	public Hash(final UUID id) {
+		HashFunction hf = Hashing.sha1();
+		HashCode hash = hf.hashString( id.toString() );
+		value = hash.toString();
 	}
 
 	public Hash(final TileCoordinate coord) {

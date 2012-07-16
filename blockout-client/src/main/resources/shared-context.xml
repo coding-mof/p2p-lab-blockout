@@ -22,7 +22,14 @@
 		<property name="poolSize" value="10" />
 	</bean>
 	
-	<bean name="connectionMgr" class="org.blockout.network.reworked.ConnectionManager"/>
+	<bean name="chordOverlay" class="org.blockout.network.reworked.ChordOverlayChannelHandler">
+		<constructor-arg ref="localNode"/>
+		<constructor-arg ref="threadPool"/>
+	</bean>
+
+	<bean name="connectionMgr" class="org.blockout.network.reworked.ConnectionManager" init-method="init">
+		<constructor-arg ref="chordOverlay"/>
+	</bean>
 
 	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">
 		<constructor-arg ref="threadPool" />
@@ -32,12 +39,6 @@
 	</bean>
 
 	<bean name="localNode" class="org.blockout.network.LocalNode"/>
-	
-	<bean name="chordOverlay" class="org.blockout.network.reworked.ChordOverlayChannelHandler">
-		<constructor-arg ref="localNode"/>
-		<constructor-arg ref="threadPool"/>
-		<constructor-arg ref="connectionMgr"/>
-	</bean>
 
 	<bean name="messageBroker" class="org.blockout.network.message.MessageBroker">
 		<constructor-arg ref="threadPool" />

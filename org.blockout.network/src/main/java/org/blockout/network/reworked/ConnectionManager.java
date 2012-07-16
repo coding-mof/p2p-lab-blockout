@@ -1,7 +1,9 @@
 package org.blockout.network.reworked;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -28,34 +30,55 @@ import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+
 public class ConnectionManager extends SimpleChannelHandler implements IConnectionManager {
 
-	private static final Logger	logger;
+	private static final Logger		logger;
 	static {
 		logger = LoggerFactory.getLogger( ConnectionManager.class );
 	}
 
-	private final ChannelGroup	allChannels;
-	private ClientBootstrap		clientBootstrap;
-	private ServerBootstrap		serverBootstrap;
-	private Channel				serverChannel;
+	private final ChannelGroup		allChannels;
+	private ClientBootstrap			clientBootstrap;
+	private ServerBootstrap			serverBootstrap;
+	private Channel					serverChannel;
+	private final PipelineFactory	pipelineFactory;
 
 	public ConnectionManager() {
 		allChannels = new DefaultChannelGroup();
+		pipelineFactory = new PipelineFactory();
+	}
+
+	public ConnectionManager(final ChannelInterceptor... interceptors) {
+		allChannels = new DefaultChannelGroup();
+		pipelineFactory = new PipelineFactory();
+		if ( interceptors != null && interceptors.length > 0 ) {
+			for ( ChannelInterceptor interceptor : interceptors ) {
+				addChannelInterceptor( interceptor );
+			}
+		}
+	}
+
+	public void init() {
 		initClient();
 		initServer();
 	}
 
 	private void initClient() {
 		clientBootstrap = new ClientBootstrap( new NioClientSocketChannelFactory() );
-		// clientBootstrap.setPipelineFactory( pipelineFactory );
+		clientBootstrap.setPipelineFactory( pipelineFactory );
 	}
 
 	private void initServer() {
 		serverBootstrap = new ServerBootstrap( new NioServerSocketChannelFactory() );
-		// serverBootstrap.setPipelineFactory();
-		serverChannel = serverBootstrap.bind();
+		serverBootstrap.setPipelineFactory( pipelineFactory );
+		serverChannel = serverBootstrap.bind( new InetSocketAddress( 0 ) );
 		logger.info( "Bound server to " + serverChannel.getLocalAddress() );
+	}
+
+	public void addChannelInterceptor( final ChannelInterceptor interceptor ) {
+		pipelineFactory.addChannelInterceptor( interceptor );
 	}
 
 	@Override
@@ -145,8 +168,14 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 
 	private class PipelineFactory implements ChannelPipelineFactory {
 
-		public PipelineFactory() {
+		private final List<ChannelInterceptor>	interceptors;
 
+		public PipelineFactory() {
+			interceptors = Lists.newArrayList();
+		}
+
+		public void addChannelInterceptor( final ChannelInterceptor interceptor ) {
+			interceptors.add( interceptor );
 		}
 
 		@Override
@@ -156,6 +185,10 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 			pipeline.addLast( "objectEncoder", new ObjectEncoder() );
 			ClassResolver classResolver = ClassResolvers.cacheDisabled( getClass().getClassLoader() );
 			pipeline.addLast( "objectDecoder", new ObjectDecoder( classResolver ) );
+			for ( ChannelInterceptor interceptor : interceptors ) {
+				pipeline.addLast( interceptor.getName(), new ChannelHandlerInterceptorAdapter( ConnectionManager.this,
+						interceptor ) );
+			}
 			return pipeline;
 		}
 	}

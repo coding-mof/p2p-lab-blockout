@@ -49,6 +49,7 @@ public class MessageBroker implements IMessagePassing, ChordListener {
 		this.exec = exec;
 		this.chordOverlay = chordOverlay;
 
+		chordOverlay.addChordListener( this );
 		filteredReceivers = HashMultimap.create();
 	}
 

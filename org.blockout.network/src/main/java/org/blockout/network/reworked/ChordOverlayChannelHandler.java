@@ -19,7 +19,6 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ChildChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.slf4j.Logger;
@@ -37,7 +36,7 @@ import com.google.common.base.Preconditions;
  * 
  */
 @ChannelHandler.Sharable
-public class ChordOverlayChannelHandler extends SimpleChannelHandler implements IChordOverlay {
+public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implements IChordOverlay {
 
 	private static final Logger				logger;
 	static {
@@ -56,7 +55,6 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 	private final ChannelGroup				channels;
 	private final LocalNode					localNode;
 	private final TaskExecutor				executor;
-	private final IConnectionManager		connectionMgr;
 
 	/**
 	 * Creates a new chord overlay with the initial responsibility of
@@ -67,16 +65,13 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 	 * @param executor
 	 *            An executor for dispatching the listener invocations.
 	 */
-	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskExecutor executor,
-			final IConnectionManager connectionMgr) {
+	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskExecutor executor) {
 
 		Preconditions.checkNotNull( localNode );
 		Preconditions.checkNotNull( executor );
-		Preconditions.checkNotNull( connectionMgr );
 
 		this.localNode = localNode;
 		this.executor = executor;
-		this.connectionMgr = connectionMgr;
 
 		pendingSuccessorLookups = Collections.synchronizedSet( new HashSet<FindSuccessorFuture>() );
 		listener = new CopyOnWriteArrayList<ChordListener>();
@@ -88,7 +83,8 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 	}
 
 	@Override
-	public void messageReceived( final ChannelHandlerContext ctx, final MessageEvent e ) throws Exception {
+	public void messageReceived( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
+			final MessageEvent e ) throws Exception {
 
 		Object message = e.getMessage();
 		if ( message instanceof FindSuccessorMessage ) {
@@ -96,13 +92,13 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 		} else if ( message instanceof SuccessorFoundMessage ) {
 			handleFoundSuccessorMessage( (SuccessorFoundMessage) message );
 		} else if ( message instanceof JoinMessage ) {
-			handleJoinMessage( e, (JoinMessage) message );
+			handleJoinMessage( connectionMgr, e, (JoinMessage) message );
 		} else {
 			// TODO: What is the origin's hash?
 			fireMessageReceived( null, message );
 		}
 
-		super.messageReceived( ctx, e );
+		ctx.sendUpstream( e );
 	}
 
 	/**
@@ -152,11 +148,12 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 		}
 	}
 
-	private void handleJoinMessage( final MessageEvent e, final JoinMessage message ) {
+	private void handleJoinMessage( final IConnectionManager connectionMgr, final MessageEvent e,
+			final JoinMessage message ) {
 
 		if ( responsibility.contains( message.getNodeId() ) ) {
 			// We are the new node's successor
-			welcomeNode( e, message );
+			welcomeNode( connectionMgr, e, message );
 			return;
 		}
 
@@ -179,7 +176,7 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 		} );
 	}
 
-	private void welcomeNode( final MessageEvent e, final JoinMessage message ) {
+	private void welcomeNode( final IConnectionManager connectionMgr, final MessageEvent e, final JoinMessage message ) {
 		ConnectionFuture future = connectionMgr.connectTo( message.getAddress() );
 		future.addListener( new ConnectionFutureListener() {
 
@@ -246,18 +243,22 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 	}
 
 	@Override
-	public void channelOpen( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
+	public void channelOpen( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
+			final ChannelStateEvent e ) throws Exception {
 		channels.add( e.getChannel() );
 		// We connected as client - so we need to join the existing ring
 		Channels.write( e.getChannel(), new JoinMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
-		super.channelOpen( ctx, e );
+
+		ctx.sendUpstream( e );
 	}
 
 	@Override
-	public void childChannelOpen( final ChannelHandlerContext ctx, final ChildChannelStateEvent e ) throws Exception {
+	public void childChannelOpen( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
+			final ChildChannelStateEvent e ) throws Exception {
 		// Someone connected to us
 		channels.add( e.getChannel() );
-		super.childChannelOpen( ctx, e );
+
+		ctx.sendUpstream( e );
 	}
 
 	@Override
@@ -348,6 +349,15 @@ public class ChordOverlayChannelHandler extends SimpleChannelHandler implements 
 	@Override
 	public void routeMessage( final Serializable message, final IHash nodeId ) {
 		logger.debug( "Routing message " + message + " to " + nodeId );
-		// TODO: Implement routing
+		if ( nodeId.equals( localNode.getNodeId() ) ) {
+			fireMessageReceived( nodeId, message );
+			return;
+		}
+		Channels.write( successorChannel, message );
+	}
+
+	@Override
+	public String getName() {
+		return "ChordOverlayHandler";
 	}
 }
