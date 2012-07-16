@@ -64,7 +64,11 @@ public class Shader {
 
 	public static boolean areSupported() {
 		ContextCapabilities capabilities = GLContext.getCapabilities();
-		return capabilities.GL_ARB_vertex_shader & capabilities.GL_ARB_fragment_shader;
+
+        if( null != capabilities )
+            return capabilities.OpenGL20;
+        else
+            return false;
 	}
 
 	private Shader(final ShaderResourceManager srm, final String vertexFileName, final String fragmentFileName)

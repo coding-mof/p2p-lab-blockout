@@ -196,11 +196,7 @@ public class World implements IWorld, WorldAdapter {
 		for ( int x = pos.getX() - 1; x <= pos.getX() + 1; x++ ) {
 			for ( int y = pos.getX() - 1; y <= pos.getY() + 1; y++ ) {
 				if ( !view.containsKey( new TileCoordinate( x, y ) ) ) {
-					if ( !managedChunks.containsKey( new TileCoordinate( x, y ) ) ) {
-						chunkManager.requestChunk( new TileCoordinate( x, y ) );
-					} else {
-						view.put( new TileCoordinate( x, y ), managedChunks.get( new TileCoordinate( x, y ) ) );
-					}
+					chunkManager.requestChunk( new TileCoordinate( x, y ) );
 				}
 			}
 		}
@@ -254,6 +250,11 @@ public class World implements IWorld, WorldAdapter {
 		}
 
 		return null;
+	}
+
+	@Override
+	public boolean isReady() {
+		return pos != null;
 	}
 
 }
