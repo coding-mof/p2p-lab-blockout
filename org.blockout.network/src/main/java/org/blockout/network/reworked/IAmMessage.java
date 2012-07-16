@@ -17,13 +17,13 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * 
  */
-public class JoinMessage implements Serializable {
+public class IAmMessage implements Serializable {
 
 	private static final long	serialVersionUID	= -7039915306236068931L;
 	private final IHash			nodeId;
 	private final SocketAddress	address;
 
-	public JoinMessage(final IHash nodeId, final SocketAddress address) {
+	public IAmMessage(final IHash nodeId, final SocketAddress address) {
 
 		Preconditions.checkNotNull( nodeId );
 		Preconditions.checkNotNull( address );

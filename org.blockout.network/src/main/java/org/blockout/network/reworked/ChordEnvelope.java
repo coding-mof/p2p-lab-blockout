@@ -6,6 +6,7 @@ import org.blockout.network.dht.IHash;
 
 public class ChordEnvelope implements Serializable {
 
+	private static final long	serialVersionUID	= -1484555197910309758L;
 	private final IHash			senderId;
 	private final IHash			receiverId;
 	private final Serializable	content;
@@ -26,5 +27,11 @@ public class ChordEnvelope implements Serializable {
 
 	public Serializable getContent() {
 		return content;
+	}
+
+	@Override
+	public String toString() {
+		return "ChordEnvelope[source=" + getSenderId() + ", destination=" + getReceiverId() + ", content="
+				+ getContent() + "]";
 	}
 }

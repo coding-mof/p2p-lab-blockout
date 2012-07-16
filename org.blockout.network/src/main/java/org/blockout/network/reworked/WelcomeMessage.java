@@ -1,5 +1,6 @@
 package org.blockout.network.reworked;
 
+import java.io.Serializable;
 import java.net.SocketAddress;
 
 import org.blockout.network.dht.IHash;
@@ -8,13 +9,14 @@ import com.google.common.base.Preconditions;
 
 /**
  * The welcome message gets send by a node already in the chord ring as response
- * to a {@link JoinMessage}. This message tells the new node what it's successor
+ * to a {@link IAmMessage}. This message tells the new node what it's successor
  * and predecessor will be.
  * 
  * @author Marc-Christian Schulze
  * 
  */
-public class WelcomeMessage {
+public class WelcomeMessage implements Serializable {
+	private static final long	serialVersionUID	= 9178269876442403205L;
 	private final IHash			successorId;
 	private final SocketAddress	successorAddress;
 	private final IHash			predecessorId;
@@ -25,8 +27,6 @@ public class WelcomeMessage {
 
 		Preconditions.checkNotNull( successorId );
 		Preconditions.checkNotNull( successorAddress );
-		Preconditions.checkNotNull( predecessorId );
-		Preconditions.checkNotNull( predecessorAddress );
 
 		this.successorId = successorId;
 		this.successorAddress = successorAddress;
@@ -42,10 +42,20 @@ public class WelcomeMessage {
 		return successorAddress;
 	}
 
+	/**
+	 * Returns the predeccesor's id - if known. Otherwise null.
+	 * 
+	 * @return
+	 */
 	public IHash getPredecessorId() {
 		return predecessorId;
 	}
 
+	/**
+	 * Returns the predecessor's address - if known. Otherwise null.
+	 * 
+	 * @return
+	 */
 	public SocketAddress getPredecessorAddress() {
 		return predecessorAddress;
 	}

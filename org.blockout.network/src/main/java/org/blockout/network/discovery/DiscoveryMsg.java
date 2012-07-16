@@ -16,4 +16,9 @@ public class DiscoveryMsg implements IMessage {
 	public SocketAddress getServerAddress() {
 		return serverAddress;
 	}
+
+	@Override
+	public String toString() {
+		return "DiscoveryMsg[address=" + getServerAddress() + "]";
+	}
 }

@@ -52,5 +52,5 @@ public interface IChordOverlay {
 	 * @param message
 	 * @param nodeId
 	 */
-	public void routeMessage( Serializable message, IHash nodeId );
+	public void sendMessage( Serializable message, IHash nodeId );
 }

@@ -17,7 +17,6 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.ChildChannelStateEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
@@ -91,14 +90,16 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			handleFindSuccessorMessage( e, (FindSuccessorMessage) message );
 		} else if ( message instanceof SuccessorFoundMessage ) {
 			handleFoundSuccessorMessage( (SuccessorFoundMessage) message );
-		} else if ( message instanceof JoinMessage ) {
-			handleJoinMessage( connectionMgr, e, (JoinMessage) message );
+		} else if ( message instanceof IAmMessage ) {
+			handleIAmMessage( connectionMgr, e, (IAmMessage) message );
+		} else if ( message instanceof ChordEnvelope ) {
+			ChordEnvelope envelope = (ChordEnvelope) message;
+			fireMessageReceived( envelope.getSenderId(), envelope.getContent() );
 		} else {
-			// TODO: What is the origin's hash?
-			fireMessageReceived( null, message );
+			logger.warn( "Discard unknown message type " + message );
 		}
 
-		ctx.sendUpstream( e );
+		super.messageReceived( connectionMgr, ctx, e );
 	}
 
 	/**
@@ -148,10 +149,15 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 	}
 
-	private void handleJoinMessage( final IConnectionManager connectionMgr, final MessageEvent e,
-			final JoinMessage message ) {
+	private void handleIAmMessage( final IConnectionManager connectionMgr, final MessageEvent e,
+			final IAmMessage message ) {
 
 		if ( responsibility.contains( message.getNodeId() ) ) {
+			if ( message.getNodeId().equals( predeccessorId ) ) {
+				// The new node is already our predecessor
+				// (created just a redundant link)
+				return;
+			}
 			// We are the new node's successor
 			welcomeNode( connectionMgr, e, message );
 			return;
@@ -176,7 +182,9 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		} );
 	}
 
-	private void welcomeNode( final IConnectionManager connectionMgr, final MessageEvent e, final JoinMessage message ) {
+	private void welcomeNode( final IConnectionManager connectionMgr, final MessageEvent e, final IAmMessage message ) {
+
+		logger.info( "Connecting to new node " + message.getAddress() + " to welcome it." );
 		ConnectionFuture future = connectionMgr.connectTo( message.getAddress() );
 		future.addListener( new ConnectionFutureListener() {
 
@@ -195,16 +203,23 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 					return;
 				}
 
+				logger.info( "Connected to " + message.getAddress() + " sending welcome message." );
 				// Send welcome message
 				WelcomeMessage welcomeMsg;
 				SocketAddress serverAddress = connectionMgr.getServerAddress();
-				SocketAddress remoteAddress = predeccessorChannel.getRemoteAddress();
+				SocketAddress remoteAddress = predeccessorChannel == null ? null : predeccessorChannel
+						.getRemoteAddress();
 				welcomeMsg = new WelcomeMessage( localNode.getNodeId(), serverAddress, predeccessorId, remoteAddress );
 				Channels.write( channel, welcomeMsg );
+				logger.info( "Predecessor changed from " + predeccessorId + " to " + message.getNodeId() );
 
 				// Update our predecessor reference
 				predeccessorId = message.getNodeId();
 				predeccessorChannel = e.getChannel();
+				if ( successorId == null ) {
+					successorId = message.getNodeId();
+					successorChannel = e.getChannel();
+				}
 
 				// Update responsibility
 				WrappedRange<IHash> newResponsibility;
@@ -243,22 +258,13 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	@Override
-	public void channelOpen( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
+	public void channelConnected( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
 			final ChannelStateEvent e ) throws Exception {
-		channels.add( e.getChannel() );
-		// We connected as client - so we need to join the existing ring
-		Channels.write( e.getChannel(), new JoinMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
 
-		ctx.sendUpstream( e );
-	}
+		// Introduce ourself when we have connected.
+		Channels.write( e.getChannel(), new IAmMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
 
-	@Override
-	public void childChannelOpen( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
-			final ChildChannelStateEvent e ) throws Exception {
-		// Someone connected to us
-		channels.add( e.getChannel() );
-
-		ctx.sendUpstream( e );
+		super.channelConnected( connectionMgr, ctx, e );
 	}
 
 	@Override
@@ -347,7 +353,11 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	@Override
-	public void routeMessage( final Serializable message, final IHash nodeId ) {
+	public void sendMessage( final Serializable message, final IHash nodeId ) {
+		routeMessage( new ChordEnvelope( localNode.getNodeId(), nodeId, message ), nodeId );
+	}
+
+	private void routeMessage( final Serializable message, final IHash nodeId ) {
 		logger.debug( "Routing message " + message + " to " + nodeId );
 		if ( nodeId.equals( localNode.getNodeId() ) ) {
 			fireMessageReceived( nodeId, message );

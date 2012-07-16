@@ -64,7 +64,7 @@ public class MessageBroker implements IMessagePassing, ChordListener {
 				try {
 					IHash nodeId = future.get();
 					logger.debug( "Routing message " + msg + " to node " + nodeId );
-					chordOverlay.routeMessage( msg, nodeId );
+					chordOverlay.sendMessage( msg, nodeId );
 				} catch ( InterruptedException e ) {
 					logger.error( "Someone interrupted the successor lookup.", e );
 				} catch ( ExecutionException e ) {

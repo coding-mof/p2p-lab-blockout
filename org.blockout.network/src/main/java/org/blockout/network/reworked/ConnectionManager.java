@@ -1,7 +1,12 @@
 package org.blockout.network.reworked;
 
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.SocketAddress;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,8 +78,50 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	private void initServer() {
 		serverBootstrap = new ServerBootstrap( new NioServerSocketChannelFactory() );
 		serverBootstrap.setPipelineFactory( pipelineFactory );
-		serverChannel = serverBootstrap.bind( new InetSocketAddress( 0 ) );
+		serverChannel = serverBootstrap.bind( new InetSocketAddress( findLocalNetworkInterface(), 0 ) );
 		logger.info( "Bound server to " + serverChannel.getLocalAddress() );
+	}
+
+	private InetAddress findLocalNetworkInterface() {
+		try {
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			while ( interfaces.hasMoreElements() ) {
+				NetworkInterface networkInterface = interfaces.nextElement();
+				if ( !networkInterface.isUp() ) {
+					logger.debug( "Skipped (down): " + networkInterface );
+					continue;
+				}
+				if ( networkInterface.isLoopback() ) {
+					logger.debug( "Skipped loopback: " + networkInterface );
+					continue;
+				}
+				if ( networkInterface.isPointToPoint() ) {
+					logger.debug( "Skipped ptp: " + networkInterface );
+					continue;
+				}
+				Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+				while ( inetAddresses.hasMoreElements() ) {
+					InetAddress address = inetAddresses.nextElement();
+					if ( address.isLoopbackAddress() ) {
+						logger.debug( "Skipped loopback: " + address );
+						continue;
+					}
+					if ( address.isMCNodeLocal() ) {
+						logger.debug( "Skipped node local: " + address );
+						continue;
+					}
+					if ( address instanceof Inet6Address ) {
+						logger.debug( "Skipped V6 address: " + address );
+						continue;
+					}
+					logger.debug( "Selected: " + address + " of " + networkInterface );
+					return address;
+				}
+			}
+		} catch ( SocketException e ) {
+			throw new RuntimeException( "No appropriate network interface found.", e );
+		}
+		throw new RuntimeException( "No appropriate network interface found." );
 	}
 
 	public void addChannelInterceptor( final ChannelInterceptor interceptor ) {
@@ -100,6 +147,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		logger.info( "Connecting to " + address );
 		Channel channel = findChannel( address );
 		if ( channel != null ) {
+			logger.debug( "Channel already opened to " + address );
 			return new ChannelFutureAdapter( Channels.succeededFuture( channel ) );
 		}
 		ChannelFuture future = clientBootstrap.connect( address );
@@ -110,6 +158,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 				if ( !future.isSuccess() ) {
 					logger.warn( "Failed to connect to " + future.getChannel().getRemoteAddress(), future.getCause() );
 				}
+				logger.info( "Connected to " + future.getChannel().getRemoteAddress() );
 			}
 		} );
 		return new ChannelFutureAdapter( future );
@@ -122,7 +171,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		if ( channel == null ) {
 			return;
 		}
-		channel.disconnect();
+		channel.close();
 	}
 
 	private Channel findChannel( final SocketAddress address ) {
@@ -136,34 +185,34 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 
 	@Override
 	public void exceptionCaught( final ChannelHandlerContext ctx, final ExceptionEvent e ) throws Exception {
+		logger.warn( "Caught exception in network stack.", e.getCause() );
 		super.exceptionCaught( ctx, e );
-		logger.warn( "Caught exception in network stack.", e );
 	}
 
 	@Override
 	public void channelConnected( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
+		logger.info( "ChannelConnected to " + e.getChannel().getRemoteAddress() );
 		super.channelConnected( ctx, e );
-		logger.info( "Connected to " + e.getChannel().getRemoteAddress() );
 	}
 
 	@Override
 	public void channelDisconnected( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
-		super.channelDisconnected( ctx, e );
 		logger.info( "Disconnected from " + e.getChannel().getRemoteAddress() );
 		e.getChannel().close();
+		super.channelDisconnected( ctx, e );
 	}
 
 	@Override
 	public void childChannelOpen( final ChannelHandlerContext ctx, final ChildChannelStateEvent e ) throws Exception {
-		super.childChannelOpen( ctx, e );
 		logger.info( "Client " + e.getChannel().getRemoteAddress() + " connected." );
 		allChannels.add( e.getChannel() );
+		super.childChannelOpen( ctx, e );
 	}
 
 	@Override
 	public void childChannelClosed( final ChannelHandlerContext ctx, final ChildChannelStateEvent e ) throws Exception {
-		super.childChannelClosed( ctx, e );
 		logger.info( "Client " + e.getChannel().getRemoteAddress() + " disconnected." );
+		super.childChannelClosed( ctx, e );
 	}
 
 	private class PipelineFactory implements ChannelPipelineFactory {

@@ -114,11 +114,15 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 		if ( logger.isDebugEnabled() ) {
 			logger.debug( "Received node discovery message: " + e.getMessage() );
 		}
+		final DiscoveryMsg msg = (DiscoveryMsg) e.getMessage();
+		if ( msg.getServerAddress().equals( connectionMgr.getServerAddress() ) ) {
+			logger.debug( "Discarding own discovery packet: " + e.getMessage() );
+			return;
+		}
 
 		Runnable handleMessage = new Runnable() {
 			@Override
 			public void run() {
-				DiscoveryMsg msg = (DiscoveryMsg) e.getMessage();
 				NodeDiscovery.this.fireNodeDiscoveredIfNewNode( msg.getServerAddress() );
 			}
 		};
@@ -134,7 +138,7 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 	private void fireNodeDiscoveredIfNewNode( final SocketAddress nodeAddress ) {
 		if ( !nodes.contains( nodeAddress ) ) {
 			nodes.add( nodeAddress );
-
+			connectionMgr.connectTo( nodeAddress );
 			fireNodeDiscovered( nodeAddress );
 		}
 	}

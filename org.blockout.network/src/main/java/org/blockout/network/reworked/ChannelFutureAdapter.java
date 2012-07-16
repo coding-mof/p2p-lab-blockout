@@ -1,15 +1,19 @@
 package org.blockout.network.reworked;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.channel.ChannelFuture;
 
 class ChannelFutureAdapter implements ConnectionFuture {
 
-	private final ChannelFuture	future;
+	private final Map<ConnectionFutureListener, ChannelFutureListenerAdapter>	mapping;
+	private final ChannelFuture													future;
 
 	public ChannelFutureAdapter(final ChannelFuture future) {
 		this.future = future;
+		mapping = new HashMap<ConnectionFutureListener, ChannelFutureListenerAdapter>();
 	}
 
 	@Override
@@ -39,14 +43,15 @@ class ChannelFutureAdapter implements ConnectionFuture {
 
 	@Override
 	public void addListener( final ConnectionFutureListener connectFutureListener ) {
-		// TODO Auto-generated method stub
-
+		ChannelFutureListenerAdapter adapter = new ChannelFutureListenerAdapter( connectFutureListener );
+		mapping.put( connectFutureListener, adapter );
+		future.addListener( adapter );
 	}
 
 	@Override
 	public void removeListener( final ConnectionFutureListener connectFutureListener ) {
-		// TODO Auto-generated method stub
-
+		ChannelFutureListenerAdapter adapter = mapping.remove( connectFutureListener );
+		future.removeListener( adapter );
 	}
 
 	@Override
