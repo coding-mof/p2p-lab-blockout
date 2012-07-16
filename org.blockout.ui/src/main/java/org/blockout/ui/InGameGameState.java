@@ -112,7 +112,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
         // logger.warn( "Failed to render health. Falling back...", e );
         // healthRenderer = new PrimitiveHealthRenderer();
         // }
-        getHealthRenderer().render();
+        getHealthRenderer().render( paramGraphics );
 	}
 
 	@Override
@@ -167,8 +167,10 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	            healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
 	        }
 	        else{
-	            healthRenderer = new PrimitiveHealthRenderer();
+                healthRenderer = new PrimitiveHealthRenderer( camera, gameState );
 	        }
+
+            healthRenderer.init();
 	    }
 	
         return healthRenderer;
