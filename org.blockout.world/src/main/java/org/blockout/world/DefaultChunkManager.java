@@ -117,18 +117,18 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	 */
 	@Override
 	public void requestChunk( final TileCoordinate position ) {
-		if(receiver.containsKey(position)){
-			local.put(position, receiver.get(position));
-			worldAdapter.responseChunk(worldAdapter.getChunk(position));
-			
-			for (INodeAddress address : local.get(position)) {
-				messagePassing.send(new ChunkEnteredMessage(position), address);
+		if ( receiver.containsKey( position ) ) {
+			local.put( position, receiver.get( position ) );
+			worldAdapter.responseChunk( worldAdapter.getChunk( position ) );
+
+			for ( IHash address : local.get( position ) ) {
+				messagePassing.send( new ChunkEnteredMessage( position ), address );
 			}
-		}else {
-			local.put( position, new ArrayList<INodeAddress>() );
+		} else {
+			local.put( position, new ArrayList<IHash>() );
 			messagePassing.send( new ChuckRequestMessage( position ), new Hash( position ) );
 		}
-		
+
 	}
 
 	/**
@@ -144,6 +144,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		}
 		local.remove( position );
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -184,32 +185,32 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		messagePassing.send( new ChunkDeliveryMessage( c, (ArrayList<IHash>) receiver.get( msg.getCoordinate() )
 				.clone() ), origin );
 		receiver.get( c.getPosition() ).add( origin );
-		
-		//TODO save local connections?
+
+		// TODO save local connections?
 	}
 
 	public void receive( final ChunkDeliveryMessage msg, final IHash origin ) {
 		Chunk c = msg.getChunk();
 		if ( receiver.containsKey( c.getPosition() ) ) {
 			receiver.get( c.getPosition() ).remove( origin );
-		}else if ( local.containsKey( c.getPosition() ) ) {
+		} else if ( local.containsKey( c.getPosition() ) ) {
 			receiver.put( c.getPosition(), msg.getLocalPlayers() );
-			
+
 			worldAdapter.responseChunk( c );
-			
-			for (INodeAddress address : local.get(c.getPosition())) {
-				messagePassing.send(new ChunkEnteredMessage(c.getPosition()), address);
+
+			for ( IHash address : local.get( c.getPosition() ) ) {
+				messagePassing.send( new ChunkEnteredMessage( c.getPosition() ), address );
 			}
 		}
-		
+
 	}
 
 	public void receive( final ChunkEnteredMessage msg, final IHash origin ) {
-		if(local.containsKey(msg.getCoordinate())){
-			local.get(msg.getCoordinate()).add(origin);
+		if ( local.containsKey( msg.getCoordinate() ) ) {
+			local.get( msg.getCoordinate() ).add( origin );
 		}
 	}
-	
+
 	public void receive( final StopUpdatesMessage msg, final IHash origin ) {
 		if ( receiver.containsKey( msg.getCoordinate() ) ) {
 			receiver.get( msg.getCoordinate() ).remove( origin );
@@ -217,10 +218,9 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		if ( local.contains( msg.getCoordinate() ) ) {
 			local.get( msg.getCoordinate() ).remove( origin );
 		}
-		
-		//TODO save local connections?
+
+		// TODO save local connections?
 	}
-	
 
 	public void receive( final UnmanageMessage msg, final IHash origin ) {
 		IComparator comparator = msg.getComparator();
@@ -235,7 +235,6 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 
 	public void receive( final ManageMessage msg, final IHash origin ) {
 
-
 		ArrayList<Chunk> chunks = msg.getChunks();
 		ArrayList<ArrayList<IHash>> addresses = msg.getReceivers();
 
@@ -245,16 +244,15 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		}
 
 	}
-	
-	public void receive( final FallbackMessage msg, final INodeAddress origin ) {
-		
-		//TODO save local connections?
-		
-		if(!receiver.containsKey(msg.getChunk().getPosition())){
-			worldAdapter.manageChunk(msg.getChunk());
+
+	public void receive( final FallbackMessage msg, final IHash origin ) {
+
+		// TODO save local connections?
+
+		if ( !receiver.containsKey( msg.getChunk().getPosition() ) ) {
+			worldAdapter.manageChunk( msg.getChunk() );
 		}
 	}
-	
 
 	public void receive( final EnterGameMessage msg, final IHash origin ) {
 		Chunk c = worldAdapter.getChunk( new TileCoordinate( 0, 0 ) );
@@ -269,7 +267,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 		messagePassing.send( new GameEnteredMessage( c, (ArrayList<IHash>) receiver.get( c.getPosition() ).clone() ),
 				origin );
 		receiver.get( c.getPosition() ).add( origin );
-		//TODO save local connections?
+		// TODO save local connections?
 	}
 
 	public void receive( final GameEnteredMessage msg, final IHash origin ) {
