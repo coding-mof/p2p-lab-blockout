@@ -213,6 +213,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				Channels.write( channel, welcomeMsg );
 				logger.info( "Predecessor changed from " + predeccessorId + " to " + message.getNodeId() );
 
+				// TODO: Merge of 2 chord rings not handled
+				// TODO: Welcoming new nodes not correctly implemented
 				// Update our predecessor reference
 				predeccessorId = message.getNodeId();
 				predeccessorChannel = e.getChannel();

@@ -32,7 +32,10 @@
 			<bean class="org.jboss.netty.util.HashedWheelTimer"/>
 		</constructor-arg>
 		<constructor-arg value="${keepAliveDelay}"/>
+		<constructor-arg value="${keepAliveTimeout}"/>
 		<constructor-arg ref="chordOverlay"/>
+		
+		
 	</bean>
 
 	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">

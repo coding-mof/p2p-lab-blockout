@@ -34,6 +34,7 @@ import org.jboss.netty.handler.codec.serialization.ClassResolver;
 import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
 import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
+import org.jboss.netty.handler.timeout.IdleState;
 import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.jboss.netty.util.Timer;
 import org.slf4j.Logger;
@@ -56,22 +57,26 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	private final PipelineFactory	pipelineFactory;
 	private final Timer				timer;
 	private final int				keepAliveDelay;
+	private final int				keepAliveTimeout;
 
-	public ConnectionManager(final Timer timer, final int keepAliveDelay) {
+	public ConnectionManager(final Timer timer, final int keepAliveDelay, final int keepAliveTimeout) {
 
 		Preconditions.checkNotNull( timer );
 
 		this.timer = timer;
+		this.keepAliveTimeout = keepAliveTimeout;
 		this.keepAliveDelay = keepAliveDelay;
 		allChannels = new DefaultChannelGroup();
 		pipelineFactory = new PipelineFactory();
 	}
 
-	public ConnectionManager(final Timer timer, final int keepAliveDelay, final ChannelInterceptor... interceptors) {
+	public ConnectionManager(final Timer timer, final int keepAliveDelay, final int keepAliveTimeout,
+			final ChannelInterceptor... interceptors) {
 
 		Preconditions.checkNotNull( timer );
 
 		this.timer = timer;
+		this.keepAliveTimeout = keepAliveTimeout;
 		this.keepAliveDelay = keepAliveDelay;
 		allChannels = new DefaultChannelGroup();
 		pipelineFactory = new PipelineFactory();
@@ -236,11 +241,12 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 
 		private final List<ChannelInterceptor>	interceptors;
 		private final ChannelHandler			keepAliveHandler;
+		private final ChannelHandler			timeoutHandler;
 
 		public PipelineFactory() {
 			interceptors = Lists.newArrayList();
-			keepAliveHandler = new IdleStateHandler( timer, keepAliveDelay * 2, keepAliveDelay, 0,
-					TimeUnit.MILLISECONDS );
+			keepAliveHandler = new KeepAliveChannelHandler( timer, keepAliveDelay, 0, 0, TimeUnit.MILLISECONDS );
+			timeoutHandler = new TimeoutChannelHandler( timer, keepAliveTimeout, 0, 0, TimeUnit.MILLISECONDS );
 		}
 
 		public void addChannelInterceptor( final ChannelInterceptor interceptor ) {
@@ -250,16 +256,67 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		@Override
 		public ChannelPipeline getPipeline() throws Exception {
 			ChannelPipeline pipeline = Channels.pipeline();
-			pipeline.addLast( "keepAliveHandler", keepAliveHandler );
 			pipeline.addLast( "connectionManager", ConnectionManager.this );
 			pipeline.addLast( "objectEncoder", new ObjectEncoder() );
 			ClassResolver classResolver = ClassResolvers.cacheDisabled( getClass().getClassLoader() );
 			pipeline.addLast( "objectDecoder", new ObjectDecoder( classResolver ) );
+			pipeline.addLast( "keepAliveHandler", keepAliveHandler );
+			pipeline.addLast( "timeoutHandler", keepAliveHandler );
 			for ( ChannelInterceptor interceptor : interceptors ) {
 				pipeline.addLast( interceptor.getName(), new ChannelHandlerInterceptorAdapter( ConnectionManager.this,
 						interceptor ) );
 			}
 			return pipeline;
+		}
+	}
+
+	private static class KeepAliveChannelHandler extends IdleStateHandler {
+		private static final Logger	logger;
+		static {
+			logger = LoggerFactory.getLogger( KeepAliveChannelHandler.class );
+		}
+
+		public KeepAliveChannelHandler(final Timer timer, final int readerIdleTimeSeconds,
+				final int writerIdleTimeSeconds, final int allIdleTimeSeconds) {
+			super( timer, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds );
+		}
+
+		public KeepAliveChannelHandler(final Timer timer, final long readerIdleTime, final long writerIdleTime,
+				final long allIdleTime, final TimeUnit unit) {
+			super( timer, readerIdleTime, writerIdleTime, allIdleTime, unit );
+		}
+
+		@Override
+		protected void channelIdle( final ChannelHandlerContext ctx, final IdleState state,
+				final long lastActivityTimeMillis ) throws Exception {
+			super.channelIdle( ctx, state, lastActivityTimeMillis );
+			logger.info( "Channel " + ctx.getChannel() + " has been idle. Sending keep alive.." );
+
+		}
+	}
+
+	private static class TimeoutChannelHandler extends IdleStateHandler {
+		private static final Logger	logger;
+		static {
+			logger = LoggerFactory.getLogger( KeepAliveChannelHandler.class );
+		}
+
+		public TimeoutChannelHandler(final Timer timer, final int readerIdleTimeSeconds,
+				final int writerIdleTimeSeconds, final int allIdleTimeSeconds) {
+			super( timer, readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds );
+		}
+
+		public TimeoutChannelHandler(final Timer timer, final long readerIdleTime, final long writerIdleTime,
+				final long allIdleTime, final TimeUnit unit) {
+			super( timer, readerIdleTime, writerIdleTime, allIdleTime, unit );
+		}
+
+		@Override
+		protected void channelIdle( final ChannelHandlerContext ctx, final IdleState state,
+				final long lastActivityTimeMillis ) throws Exception {
+			super.channelIdle( ctx, state, lastActivityTimeMillis );
+			logger.info( "Channel " + ctx.getChannel() + " has been timed out. Closing it." );
+			ctx.getChannel().close();
 		}
 	}
 }
