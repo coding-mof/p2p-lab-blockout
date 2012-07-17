@@ -1,28 +1,21 @@
 package org.blockout.network.message;
 
-import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
+import java.io.Serializable;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 
-import javax.inject.Inject;
-
-import org.blockout.network.ConnectionManager;
-import org.blockout.network.INodeAddress;
-import org.blockout.network.NodeInfo;
-import org.blockout.network.dht.Hash;
-import org.blockout.network.dht.IDistributedHashTable;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.dht.chord.messages.DHTPassOnMsg;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.MessageEvent;
+import org.blockout.network.dht.WrappedRange;
+import org.blockout.network.reworked.ChordListener;
+import org.blockout.network.reworked.FutureListener;
+import org.blockout.network.reworked.IChordOverlay;
+import org.blockout.network.reworked.ObservableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
@@ -32,212 +25,106 @@ import com.google.common.collect.Multimap;
  * It needs a DHT and a ConnectionManager to work correctly. They are injected
  * via Spring at the moment.
  * 
+ * @author Marc-Christian Schulze
  * @author Paul Dubs
  * 
  */
-
-public class MessageBroker implements IMessagePassing, Runnable {
-	private static final Logger										logger;
+public class MessageBroker implements IMessagePassing, ChordListener {
+	private static final Logger						logger;
 	static {
 		logger = LoggerFactory.getLogger( MessageBroker.class );
 	}
 
 	// Map of registered receivers
-	protected Multimap<Class<? extends IMessage>, IMessageReceiver>	filtredReceivers;
+	protected Multimap<Class<?>, IMessageReceiver>	filteredReceivers;
 
-	// DHT for addressing via nodeID
-	private IDistributedHashTable									dht;
+	private final IChordOverlay						chordOverlay;
+	private final TaskExecutor						exec;
 
-	// ConnectionMannger to abstract the messy connection management away
-	private ConnectionManager										connectionManager;
+	public MessageBroker(final TaskExecutor exec, final IChordOverlay chordOverlay) {
 
-	// Message Queues for Incoming, Outgoing and Internal Notification Messages
-	private enum MessageType {
-		OUTGOING, INCOMING
-	};
+		Preconditions.checkNotNull( exec );
+		Preconditions.checkNotNull( chordOverlay );
 
-	private final LinkedBlockingQueue<MessageType>			notifications;
-	private final LinkedList<IMessageEnvelope<IMessage>>	outgoing;
-	private final LinkedList<MessageEvent>					incoming;
-	private final TaskExecutor								exec;
-
-	// First part of Initialization Sequence, setDHT and setConnectionManager
-	// also have to be called and then the setUp method.
-	public MessageBroker(final TaskExecutor exec) {
-		filtredReceivers = HashMultimap.create();
-		notifications = new LinkedBlockingQueue<MessageType>();
-		outgoing = new LinkedList<IMessageEnvelope<IMessage>>();
-		incoming = new LinkedList<MessageEvent>();
 		this.exec = exec;
-	}
+		this.chordOverlay = chordOverlay;
 
-	@Inject
-	public void setDHT( final IDistributedHashTable dht ) {
-		this.dht = dht;
-	}
-
-	@Override
-	@Inject
-	public void setConnectionManager( final ConnectionManager mgr ) {
-		connectionManager = mgr;
-	}
-
-	// Mandatory
-	public void setUp() {
-		exec.execute( this );
-	}
-
-	public Set<INodeAddress> listNodes() {
-		return connectionManager.getAllConnections();
+		chordOverlay.addChordListener( this );
+		filteredReceivers = HashMultimap.create();
 	}
 
 	@Override
-	/**
-	 * Puts the Message in an Envelope that contains this node's address as the
-	 * sender and puts it into the outgoing message queue.
-	 */
-	public void send( final IMessage msg, final INodeAddress recipient ) {
-		IMessageEnvelope<IMessage> envelope = new MessageEnvelope<IMessage>( msg, recipient, getOwnAddress() );
-		outgoing.offer( envelope );
-		notifications.offer( MessageType.OUTGOING );
+	public void send( final Serializable msg, final IHash keyId ) {
+		logger.debug( "Sending message " + msg + " to node responsible for " + keyId );
+		ObservableFuture<IHash> future = chordOverlay.findSuccessor( keyId );
+		future.addFutureListener( new FutureListener<IHash>() {
+
+			@Override
+			public void completed( final ObservableFuture<IHash> future ) {
+				try {
+					IHash nodeId = future.get();
+					logger.debug( "Routing message " + msg + " to node " + nodeId );
+					chordOverlay.sendMessage( msg, nodeId );
+				} catch ( InterruptedException e ) {
+					logger.error( "Someone interrupted the successor lookup.", e );
+				} catch ( ExecutionException e ) {
+					logger.error( "Successor lookup failed.", e );
+				}
+			}
+		} );
 	}
 
-	@Override
-	/**
-	 * Packs the Message into a DHT Message, so that it can be redirected, and
-	 * tries to send that message.
-	 */
-	public void send( final IMessage msg, final IHash nodeId ) {
-		this.send( new DHTPassOnMsg( msg, nodeId ), new NodeInfo( (Hash) nodeId ) );
-	}
-
-	@Override
-	public INodeAddress getOwnAddress() {
-		return new NodeInfo( connectionManager.getAddress() );
-	}
-
-	// Message Handling
-	@Override
-	/**
-	 * Receives the Message, and puts it in the according queue, to be processed
-	 * later.
-	 */
-	public void messageReceived( final MessageEvent e ) {
-		incoming.offer( e );
-		notifications.offer( MessageType.INCOMING );
-	}
-
-	@Override
-	/**
-	 * Notifies all interested receivers about the given message
-	 */
-	public void notify( final IMessage message, final INodeAddress sender ) throws IllegalArgumentException,
-			SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		Collection<IMessageReceiver> receiverList = getReceiver( message.getClass() );
-		for ( IMessageReceiver receiver : receiverList ) {
-			receiver.receive( message, sender );
-		}
-	}
-
-	// Receiver Handling
-	private Collection<IMessageReceiver> getReceiver( final Class<? extends IMessage> filterClass ) {
+	private Collection<IMessageReceiver> getReceiver( final Class<?> filterClass ) {
 		Collection<IMessageReceiver> currentList;
-		currentList = filtredReceivers.get( filterClass );
+		currentList = filteredReceivers.get( filterClass );
 		return currentList;
 	}
 
 	@Override
-	public void addReceiver( final IMessageReceiver receiver, final Class<? extends IMessage>... filterClasses ) {
-		for ( Class<? extends IMessage> clazz : filterClasses ) {
+	public void addReceiver( final IMessageReceiver receiver, final Class<?>... filterClasses ) {
+		for ( Class<?> clazz : filterClasses ) {
 			getReceiver( clazz ).add( receiver );
 		}
 	}
 
 	@Override
-	public void addReceiver( final Set<IMessageReceiver> receiver, final Class<? extends IMessage>... filterClasses ) {
-		for ( Class<? extends IMessage> clazz : filterClasses ) {
+	public void addReceiver( final Set<IMessageReceiver> receiver, final Class<?>... filterClasses ) {
+		for ( Class<?> clazz : filterClasses ) {
 			getReceiver( clazz ).addAll( receiver );
 		}
 	}
 
 	@Override
-	public void removeReceiver( final IMessageReceiver receiver, final Class<? extends IMessage>... filterClasses ) {
-		for ( Class<? extends IMessage> clazz : filterClasses ) {
-			filtredReceivers.remove( clazz, receiver );
+	public void removeReceiver( final IMessageReceiver receiver, final Class<?>... filterClasses ) {
+		for ( Class<?> clazz : filterClasses ) {
+			filteredReceivers.remove( clazz, receiver );
+		}
+	}
+
+	/**
+	 * Notifies all interested receivers about the given message
+	 */
+	protected void fireMessageReceived( final Object message, final IHash sender ) {
+		Collection<IMessageReceiver> receiverList = getReceiver( message.getClass() );
+		for ( final IMessageReceiver receiver : receiverList ) {
+			exec.execute( new Runnable() {
+
+				@Override
+				public void run() {
+					receiver.receive( message, sender );
+				}
+			} );
 		}
 	}
 
 	@Override
-	/**
-	 * The Runloop, the messages are dealt with in their order of insertion.
-	 */
-	public void run() {
-		MessageType type;
-		while ( true ) {
-			try {
-				type = notifications.poll( 5, TimeUnit.SECONDS );
-
-				if ( type == MessageType.INCOMING ) {
-					receive_message();
-				} else if ( type == MessageType.OUTGOING ) {
-					send_message();
-				}
-
-			} catch ( InterruptedException e ) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	public void responsibilityChanged( final IChordOverlay chord, final WrappedRange<IHash> from,
+			final WrappedRange<IHash> to ) {
+		// TODO: Do we need to do something?
 	}
 
-	/**
-	 * Gets a message from the incoming queue, corrects its sender and notifies
-	 * everybody who cares about it.
-	 */
-	private void receive_message() {
-		MessageEvent event = incoming.poll();
-
-		IMessageEnvelope<IMessage> envelope = (IMessageEnvelope<IMessage>) event.getMessage();
-
-		logger.debug( "Received Message in Envelope: " + envelope );
-
-		INodeAddress actualSender = new NodeInfo(
-				((InetSocketAddress) event.getChannel().getRemoteAddress()).getHostName(), envelope.getSender()
-						.getInetAddress().getPort(), envelope.getSender().getNodeId() );
-
-		envelope.setSender( actualSender );
-		connectionManager.addConnection( envelope.getSender(), event.getChannel() );
-		try {
-			this.notify( envelope.getMessage(), envelope.getSender() );
-		} catch ( Exception e1 ) {
-			e1.printStackTrace();
-			logger.warn( "Closing channel " + event.getChannel() + " due to exception.", e1 );
-			connectionManager.closeConnection( event.getChannel() );
-		}
+	@Override
+	public void receivedMessage( final IChordOverlay chord, final Object message, final IHash senderId ) {
+		fireMessageReceived( message, senderId );
 	}
-
-	/**
-	 * Gets a message from the outgoing queue, tries to send it directly, and if
-	 * no direct connection is found it is routed over the DHT.
-	 */
-	private void send_message() {
-		IMessageEnvelope<IMessage> envelope = outgoing.poll();
-		INodeAddress recipient = envelope.getRecipient();
-		Channel chan;
-
-		logger.debug( "sending: " + envelope.getMessage() + " to Address " + envelope.getRecipient() );
-
-		if ( recipient.getInetAddress() == null ) {
-			chan = connectionManager.getConnection( recipient.getNodeId() );
-		} else {
-			chan = connectionManager.getConnection( recipient );
-		}
-
-		if ( chan == null ) {
-			dht.sendTo( envelope.getMessage(), recipient.getNodeId() );
-		} else {
-			chan.write( envelope );
-		}
-	}
-
 }

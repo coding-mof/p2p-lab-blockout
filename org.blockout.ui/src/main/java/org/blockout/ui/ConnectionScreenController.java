@@ -1,13 +1,12 @@
 package org.blockout.ui;
 
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.blockout.network.INodeAddress;
-import org.blockout.network.NodeInfo;
 import org.blockout.network.discovery.DiscoveryListener;
 import org.blockout.network.discovery.INodeDiscovery;
 import org.blockout.world.IWorld;
@@ -40,14 +39,14 @@ public class ConnectionScreenController implements StateBasedScreenController, D
 	protected IWorld				world;
 	protected LocalGameState		gameState;
 
-	protected List<INodeAddress>	knownNodes;
+	protected List<SocketAddress>	knownNodes;
 
 	@Inject
 	public ConnectionScreenController(final LocalGameState gameState, final IWorld world, final INodeDiscovery discovery) {
 		this.gameState = gameState;
 		this.world = world;
 		this.discovery = discovery;
-		knownNodes = new ArrayList<INodeAddress>( discovery.listNodes() );
+		knownNodes = new ArrayList<SocketAddress>( discovery.listNodes() );
 	}
 
 	@Override
@@ -88,16 +87,16 @@ public class ConnectionScreenController implements StateBasedScreenController, D
 	}
 
 	@Override
-	public void nodeDiscovered( final NodeInfo info ) {
+	public void nodeDiscovered( final SocketAddress info ) {
 		knownNodes.add( info );
 		updateNodeList();
 	}
 
 	protected void updateNodeList() {
 		@SuppressWarnings("unchecked")
-		ListBox<INodeAddress> listBox = screen.findNiftyControl( "listPeers", ListBox.class );
+		ListBox<SocketAddress> listBox = screen.findNiftyControl( "listPeers", ListBox.class );
 		listBox.clear();
 
-		listBox.addAllItems( new ArrayList<INodeAddress>( knownNodes ) );
+		listBox.addAllItems( new ArrayList<SocketAddress>( knownNodes ) );
 	}
 }

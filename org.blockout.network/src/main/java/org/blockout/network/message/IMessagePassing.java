@@ -1,31 +1,29 @@
 package org.blockout.network.message;
 
-import java.lang.reflect.InvocationTargetException;
+import java.io.Serializable;
 import java.util.Set;
 
-import org.blockout.network.ConnectionManager;
-import org.blockout.network.INodeAddress;
 import org.blockout.network.dht.IHash;
-import org.jboss.netty.channel.MessageEvent;
 
+/**
+ * Abstractions for a message broker that is able to route messages in the chord
+ * ring even if the given key is not directly the node id.
+ * 
+ * @author Marc-Christian Schulze
+ * @author Paul Dubs
+ */
 public interface IMessagePassing {
-	public void send(IMessage msg, INodeAddress recipient);
-	public void send(IMessage msg, IHash nodeId);
+	/**
+	 * Sends a message to the node that is responsible for the given key.
+	 * 
+	 * @param msg
+	 * @param keyId
+	 */
+	public void send( Serializable msg, IHash keyId );
 
-	public void addReceiver(IMessageReceiver receiver, Class<? extends IMessage>... filterClass);
+	public void addReceiver( IMessageReceiver receiver, Class<?>... filterClass );
 
-	public void addReceiver(Set<IMessageReceiver> receiver, Class<? extends IMessage>... filterClass);
+	public void addReceiver( Set<IMessageReceiver> receiver, Class<?>... filterClass );
 
-	public void removeReceiver(IMessageReceiver receiver, Class<? extends IMessage>... filterClasses);
-
-	public INodeAddress getOwnAddress();
-
-	public void setConnectionManager(ConnectionManager mgr);
-
-	public void messageReceived(MessageEvent e);
-
-	public void notify(IMessage msg, INodeAddress origin)
-			throws IllegalArgumentException, SecurityException,
-			IllegalAccessException, InvocationTargetException,
-			NoSuchMethodException;
+	public void removeReceiver( IMessageReceiver receiver, Class<?>... filterClasses );
 }

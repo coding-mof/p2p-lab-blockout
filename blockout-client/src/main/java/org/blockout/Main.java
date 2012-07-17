@@ -1,5 +1,7 @@
 package org.blockout;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 
 import org.blockout.common.TileCoordinate;
@@ -35,7 +37,8 @@ public class Main {
 		logger = LoggerFactory.getLogger( Main.class );
 	}
 
-	public static void main( final String[] args ) throws SlickException, ParseException {
+	public static void main( final String[] args ) throws SlickException, ParseException, UnknownHostException,
+			IOException {
 
 		Arguments arguments = parseArgumentsOrExit( args );
 

@@ -1,24 +1,24 @@
 package org.blockout.network.discovery;
 
-import org.blockout.network.dht.IHash;
+import java.net.SocketAddress;
+
 import org.blockout.network.message.IMessage;
 
 public class DiscoveryMsg implements IMessage {
 
-	private final int port;
-	private final IHash nodeId;
+	private static final long	serialVersionUID	= -2443324053955389106L;
+	private final SocketAddress	serverAddress;
 
-	public DiscoveryMsg(int port, IHash nodeId) {
-		this.port = port;
-		this.nodeId = nodeId;
+	public DiscoveryMsg(final SocketAddress nodeInfo) {
+		serverAddress = nodeInfo;
 	}
 
-	public int getPort() {
-		return this.port;
+	public SocketAddress getServerAddress() {
+		return serverAddress;
 	}
 
-	public IHash getNodeId() {
-		return this.nodeId;
+	@Override
+	public String toString() {
+		return "DiscoveryMsg[address=" + getServerAddress() + "]";
 	}
-
 }

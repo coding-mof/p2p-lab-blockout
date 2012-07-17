@@ -55,6 +55,17 @@ public class Chunk implements Serializable {
 		setTiles( tiles );
 	}
 
+	public TileCoordinate findFreeTile() {
+		for ( int i = 1; i < Chunk.CHUNK_SIZE - 1; i++ ) {
+			for ( int j = 1; j < Chunk.CHUNK_SIZE - 1; j++ ) {
+				if ( getTile( i, j ).getEntityOnTile() == null ) {
+					return new TileCoordinate( i, j );
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * @param x
 	 *            coordinate of the Chunk in the World

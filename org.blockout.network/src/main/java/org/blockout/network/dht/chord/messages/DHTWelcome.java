@@ -1,18 +1,18 @@
 package org.blockout.network.dht.chord.messages;
 
-import org.blockout.network.INodeAddress;
+import org.blockout.network.dht.IHash;
 import org.blockout.network.message.IMessage;
 
 public class DHTWelcome implements IMessage {
 
-	private static final long serialVersionUID = -1442230602052840020L;
-	private INodeAddress predecessor;
+	private static final long	serialVersionUID	= -1442230602052840020L;
+	private final IHash			predecessor;
 
-	public DHTWelcome(INodeAddress predecessor) {
+	public DHTWelcome(final IHash predecessor) {
 		this.predecessor = predecessor;
 	}
 
-	public INodeAddress getPredecessor() {
-		return this.predecessor;
+	public IHash getPredecessor() {
+		return predecessor;
 	}
 }

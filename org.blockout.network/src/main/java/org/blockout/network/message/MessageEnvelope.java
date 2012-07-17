@@ -1,22 +1,24 @@
 package org.blockout.network.message;
 
-import org.blockout.network.INodeAddress;
+import java.net.InetSocketAddress;
+
+import org.blockout.network.dht.IHash;
 
 public class MessageEnvelope<T extends IMessage> implements IMessageEnvelope<T> {
 	private static final long	serialVersionUID	= 1808833825449980446L;
 
 	private final T				msg;
-	private final INodeAddress	recipient;
-	private INodeAddress		sender;
+	private final IHash			recipient;
+	private IHash				sender;
 
-	public MessageEnvelope(final T msg, final INodeAddress recipient, final INodeAddress sender) {
+	public MessageEnvelope(final T msg, final IHash recipient, final IHash sender) {
 		this.msg = msg;
 		this.recipient = recipient;
 		this.sender = sender;
 	}
 
 	@Override
-	public INodeAddress getSender() {
+	public IHash getSender() {
 		return this.sender;
 	}
 
@@ -26,7 +28,7 @@ public class MessageEnvelope<T extends IMessage> implements IMessageEnvelope<T> 
 	}
 
 	@Override
-	public INodeAddress getRecipient() {
+	public IHash getRecipient() {
 		return this.recipient;
 	}
 
@@ -36,7 +38,19 @@ public class MessageEnvelope<T extends IMessage> implements IMessageEnvelope<T> 
 	}
 
 	@Override
-	public void setSender( final INodeAddress remoteAddress ) {
+	public void setSender( final IHash remoteAddress ) {
 		this.sender = remoteAddress;
+	}
+
+	@Override
+	public InetSocketAddress getReceiverAddress() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InetSocketAddress getSenderAddress() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

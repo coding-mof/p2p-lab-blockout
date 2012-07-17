@@ -4,5 +4,8 @@ import java.io.Serializable;
 
 public interface IHash extends Serializable, Comparable<IHash> {
 	public String getValue();
+
 	public IHash getNext();
+
+	public int getM();
 }
