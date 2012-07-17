@@ -167,8 +167,10 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	            healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
 	        }
 	        else{
-	            healthRenderer = new PrimitiveHealthRenderer();
+                healthRenderer = new PrimitiveHealthRenderer( camera, gameState );
 	        }
+
+            healthRenderer.init();
 	    }
 	
         return healthRenderer;
