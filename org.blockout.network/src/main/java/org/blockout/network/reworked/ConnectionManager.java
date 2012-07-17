@@ -10,12 +10,14 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -32,9 +34,12 @@ import org.jboss.netty.handler.codec.serialization.ClassResolver;
 import org.jboss.netty.handler.codec.serialization.ClassResolvers;
 import org.jboss.netty.handler.codec.serialization.ObjectDecoder;
 import org.jboss.netty.handler.codec.serialization.ObjectEncoder;
+import org.jboss.netty.handler.timeout.IdleStateHandler;
+import org.jboss.netty.util.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class ConnectionManager extends SimpleChannelHandler implements IConnectionManager {
@@ -49,13 +54,25 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	private ServerBootstrap			serverBootstrap;
 	private Channel					serverChannel;
 	private final PipelineFactory	pipelineFactory;
+	private final Timer				timer;
+	private final int				keepAliveDelay;
 
-	public ConnectionManager() {
+	public ConnectionManager(final Timer timer, final int keepAliveDelay) {
+
+		Preconditions.checkNotNull( timer );
+
+		this.timer = timer;
+		this.keepAliveDelay = keepAliveDelay;
 		allChannels = new DefaultChannelGroup();
 		pipelineFactory = new PipelineFactory();
 	}
 
-	public ConnectionManager(final ChannelInterceptor... interceptors) {
+	public ConnectionManager(final Timer timer, final int keepAliveDelay, final ChannelInterceptor... interceptors) {
+
+		Preconditions.checkNotNull( timer );
+
+		this.timer = timer;
+		this.keepAliveDelay = keepAliveDelay;
 		allChannels = new DefaultChannelGroup();
 		pipelineFactory = new PipelineFactory();
 		if ( interceptors != null && interceptors.length > 0 ) {
@@ -218,9 +235,12 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	private class PipelineFactory implements ChannelPipelineFactory {
 
 		private final List<ChannelInterceptor>	interceptors;
+		private final ChannelHandler			keepAliveHandler;
 
 		public PipelineFactory() {
 			interceptors = Lists.newArrayList();
+			keepAliveHandler = new IdleStateHandler( timer, keepAliveDelay * 2, keepAliveDelay, 0,
+					TimeUnit.MILLISECONDS );
 		}
 
 		public void addChannelInterceptor( final ChannelInterceptor interceptor ) {
@@ -230,6 +250,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		@Override
 		public ChannelPipeline getPipeline() throws Exception {
 			ChannelPipeline pipeline = Channels.pipeline();
+			pipeline.addLast( "keepAliveHandler", keepAliveHandler );
 			pipeline.addLast( "connectionManager", ConnectionManager.this );
 			pipeline.addLast( "objectEncoder", new ObjectEncoder() );
 			ClassResolver classResolver = ClassResolvers.cacheDisabled( getClass().getClassLoader() );

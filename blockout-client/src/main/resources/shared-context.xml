@@ -28,6 +28,10 @@
 	</bean>
 
 	<bean name="connectionMgr" class="org.blockout.network.reworked.ConnectionManager" init-method="init">
+		<constructor-arg>
+			<bean class="org.jboss.netty.util.HashedWheelTimer"/>
+		</constructor-arg>
+		<constructor-arg value="${keepAliveDelay}"/>
 		<constructor-arg ref="chordOverlay"/>
 	</bean>
 

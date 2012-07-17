@@ -261,6 +261,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	public void channelConnected( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
 			final ChannelStateEvent e ) throws Exception {
 
+		channels.add( e.getChannel() );
+
 		// Introduce ourself when we have connected.
 		Channels.write( e.getChannel(), new IAmMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
 
