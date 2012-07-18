@@ -2,8 +2,8 @@ package org.blockout.network.reworked;
 
 import java.io.Serializable;
 
-import org.blockout.network.dht.WrappedRange;
 import org.blockout.network.dht.IHash;
+import org.blockout.network.dht.WrappedRange;
 
 /**
  * Abstraction of a chord overlay that provides key lookup functionality as well
@@ -53,4 +53,25 @@ public interface IChordOverlay {
 	 * @param nodeId
 	 */
 	public void sendMessage( Serializable message, IHash nodeId );
+
+    /**
+     * Returns the current predecessor of the local node
+     * 
+     * @return
+     */
+    public IHash getPredecessor();
+
+    /**
+     * Returns the current successor of the local node
+     * 
+     * @return
+     */
+    public IHash getSuccessor();
+
+    /**
+     * Returns the Id of the local node
+     * 
+     * @return
+     */
+    public IHash getLocalId();
 }

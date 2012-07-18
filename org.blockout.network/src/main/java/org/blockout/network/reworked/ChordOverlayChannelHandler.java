@@ -525,4 +525,19 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			}
 		}, stabilizationRate );
 	}
+
+    @Override
+    public IHash getPredecessor() {
+        return predecessorId;
+    }
+
+    @Override
+    public IHash getSuccessor() {
+        return successorId;
+    }
+
+    @Override
+    public IHash getLocalId() {
+        return responsibility.getUpperBound();
+    }
 }

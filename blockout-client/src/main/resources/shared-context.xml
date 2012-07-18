@@ -40,6 +40,7 @@
 	
 	<bean class="org.blockout.network.ConnectionDebugLogger">
 	    <constructor-arg ref="connectionMgr"/>
+	    <constructor-arg ref="chordOverlay"/>
     </bean>
 
 	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">
