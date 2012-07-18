@@ -110,7 +110,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 		ConnectionFuture future = connectionMgr.connectTo( address );
 		future.awaitUninterruptibly();
-
+		// FIXME: Seems to be a timing issue
 		for ( Channel channel : channels ) {
 			if ( channel.getRemoteAddress().equals( address ) ) {
 				return channel;
@@ -462,24 +462,30 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	private void routeMessage( final Serializable message, final IHash nodeId ) {
-		logger.debug( "Routing message " + message + " to " + nodeId );
-
 		Channel channel;
+		IHash destinationKey;
 		IHash higherKey = lookupTable.higherKey( nodeId );
 		if ( higherKey == null ) {
 			// either we passed the upper bound
 			// or the last finger is matching the key exactly
 			if ( lookupTable.lastKey().equals( nodeId ) ) {
-				channel = lookupTable.get( nodeId );
-			} else {
 				channel = lookupTable.lastEntry().getValue();
+				destinationKey = lookupTable.lastEntry().getKey();
+				logger.debug( "Router: using last key" );
+			} else {
+				channel = lookupTable.firstEntry().getValue();
+				destinationKey = lookupTable.firstEntry().getKey();
+				logger.debug( "Router: using first key" );
 			}
 		} else {
 			IHash lowerKey = lookupTable.lowerKey( higherKey );
 			channel = lookupTable.get( lowerKey );
+			destinationKey = lowerKey;
+			logger.debug( "Router: using next higher key" );
 		}
 
-		logger.debug( "Routing message " + message + " using channel " + channel );
+		logger.debug( "Routing message " + message + "(destination=" + nodeId + ") using channel " + channel + "(to="
+				+ destinationKey + ")" );
 		Channels.write( channel, message );
 	}
 
@@ -526,18 +532,18 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}, stabilizationRate );
 	}
 
-    @Override
-    public IHash getPredecessor() {
-        return predecessorId;
-    }
+	@Override
+	public IHash getPredecessor() {
+		return predecessorId;
+	}
 
-    @Override
-    public IHash getSuccessor() {
-        return successorId;
-    }
+	@Override
+	public IHash getSuccessor() {
+		return successorId;
+	}
 
-    @Override
-    public IHash getLocalId() {
-        return responsibility.getUpperBound();
-    }
+	@Override
+	public IHash getLocalId() {
+		return responsibility.getUpperBound();
+	}
 }

@@ -57,4 +57,14 @@ public class HashAndAddress implements IHash {
 	public String toString() {
 		return "HashAndAddress[hash=" + getHash() + ", address=" + getAddress() + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		return hash.hashCode();
+	}
+
+	@Override
+	public boolean equals( final Object obj ) {
+		return hash.equals( obj );
+	}
 }

@@ -27,7 +27,7 @@ public class WrappedRange<C extends Comparable<C>> implements Serializable {
 			int lower = this.lowerBound.compareTo( element );
 			int upper = this.upperBound.compareTo( element );
 			if ( this.wrapAround ) {
-				return upper <= 0 || lower >= 0;
+				return upper >= 0 || lower <= 0;
 			} else {
 				return lower <= 0 && upper >= 0;
 			}
