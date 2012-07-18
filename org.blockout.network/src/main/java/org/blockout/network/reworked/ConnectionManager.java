@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandler;
@@ -23,9 +24,11 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ChildChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
@@ -340,12 +343,29 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 			ClassResolver classResolver = ClassResolvers.cacheDisabled( getClass().getClassLoader() );
 			pipeline.addLast( "objectDecoder", new ObjectDecoder( classResolver ) );
 			pipeline.addLast( "keepAliveHandler", keepAliveHandler );
-			pipeline.addLast( "timeoutHandler", keepAliveHandler );
+			pipeline.addLast( "timeoutHandler", timeoutHandler );
+			pipeline.addLast( "keepAliveFilter", new KeepAlivePacketFilter() );
 			for ( ChannelInterceptor interceptor : interceptors ) {
 				pipeline.addLast( interceptor.getName(), new ChannelHandlerInterceptorAdapter( ConnectionManager.this,
 						interceptor ) );
 			}
 			return pipeline;
+		}
+	}
+
+	@ChannelHandler.Sharable
+	private static class KeepAlivePacketFilter implements ChannelUpstreamHandler {
+
+		@Override
+		public void handleUpstream( final ChannelHandlerContext ctx, final ChannelEvent e ) throws Exception {
+			if ( e instanceof MessageEvent ) {
+				MessageEvent evt = (MessageEvent) e;
+				if ( evt.getMessage() instanceof KeepAliveMessage ) {
+					// Discard KeepAlive messages
+					return;
+				}
+			}
+			ctx.sendUpstream( e );
 		}
 	}
 
@@ -370,7 +390,21 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 				final long lastActivityTimeMillis ) throws Exception {
 			super.channelIdle( ctx, state, lastActivityTimeMillis );
 			logger.info( "Channel " + ctx.getChannel() + " has been idle. Sending keep alive.." );
+			Channels.write( ctx.getChannel(), new KeepAliveMessage( false ) );
+		}
 
+		@Override
+		public void messageReceived( final ChannelHandlerContext ctx, final MessageEvent e ) throws Exception {
+			super.messageReceived( ctx, e );
+
+			if ( e.getMessage() instanceof KeepAliveMessage ) {
+				KeepAliveMessage msg = (KeepAliveMessage) e.getMessage();
+				// Check that this is not a response to previous ack to prevent
+				// looping
+				if ( !msg.isAck() ) {
+					Channels.write( ctx.getChannel(), new KeepAliveMessage( true ) );
+				}
+			}
 		}
 	}
 
@@ -398,5 +432,4 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 			ctx.getChannel().close();
 		}
 	}
-
 }
