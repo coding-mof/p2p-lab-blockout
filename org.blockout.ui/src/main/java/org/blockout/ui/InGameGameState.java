@@ -70,11 +70,11 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		this.world = world;
 		this.camera = camera;
 
-//        try {
-//            healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
-//        } catch ( Exception e ) {
-//            healthRenderer = new PrimitiveHealthRenderer();
-//        }
+		// try {
+		// healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
+		// } catch ( Exception e ) {
+		// healthRenderer = new PrimitiveHealthRenderer();
+		// }
 
 		this.beanFactory = beanFactory;
 	}
@@ -106,13 +106,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	protected void renderHUDOverlay( final GameContainer paramGameContainer, final StateBasedGame paramStateBasedGame,
 			final Graphics paramGraphics ) throws SlickException {
 
-        // try {
-        // healthRenderer.render();
-        // } catch ( UnsupportedOperationException e ) {
-        // logger.warn( "Failed to render health. Falling back...", e );
-        // healthRenderer = new PrimitiveHealthRenderer();
-        // }
-        getHealthRenderer().render();
+		getHealthRenderer().render();
 	}
 
 	@Override
@@ -160,20 +154,19 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 
 		lblCurrentPos.setText( "" + (world.findTile( gameState.getPlayer() )) );
 	}
-	
-    private IHealthRenderer getHealthRenderer() {
-	    if(null == healthRenderer){
-	        if(Shader.areSupported()){
-	            healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
-	        }
-	        else{
-                healthRenderer = new PrimitiveHealthRenderer( camera, gameState );
-	        }
 
-            healthRenderer.init();
-	    }
-	
-        return healthRenderer;
+	private IHealthRenderer getHealthRenderer() {
+		if ( null == healthRenderer ) {
+			if ( Shader.areSupported() ) {
+				healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
+			} else {
+				healthRenderer = new PrimitiveHealthRenderer( camera, gameState );
+			}
+
+			healthRenderer.init();
+		}
+
+		return healthRenderer;
 	}
 
 	@Override

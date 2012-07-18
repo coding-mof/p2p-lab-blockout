@@ -110,14 +110,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 		ConnectionFuture future = connectionMgr.connectTo( address );
 		future.awaitUninterruptibly();
-		// FIXME: Seems to be a timing issue
-		for ( Channel channel : channels ) {
-			if ( channel.getRemoteAddress().equals( address ) ) {
-				return channel;
-			}
-		}
-		logger.error( "Failed to create channel to " + hash + " - " + address );
-		return null;
+		return future.getChannel();
 	}
 
 	@Override
@@ -168,6 +161,10 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			logger.info( "Got notified about new predecessor " + predecessorId + " at " + predecessorChannel );
 			predecessorId = msg.getNodeId();
 
+			synchronized ( lookupTable ) {
+				lookupTable.put( predecessorId, predecessorChannel );
+			}
+
 			updateResponsibility( predecessorId.getNext() );
 		}
 	}
@@ -216,15 +213,12 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			SuccessorFoundMessage responseMsg;
 			responseMsg = new SuccessorFoundMessage( msg.getOrigin(), msg.getKey(), localNode.getNodeId(),
 					connectionMgr.getServerAddress() );
-			Channels.write( e.getChannel(), responseMsg );
+			routeMessage( responseMsg, msg.getOrigin() );
 			return;
 		}
-		// Ask my successor
-		if ( logger.isDebugEnabled() ) {
-			String description = "Forwarding successor lookup to own successor {} ({})";
-			logger.debug( description, successorChannel.getRemoteAddress(), successorId );
-		}
 
+		logger.debug( "Forwarding successor lookup " + msg + " to " + msg.getKey() );
+		// We are not the successor so forward the message
 		routeMessage( msg, msg.getKey() );
 	}
 
@@ -262,7 +256,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 
 		// Route message to successor of new node
-		ObservableFuture<IHash> future = findSuccessor( message.getNodeId() );
+		ObservableFuture<IHash> future = findSuccessor( message.getNodeId().getNext() );
 		future.addFutureListener( new FutureListener<IHash>() {
 
 			@Override
@@ -300,7 +294,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 				sendWelcomeMessage( connectionMgr, message, channel );
 			}
-
 		} );
 	}
 
@@ -479,6 +472,10 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			}
 		} else {
 			IHash lowerKey = lookupTable.lowerKey( higherKey );
+			if ( lowerKey == null ) {
+				logger.debug( "Router: no lower key found. using higher as lower." );
+				lowerKey = higherKey;
+			}
 			channel = lookupTable.get( lowerKey );
 			destinationKey = lowerKey;
 			logger.debug( "Router: using next higher key" );
@@ -515,6 +512,10 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 								successorChannel = getOrCreateChannel( hash, hash.getAddress() );
 								successorId = hash;
+
+								synchronized ( lookupTable ) {
+									lookupTable.put( successorId, successorChannel );
+								}
 
 								// Notify the new successor about us - so that
 								// he can adjust his responsibility

@@ -49,4 +49,9 @@ public class AttackEvent extends AbstractEvent<AttackEvent> {
 	public TileCoordinate getResponsibleTile() {
 		return victimCoord;
 	}
+
+	@Override
+	public String toString() {
+		return "AttackEvent[aggressor=" + aggressor + ", victim=" + victim + ", at=" + victimCoord + "]";
+	}
 }

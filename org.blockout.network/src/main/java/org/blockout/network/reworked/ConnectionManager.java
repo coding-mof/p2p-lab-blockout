@@ -32,6 +32,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.channel.socket.ClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.serialization.ClassResolver;
@@ -242,10 +243,10 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	@Override
 	public void channelConnected( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
 		logger.info( "ChannelConnected to " + e.getChannel().getRemoteAddress() );
-		if ( e.getChannel().getParent() == null ) {
-			fireConnected( e.getChannel() );
-		} else {
+		if ( e.getChannel().getFactory() instanceof ClientSocketChannelFactory ) {
 			fireClientConnected( e.getChannel() );
+		} else {
+			fireConnected( e.getChannel() );
 		}
 		super.channelConnected( ctx, e );
 	}
@@ -253,10 +254,10 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	@Override
 	public void channelDisconnected( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
 		logger.info( "Disconnected from " + e.getChannel().getRemoteAddress() );
-		if ( e.getChannel().getParent() == null ) {
-			fireDisconnected( e.getChannel() );
-		} else {
+		if ( e.getChannel().getFactory() instanceof ClientSocketChannelFactory ) {
 			fireClientDisconnected( e.getChannel() );
+		} else {
+			fireDisconnected( e.getChannel() );
 		}
 		e.getChannel().close();
 		super.channelDisconnected( ctx, e );
