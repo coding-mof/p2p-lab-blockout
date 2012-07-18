@@ -454,6 +454,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	public void sendMessage( final Serializable message, final IHash nodeId ) {
 		if ( responsibility.contains( nodeId ) ) {
 
+			logger.debug( "Message " + message + " passed through loopback." );
 			fireMessageReceived( nodeId, message );
 
 			return;

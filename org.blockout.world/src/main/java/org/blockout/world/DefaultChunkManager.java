@@ -27,12 +27,19 @@ import org.blockout.world.messeges.UnmanageMessage;
 import org.blockout.world.state.IStateMachine;
 import org.blockout.world.state.IStateMachineListener;
 import org.blockout.world.state.ValidationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author Konstantin Ramig
  */
 public class DefaultChunkManager extends MessageReceiver implements IChunkManager, IStateMachineListener {
+
+	private static final Logger									logger;
+	static {
+		logger = LoggerFactory.getLogger( DefaultChunkManager.class );
+	}
 
 	private IStateMachine										stateMachine;
 
@@ -46,7 +53,6 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 
 	@Inject
 	public DefaultChunkManager(final WorldAdapter worldAdapter, final IMessagePassing network) {
-		super();
 		receiver = new Hashtable<TileCoordinate, ArrayList<IHash>>();
 		local = new Hashtable<TileCoordinate, ArrayList<IHash>>();
 		this.worldAdapter = worldAdapter;
@@ -67,6 +73,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	 */
 	@Override
 	public void eventCommitted( final IEvent<?> event ) {
+		logger.debug( "Event committed " + event );
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
 			for ( IHash address : receiver.get( coordinate ) ) {
@@ -80,6 +87,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	 */
 	@Override
 	public void eventPushed( final IEvent<?> event ) {
+		logger.debug( "Event pushed " + event );
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( !receiver.containsKey( coordinate ) ) {
 			messagePassing.send( new StateMessage( event, StateMessage.PUSH_MESSAGE ), new Hash( coordinate ) );
@@ -154,6 +162,7 @@ public class DefaultChunkManager extends MessageReceiver implements IChunkManage
 	}
 
 	public void receive( final StateMessage msg, final IHash origin ) {
+		logger.debug( "Received message " + msg + " from " + origin );
 		switch ( msg.getType() ) {
 			case StateMessage.ROLLBAK_MESSAGE:
 				stateMachine.rollbackEvent( msg.getEvent() );
