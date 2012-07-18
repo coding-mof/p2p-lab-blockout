@@ -1,5 +1,6 @@
 package org.blockout.network.dht;
 
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
@@ -47,24 +48,9 @@ public class Hash implements IHash {
 
 	@Override
 	public IHash getNext() {
-		char[] hash = value.toCharArray();
-		int overflow = 1;
-		for ( int i = hash.length - 1; i >= 0; i-- ) {
-			if ( overflow > 0 ) {
-				hash[i]++;
-				overflow--;
-			}
-			switch ( hash[i] ) {
-				case ':':
-					hash[i] = 'a';
-					break;
-				case 'g':
-					overflow++;
-					hash[i]--;
-					break;
-			}
-		}
-		return new Hash( String.copyValueOf( hash ) );
+		BigInteger i = new BigInteger( value, 16 );
+		BigInteger next = i.add( BigInteger.ONE );
+		return new Hash( next.toString( 16 ) );
 	}
 
 	@Override
