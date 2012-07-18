@@ -78,7 +78,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		this.keepAliveDelay = keepAliveDelay;
 		allChannels = new DefaultChannelGroup();
 		pipelineFactory = new PipelineFactory();
-		listener = new CopyOnWriteArrayList<ConnectionListener>();
+		listener = Lists.newCopyOnWriteArrayList();
 	}
 
 	public ConnectionManager(final Timer timer, final TaskExecutor executor, final int keepAliveDelay,
@@ -180,12 +180,21 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 
 	@Override
 	public ConnectionFuture connectTo( final SocketAddress address ) {
-		logger.info( "Connecting to " + address );
+
+		// sync{
+		// - Check if there is already a pending connect
+		//
+		// - if not check the channels
+		// }
+		// connect
+
 		Channel channel = findChannel( address );
 		if ( channel != null ) {
-			logger.debug( "Channel already opened to " + address );
-			return new ChannelFutureAdapter( Channels.succeededFuture( channel ) );
+			logger.debug( "Channel already connected to " + address );
+			return new ConnectionFutureAdapter( Channels.succeededFuture( channel ) );
 		}
+
+		logger.info( "Connecting to " + address );
 		ChannelFuture future = clientBootstrap.connect( address );
 		future.addListener( new ChannelFutureListener() {
 
@@ -197,7 +206,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 				logger.info( "Connected to " + future.getChannel().getRemoteAddress() );
 			}
 		} );
-		return new ChannelFutureAdapter( future );
+		return new ConnectionFutureAdapter( future );
 	}
 
 	@Override
@@ -211,11 +220,13 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	}
 
 	private Channel findChannel( final SocketAddress address ) {
+
 		for ( Channel channel : allChannels ) {
 			if ( channel.getRemoteAddress().equals( address ) ) {
 				return channel;
 			}
 		}
+
 		return null;
 	}
 
@@ -251,7 +262,9 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	@Override
 	public void childChannelOpen( final ChannelHandlerContext ctx, final ChildChannelStateEvent e ) throws Exception {
 		logger.info( "Client " + e.getChannel().getRemoteAddress() + " connected." );
+
 		allChannels.add( e.getChannel() );
+
 		super.childChannelOpen( ctx, e );
 	}
 
@@ -369,6 +382,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		}
 	}
 
+	@ChannelHandler.Sharable
 	private static class KeepAliveChannelHandler extends IdleStateHandler {
 		private static final Logger	logger;
 		static {
@@ -408,6 +422,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		}
 	}
 
+	@ChannelHandler.Sharable
 	private static class TimeoutChannelHandler extends IdleStateHandler {
 		private static final Logger	logger;
 		static {

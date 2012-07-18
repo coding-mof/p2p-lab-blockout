@@ -1,19 +1,22 @@
 package org.blockout.network.reworked;
 
-import java.util.HashMap;
+import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 
-class ChannelFutureAdapter implements ConnectionFuture {
+import com.google.common.collect.Maps;
+
+class ConnectionFutureAdapter implements ConnectionFuture {
 
 	private final Map<ConnectionFutureListener, ChannelFutureListenerAdapter>	mapping;
 	private final ChannelFuture													future;
 
-	public ChannelFutureAdapter(final ChannelFuture future) {
+	public ConnectionFutureAdapter(final ChannelFuture future) {
 		this.future = future;
-		mapping = new HashMap<ConnectionFutureListener, ChannelFutureListenerAdapter>();
+		mapping = Maps.newHashMap();
 	}
 
 	@Override
@@ -56,12 +59,12 @@ class ChannelFutureAdapter implements ConnectionFuture {
 
 	@Override
 	public ConnectionFuture await() throws InterruptedException {
-		return new ChannelFutureAdapter( future.await() );
+		return new ConnectionFutureAdapter( future.await() );
 	}
 
 	@Override
 	public ConnectionFuture awaitUninterruptibly() {
-		return new ChannelFutureAdapter( future.awaitUninterruptibly() );
+		return new ConnectionFutureAdapter( future.awaitUninterruptibly() );
 	}
 
 	@Override
@@ -82,5 +85,15 @@ class ChannelFutureAdapter implements ConnectionFuture {
 	@Override
 	public boolean awaitUninterruptibly( final long paramLong ) {
 		return future.awaitUninterruptibly( paramLong );
+	}
+
+	@Override
+	public SocketAddress getRemoteAddress() {
+		return future.getChannel().getRemoteAddress();
+	}
+
+	@Override
+	public Channel getChannel() {
+		return future.getChannel();
 	}
 }

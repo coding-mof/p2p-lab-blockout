@@ -13,6 +13,6 @@ public class ChannelFutureListenerAdapter implements ChannelFutureListener {
 
 	@Override
 	public void operationComplete( final ChannelFuture channelFuture ) throws Exception {
-		l.operationComplete( new ChannelFutureAdapter( channelFuture ) );
+		l.operationComplete( new ConnectionFutureAdapter( channelFuture ) );
 	}
 }

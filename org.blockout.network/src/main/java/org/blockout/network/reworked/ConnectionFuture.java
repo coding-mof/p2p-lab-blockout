@@ -1,8 +1,15 @@
 package org.blockout.network.reworked;
 
+import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import org.jboss.netty.channel.Channel;
+
 public interface ConnectionFuture {
+
+	public Channel getChannel();
+
+	public SocketAddress getRemoteAddress();
 
 	public boolean isDone();
 
