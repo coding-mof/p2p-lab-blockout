@@ -80,17 +80,17 @@
             <panel id="panel_mid" align="center" childLayout="vertical" height="50%" width="75%" >
 
 				<panel childLayout="horizontal">
-	                <control name="label" text="Connect to IP-Address" width="30%" />
+	                <control name="label" text="Join Chord-Ring by IP-Address" width="" />
 	                <control id="txtIP" name="textfield" align="left" width="30%" />
-	                <control name="button" align="right" backgroundColor="#0000" label="Connect" width="">
+	                <control name="button" align="right" backgroundColor="#0000" label="Join" width="">
 	                        <interact onClick="connectToIP()" />
 	                </control>
                 </panel>
                 <panel height="10%"/>
                 
-                <control name="label" align="left" text="Or select an automatically discovered Peer:" width="" />
+                <control name="label" align="left" text="Discovered Peers in your local subnet:" width="" />
                 <control id="listPeers" name="listBox" displayItems="10" horizontal="optional" selection="Single" vertical="optional" />
-                <control name="button" align="right" backgroundColor="#0000" label="Connect" width="">
+                <control name="button" align="right" backgroundColor="#0000" label="Start Game" width="">
                         <interact onClick="connectToPeer()" />
                 </control>
             </panel>
