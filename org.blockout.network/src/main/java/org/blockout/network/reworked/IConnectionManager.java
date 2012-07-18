@@ -12,4 +12,8 @@ public interface IConnectionManager {
 	public void disconnectFrom( final SocketAddress address );
 
 	public Set<SocketAddress> listConnections();
+
+	public void addConnectionListener( ConnectionListener l );
+
+	public void removeConnectionListener( ConnectionListener l );
 }
