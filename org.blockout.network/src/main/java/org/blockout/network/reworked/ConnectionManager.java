@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandler;
@@ -23,9 +24,11 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.ChildChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
@@ -75,7 +78,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		this.keepAliveDelay = keepAliveDelay;
 		allChannels = new DefaultChannelGroup();
 		pipelineFactory = new PipelineFactory();
-		listener = new CopyOnWriteArrayList<ConnectionListener>();
+		listener = Lists.newCopyOnWriteArrayList();
 	}
 
 	public ConnectionManager(final Timer timer, final TaskExecutor executor, final int keepAliveDelay,
@@ -177,12 +180,21 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 
 	@Override
 	public ConnectionFuture connectTo( final SocketAddress address ) {
-		logger.info( "Connecting to " + address );
+
+		// sync{
+		// - Check if there is already a pending connect
+		//
+		// - if not check the channels
+		// }
+		// connect
+
 		Channel channel = findChannel( address );
 		if ( channel != null ) {
-			logger.debug( "Channel already opened to " + address );
-			return new ChannelFutureAdapter( Channels.succeededFuture( channel ) );
+			logger.debug( "Channel already connected to " + address );
+			return new ConnectionFutureAdapter( Channels.succeededFuture( channel ) );
 		}
+
+		logger.info( "Connecting to " + address );
 		ChannelFuture future = clientBootstrap.connect( address );
 		future.addListener( new ChannelFutureListener() {
 
@@ -194,7 +206,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 				logger.info( "Connected to " + future.getChannel().getRemoteAddress() );
 			}
 		} );
-		return new ChannelFutureAdapter( future );
+		return new ConnectionFutureAdapter( future );
 	}
 
 	@Override
@@ -208,11 +220,13 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	}
 
 	private Channel findChannel( final SocketAddress address ) {
+
 		for ( Channel channel : allChannels ) {
 			if ( channel.getRemoteAddress().equals( address ) ) {
 				return channel;
 			}
 		}
+
 		return null;
 	}
 
@@ -248,7 +262,9 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	@Override
 	public void childChannelOpen( final ChannelHandlerContext ctx, final ChildChannelStateEvent e ) throws Exception {
 		logger.info( "Client " + e.getChannel().getRemoteAddress() + " connected." );
+
 		allChannels.add( e.getChannel() );
+
 		super.childChannelOpen( ctx, e );
 	}
 
@@ -340,7 +356,8 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 			ClassResolver classResolver = ClassResolvers.cacheDisabled( getClass().getClassLoader() );
 			pipeline.addLast( "objectDecoder", new ObjectDecoder( classResolver ) );
 			pipeline.addLast( "keepAliveHandler", keepAliveHandler );
-			pipeline.addLast( "timeoutHandler", keepAliveHandler );
+			pipeline.addLast( "timeoutHandler", timeoutHandler );
+			pipeline.addLast( "keepAliveFilter", new KeepAlivePacketFilter() );
 			for ( ChannelInterceptor interceptor : interceptors ) {
 				pipeline.addLast( interceptor.getName(), new ChannelHandlerInterceptorAdapter( ConnectionManager.this,
 						interceptor ) );
@@ -349,6 +366,23 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		}
 	}
 
+	@ChannelHandler.Sharable
+	private static class KeepAlivePacketFilter implements ChannelUpstreamHandler {
+
+		@Override
+		public void handleUpstream( final ChannelHandlerContext ctx, final ChannelEvent e ) throws Exception {
+			if ( e instanceof MessageEvent ) {
+				MessageEvent evt = (MessageEvent) e;
+				if ( evt.getMessage() instanceof KeepAliveMessage ) {
+					// Discard KeepAlive messages
+					return;
+				}
+			}
+			ctx.sendUpstream( e );
+		}
+	}
+
+	@ChannelHandler.Sharable
 	private static class KeepAliveChannelHandler extends IdleStateHandler {
 		private static final Logger	logger;
 		static {
@@ -370,10 +404,25 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 				final long lastActivityTimeMillis ) throws Exception {
 			super.channelIdle( ctx, state, lastActivityTimeMillis );
 			logger.info( "Channel " + ctx.getChannel() + " has been idle. Sending keep alive.." );
+			Channels.write( ctx.getChannel(), new KeepAliveMessage( false ) );
+		}
 
+		@Override
+		public void messageReceived( final ChannelHandlerContext ctx, final MessageEvent e ) throws Exception {
+			super.messageReceived( ctx, e );
+
+			if ( e.getMessage() instanceof KeepAliveMessage ) {
+				KeepAliveMessage msg = (KeepAliveMessage) e.getMessage();
+				// Check that this is not a response to previous ack to prevent
+				// looping
+				if ( !msg.isAck() ) {
+					Channels.write( ctx.getChannel(), new KeepAliveMessage( true ) );
+				}
+			}
 		}
 	}
 
+	@ChannelHandler.Sharable
 	private static class TimeoutChannelHandler extends IdleStateHandler {
 		private static final Logger	logger;
 		static {
@@ -398,5 +447,4 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 			ctx.getChannel().close();
 		}
 	}
-
 }

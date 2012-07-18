@@ -27,9 +27,9 @@ public class WrappedRange<C extends Comparable<C>> implements Serializable {
 			int lower = this.lowerBound.compareTo( element );
 			int upper = this.upperBound.compareTo( element );
 			if ( this.wrapAround ) {
-				return upper < 0 || (lower > 0 || lower == 0);
+				return upper <= 0 || lower >= 0;
 			} else {
-				return lower < 0 && (upper > 0 || upper == 0);
+				return lower <= 0 && upper >= 0;
 			}
 		}
 	}
@@ -44,6 +44,6 @@ public class WrappedRange<C extends Comparable<C>> implements Serializable {
 
 	@Override
 	public String toString() {
-		return "( " + this.lowerBound + " , " + this.upperBound + " ] WA: " + this.wrapAround;
+		return "[ " + this.lowerBound + " , " + this.upperBound + " ] WA: " + this.wrapAround;
 	}
 }

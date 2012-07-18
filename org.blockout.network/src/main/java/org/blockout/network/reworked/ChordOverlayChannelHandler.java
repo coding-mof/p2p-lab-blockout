@@ -2,6 +2,8 @@ package org.blockout.network.reworked;
 
 import java.io.Serializable;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -20,9 +22,11 @@ import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.channel.socket.ClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.google.common.base.Preconditions;
 
@@ -44,16 +48,15 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 	private final Set<FindSuccessorFuture>	pendingSuccessorLookups;
 	private final List<ChordListener>		listener;
-	private WrappedRange<IHash>				responsibility;
+	private volatile WrappedRange<IHash>	responsibility;
 
 	private IHash							successorId;
 	private Channel							successorChannel;
-	private IHash							predeccessorId;
-	private Channel							predeccessorChannel;
 
 	private final ChannelGroup				channels;
 	private final LocalNode					localNode;
-	private final TaskExecutor				executor;
+	private final TaskScheduler				scheduler;
+	private final List<SocketAddress>		introductionFilter;
 
 	/**
 	 * Creates a new chord overlay with the initial responsibility of
@@ -61,16 +64,18 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	 * 
 	 * @param localNode
 	 *            The local node to retrieve the local node id from.
-	 * @param executor
+	 * @param scheduler
 	 *            An executor for dispatching the listener invocations.
 	 */
-	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskExecutor executor) {
+	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskScheduler scheduler) {
 
 		Preconditions.checkNotNull( localNode );
-		Preconditions.checkNotNull( executor );
+		Preconditions.checkNotNull( scheduler );
 
 		this.localNode = localNode;
-		this.executor = executor;
+		this.scheduler = scheduler;
+
+		introductionFilter = Collections.synchronizedList( new ArrayList<SocketAddress>() );
 
 		pendingSuccessorLookups = Collections.synchronizedSet( new HashSet<FindSuccessorFuture>() );
 		listener = new CopyOnWriteArrayList<ChordListener>();
@@ -79,6 +84,33 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		IHash ownNodeId = localNode.getNodeId();
 		responsibility = new WrappedRange<IHash>( ownNodeId.getNext(), ownNodeId );
 		logger.info( "Initialized chord with range = " + responsibility );
+
+		scheduler.scheduleAtFixedRate( new Runnable() {
+
+			@Override
+			public void run() {
+				ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
+				future.addFutureListener( new FutureListener<IHash>() {
+
+					@Override
+					public void completed( final ObservableFuture<IHash> future ) {
+						try {
+							IHash hash = future.get();
+							if ( hash != null && !hash.equals( successorId ) ) {
+								logger.warn( "Stabilization detected invalid successor. Current " + successorId
+										+ ", actual " + hash );
+							} else {
+								logger.info( "Stabilization detected valid successor. Current " + successorId );
+							}
+						} catch ( InterruptedException e ) {
+							e.printStackTrace();
+						} catch ( ExecutionException e ) {
+							e.printStackTrace();
+						}
+					}
+				} );
+			}
+		}, 30000 );
 	}
 
 	@Override
@@ -95,11 +127,27 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		} else if ( message instanceof ChordEnvelope ) {
 			ChordEnvelope envelope = (ChordEnvelope) message;
 			fireMessageReceived( envelope.getSenderId(), envelope.getContent() );
+		} else if ( message instanceof WelcomeMessage ) {
+			handleWelcomeMessage( e, (WelcomeMessage) message );
 		} else {
 			logger.warn( "Discard unknown message type " + message );
 		}
 
 		super.messageReceived( connectionMgr, ctx, e );
+	}
+
+	private void handleWelcomeMessage( final MessageEvent e, final WelcomeMessage msg ) {
+		logger.info( "Joining chord ring. My successor will be " + msg.getSuccessorId() + " at "
+				+ msg.getSuccessorAddress() );
+		successorId = msg.getSuccessorId();
+		successorChannel = e.getChannel();
+
+		// Update responsibility
+		WrappedRange<IHash> newResponsibility;
+		newResponsibility = new WrappedRange<IHash>( msg.getLowerBound(), localNode.getNodeId() );
+		WrappedRange<IHash> tmp = responsibility;
+		responsibility = newResponsibility;
+		fireResponsibilityChanged( tmp, newResponsibility );
 	}
 
 	/**
@@ -112,10 +160,12 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	 */
 	private void handleFindSuccessorMessage( final MessageEvent e, final FindSuccessorMessage msg ) {
 
-		WrappedRange<IHash> range = new WrappedRange<IHash>( localNode.getNodeId(), successorId );
-		if ( range.contains( msg.getKey() ) ) {
+		// WrappedRange<IHash> range = new WrappedRange<IHash>(
+		// localNode.getNodeId(), successorId );
+		if ( responsibility.contains( msg.getKey() ) ) {
 			// I'm the successor
-			logger.debug( "Local node is the successor of " + msg.getKey() );
+			logger.debug( "I'm the successor: " + responsibility + " contained " + msg.getKey() );
+			// logger.debug( "Local node is the successor of " + msg.getKey() );
 			SuccessorFoundMessage responseMsg;
 			responseMsg = new SuccessorFoundMessage( msg.getOrigin(), msg.getKey(), localNode.getNodeId() );
 			Channels.write( e.getChannel(), responseMsg );
@@ -144,8 +194,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		completeFutures( msg );
 
 		if ( !msg.getDestination().equals( localNode.getNodeId() ) ) {
-			// We need to route the message back to our predecessor
-			Channels.write( predeccessorChannel, msg );
+			// We need to route the message back
+			routeMessage( msg, msg.getDestination() );
 		}
 	}
 
@@ -153,11 +203,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			final IAmMessage message ) {
 
 		if ( responsibility.contains( message.getNodeId() ) ) {
-			if ( message.getNodeId().equals( predeccessorId ) ) {
-				// The new node is already our predecessor
-				// (created just a redundant link)
-				return;
-			}
 			// We are the new node's successor
 			welcomeNode( connectionMgr, e, message );
 			return;
@@ -184,6 +229,9 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 	private void welcomeNode( final IConnectionManager connectionMgr, final MessageEvent e, final IAmMessage message ) {
 
+		// mark the new connection so that no I'm message will be sent
+		introductionFilter.add( message.getAddress() );
+
 		logger.info( "Connecting to new node " + message.getAddress() + " to welcome it." );
 		ConnectionFuture future = connectionMgr.connectTo( message.getAddress() );
 		future.addListener( new ConnectionFutureListener() {
@@ -195,50 +243,30 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 					return;
 				}
 
-				Channel channel = findChannelConnectedTo( message.getAddress() );
-				if ( channel == null ) {
-					// How can that happen?
-					// Did the connection crash in the meantime?
-					logger.error( "Connection to {} seems to be crashed in the meantime", message.getAddress() );
-					return;
-				}
+				Channel channel = connectFuture.getChannel();
 
-				logger.info( "Connected to " + message.getAddress() + " sending welcome message." );
-				// Send welcome message
-				WelcomeMessage welcomeMsg;
-				SocketAddress serverAddress = connectionMgr.getServerAddress();
-				SocketAddress remoteAddress = predeccessorChannel == null ? null : predeccessorChannel
-						.getRemoteAddress();
-				welcomeMsg = new WelcomeMessage( localNode.getNodeId(), serverAddress, predeccessorId, remoteAddress );
-				Channels.write( channel, welcomeMsg );
-				logger.info( "Predecessor changed from " + predeccessorId + " to " + message.getNodeId() );
-
-				// TODO: Merge of 2 chord rings not handled
-				// TODO: Welcoming new nodes not correctly implemented
-				// Update our predecessor reference
-				predeccessorId = message.getNodeId();
-				predeccessorChannel = e.getChannel();
-				if ( successorId == null ) {
-					successorId = message.getNodeId();
-					successorChannel = e.getChannel();
-				}
-
-				// Update responsibility
-				WrappedRange<IHash> newResponsibility;
-				newResponsibility = new WrappedRange<IHash>( predeccessorId.getNext(), localNode.getNodeId() );
-				fireResponsibilityChanged( responsibility, newResponsibility );
-				responsibility = newResponsibility;
+				sendWelcomeMessage( connectionMgr, message, channel );
 			}
+
 		} );
 	}
 
-	private Channel findChannelConnectedTo( final SocketAddress address ) {
-		for ( Channel channel : channels ) {
-			if ( channel.getRemoteAddress().equals( address ) ) {
-				return channel;
-			}
-		}
-		return null;
+	private void sendWelcomeMessage( final IConnectionManager connectionMgr, final IAmMessage message,
+			final Channel channel ) {
+		logger.info( "Connected to " + message.getAddress() + " sending welcome message." );
+		// Send welcome message
+		SocketAddress serverAddress = connectionMgr.getServerAddress();
+		WelcomeMessage welcomeMsg;
+		welcomeMsg = new WelcomeMessage( localNode.getNodeId(), serverAddress, responsibility.getLowerBound() );
+
+		Channels.write( channel, welcomeMsg );
+
+		// Update responsibility
+		WrappedRange<IHash> newResponsibility;
+		newResponsibility = new WrappedRange<IHash>( message.getNodeId().getNext(), localNode.getNodeId() );
+		WrappedRange<IHash> tmp = responsibility;
+		responsibility = newResponsibility;
+		fireResponsibilityChanged( tmp, newResponsibility );
 	}
 
 	/**
@@ -263,10 +291,22 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	public void channelConnected( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
 			final ChannelStateEvent e ) throws Exception {
 
+		logger.info( "ChannelConnected: parent=" + e.getChannel().getParent() + ", channel=" + e.getChannel() );
+
 		channels.add( e.getChannel() );
 
 		// Introduce ourself when we have connected.
-		Channels.write( e.getChannel(), new IAmMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
+		if ( e.getChannel().getFactory() instanceof ClientSocketChannelFactory ) {
+			// only clients introduce themself
+
+			if ( !introductionFilter.contains( e.getChannel().getRemoteAddress() ) ) {
+				logger.info( "We connected to a stranger. Introduce ourself." );
+				Channels.write( e.getChannel(),
+						new IAmMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
+			} else {
+				introductionFilter.remove( e.getChannel().getRemoteAddress() );
+			}
+		}
 
 		super.channelConnected( connectionMgr, ctx, e );
 	}
@@ -286,6 +326,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 		future = new FindSuccessorFuture( pendingSuccessorLookups, key );
 		if ( responsibility.contains( key ) ) {
+			logger.debug( "LocalNode is the successor: " + responsibility + " contained " + key );
 			// Local node is the successor
 			future.complete( localNode.getNodeId() );
 			return future;
@@ -332,27 +373,28 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	 */
 	private void fireResponsibilityChanged( final WrappedRange<IHash> from, final WrappedRange<IHash> to ) {
 		logger.info( "Responsibility changed from " + from + " to " + to );
+
 		for ( final ChordListener l : listener ) {
-			executor.execute( new Runnable() {
+			scheduler.schedule( new Runnable() {
 
 				@Override
 				public void run() {
 					l.responsibilityChanged( ChordOverlayChannelHandler.this, from, to );
 				}
-			} );
+			}, Calendar.getInstance().getTime() );
 		}
 	}
 
 	private void fireMessageReceived( final IHash from, final Object message ) {
 		logger.info( "Received message " + message + " from " + from );
 		for ( final ChordListener l : listener ) {
-			executor.execute( new Runnable() {
+			scheduler.schedule( new Runnable() {
 
 				@Override
 				public void run() {
 					l.receivedMessage( ChordOverlayChannelHandler.this, message, from );
 				}
-			} );
+			}, Calendar.getInstance().getTime() );
 		}
 	}
 
