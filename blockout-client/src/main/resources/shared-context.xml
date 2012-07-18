@@ -36,6 +36,10 @@
 		<constructor-arg value="${keepAliveTimeout}"/>
 		<constructor-arg ref="chordOverlay"/>
 	</bean>
+	
+	<bean class="org.blockout.network.ConnectionDebugLogger">
+	    <constructor-arg ref="connectionMgr"/>
+    </bean>
 
 	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">
 		<constructor-arg ref="threadPool" />
