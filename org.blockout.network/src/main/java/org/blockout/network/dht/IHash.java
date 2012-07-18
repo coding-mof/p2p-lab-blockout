@@ -7,5 +7,7 @@ public interface IHash extends Serializable, Comparable<IHash> {
 
 	public IHash getNext();
 
+	public IHash getPrevious();
+
 	public int getM();
 }

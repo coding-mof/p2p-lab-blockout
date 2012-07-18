@@ -19,19 +19,17 @@ public class WelcomeMessage implements Serializable {
 	private static final long	serialVersionUID	= 9178269876442403205L;
 	private final IHash			successorId;
 	private final SocketAddress	successorAddress;
-	private final IHash			predecessorId;
-	private final SocketAddress	predecessorAddress;
+	private final IHash			lowerBound;
 
-	public WelcomeMessage(final IHash successorId, final SocketAddress successorAddress, final IHash predecessorId,
-			final SocketAddress predecessorAddress) {
+	public WelcomeMessage(final IHash successorId, final SocketAddress successorAddress, final IHash lowerBound) {
 
 		Preconditions.checkNotNull( successorId );
 		Preconditions.checkNotNull( successorAddress );
+		Preconditions.checkNotNull( lowerBound );
 
 		this.successorId = successorId;
 		this.successorAddress = successorAddress;
-		this.predecessorId = predecessorId;
-		this.predecessorAddress = predecessorAddress;
+		this.lowerBound = lowerBound;
 	}
 
 	public IHash getSuccessorId() {
@@ -42,21 +40,8 @@ public class WelcomeMessage implements Serializable {
 		return successorAddress;
 	}
 
-	/**
-	 * Returns the predeccesor's id - if known. Otherwise null.
-	 * 
-	 * @return
-	 */
-	public IHash getPredecessorId() {
-		return predecessorId;
+	public IHash getLowerBound() {
+		return lowerBound;
 	}
 
-	/**
-	 * Returns the predecessor's address - if known. Otherwise null.
-	 * 
-	 * @return
-	 */
-	public SocketAddress getPredecessorAddress() {
-		return predecessorAddress;
-	}
 }

@@ -1,5 +1,6 @@
 package org.blockout.network.dht;
 
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
@@ -47,29 +48,17 @@ public class Hash implements IHash {
 
 	@Override
 	public IHash getNext() {
-		char[] hash = value.toCharArray();
-		int overflow = 1;
-		for ( int i = hash.length - 1; i >= 0; i-- ) {
-			if ( overflow > 0 ) {
-				hash[i]++;
-				overflow--;
-			}
-			switch ( hash[i] ) {
-				case ':':
-					hash[i] = 'a';
-					break;
-				case 'g':
-					overflow++;
-					hash[i]--;
-					break;
-			}
+		BigInteger i = new BigInteger( value, 16 );
+		BigInteger next = i.add( BigInteger.ONE );
+		if ( next.equals( new BigInteger( "2" ).pow( getM() ) ) ) {
+			return new Hash( BigInteger.ZERO.toString( 16 ) );
 		}
-		return new Hash( String.copyValueOf( hash ) );
+		return new Hash( next.toString( 16 ) );
 	}
 
 	@Override
 	public int compareTo( final IHash other ) {
-		return value.compareTo( other.getValue() );
+		return new BigInteger( value, 16 ).compareTo( new BigInteger( other.getValue(), 16 ) );
 	}
 
 	@Override
@@ -88,5 +77,15 @@ public class Hash implements IHash {
 	@Override
 	public int getM() {
 		return 160;
+	}
+
+	@Override
+	public IHash getPrevious() {
+		BigInteger i = new BigInteger( value, 16 );
+		BigInteger next = i.subtract( BigInteger.ONE );
+		if ( next.equals( new BigInteger( "-1" ) ) ) {
+			return new Hash( new BigInteger( "2" ).pow( getM() ).subtract( BigInteger.ONE ).toString( 16 ) );
+		}
+		return new Hash( next.toString( 16 ) );
 	}
 }

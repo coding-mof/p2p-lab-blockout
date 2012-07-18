@@ -1,6 +1,7 @@
 package org.blockout.network.reworked;
 
 import java.io.Serializable;
+import java.net.SocketAddress;
 
 import org.blockout.network.dht.IHash;
 
@@ -18,16 +19,20 @@ public class SuccessorFoundMessage implements Serializable {
 	private final IHash			destination;
 	private final IHash			key;
 	private final IHash			successor;
+	private final SocketAddress	serverAddress;
 
-	public SuccessorFoundMessage(final IHash destination, final IHash key, final IHash successor) {
+	public SuccessorFoundMessage(final IHash destination, final IHash key, final IHash successor,
+			final SocketAddress serverAddress) {
 
 		Preconditions.checkNotNull( destination );
 		Preconditions.checkNotNull( key );
 		Preconditions.checkNotNull( successor );
+		Preconditions.checkNotNull( serverAddress );
 
 		this.destination = destination;
 		this.key = key;
 		this.successor = successor;
+		this.serverAddress = serverAddress;
 	}
 
 	/**
@@ -56,4 +61,9 @@ public class SuccessorFoundMessage implements Serializable {
 	public IHash getSuccessor() {
 		return successor;
 	}
+
+	public SocketAddress getServerAddress() {
+		return serverAddress;
+	}
+
 }

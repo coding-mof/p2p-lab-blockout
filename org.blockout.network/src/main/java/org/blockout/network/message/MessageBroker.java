@@ -111,6 +111,7 @@ public class MessageBroker implements IMessagePassing, ChordListener {
 
 				@Override
 				public void run() {
+					logger.debug( "Passing message " + message + " to receiver " + receiver );
 					receiver.receive( message, sender );
 				}
 			} );

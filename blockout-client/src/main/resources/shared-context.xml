@@ -25,15 +25,22 @@
 	<bean name="chordOverlay" class="org.blockout.network.reworked.ChordOverlayChannelHandler">
 		<constructor-arg ref="localNode"/>
 		<constructor-arg ref="threadPool"/>
+		<constructor-arg value="${stabilizationRate}"/>
 	</bean>
 
 	<bean name="connectionMgr" class="org.blockout.network.reworked.ConnectionManager" init-method="init">
 		<constructor-arg>
 			<bean class="org.jboss.netty.util.HashedWheelTimer"/>
 		</constructor-arg>
+		<constructor-arg ref="threadPool"/>
 		<constructor-arg value="${keepAliveDelay}"/>
+		<constructor-arg value="${keepAliveTimeout}"/>
 		<constructor-arg ref="chordOverlay"/>
 	</bean>
+	
+	<bean class="org.blockout.network.ConnectionDebugLogger">
+	    <constructor-arg ref="connectionMgr"/>
+    </bean>
 
 	<bean name="nodeDiscovery" class="org.blockout.network.discovery.NodeDiscovery">
 		<constructor-arg ref="threadPool" />

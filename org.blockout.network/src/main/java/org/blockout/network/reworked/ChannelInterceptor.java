@@ -9,6 +9,8 @@ import org.jboss.netty.channel.WriteCompletionEvent;
 
 public interface ChannelInterceptor {
 
+	public void init( IConnectionManager conMgr );
+
 	public String getName();
 
 	public void messageReceived( IConnectionManager connectionMgr, ChannelHandlerContext ctx, MessageEvent e )
