@@ -97,7 +97,6 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		if ( interceptors != null && interceptors.length > 0 ) {
 			for ( ChannelInterceptor interceptor : interceptors ) {
 				addChannelInterceptor( interceptor );
-				interceptor.init( this );
 			}
 		}
 	}
@@ -105,6 +104,9 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	public void init() {
 		initClient();
 		initServer();
+		for ( ChannelInterceptor interceptor : pipelineFactory.getInterceptors() ) {
+			interceptor.init( this );
+		}
 	}
 
 	private void initClient() {
@@ -347,6 +349,10 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 
 		public void addChannelInterceptor( final ChannelInterceptor interceptor ) {
 			interceptors.add( interceptor );
+		}
+
+		public List<ChannelInterceptor> getInterceptors() {
+			return interceptors;
 		}
 
 		@Override
