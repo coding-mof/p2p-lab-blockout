@@ -1,10 +1,12 @@
 package org.blockout;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.network.reworked.ConnectionManager;
 import org.blockout.ui.Camera;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
@@ -83,6 +85,13 @@ public class Main {
 		LocalGameState gameState = context.getBean( LocalGameState.class );
 		IWorld world = context.getBean( IWorld.class );
 		Camera camera = context.getBean( Camera.class );
+
+		InetSocketAddress address = new InetSocketAddress( arguments.getHeadlessCmd().getBootstrapAddress(), arguments
+				.getHeadlessCmd().getBootstrapPort() );
+		logger.info( "Bootstrapping from " + address );
+		ConnectionManager connectionManager = context.getBean( ConnectionManager.class );
+		connectionManager.connectTo( address );
+
 		try {
 			Thread.sleep( 6000 );
 		} catch ( InterruptedException e ) {

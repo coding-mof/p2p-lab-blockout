@@ -52,6 +52,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		this.worldAdapter = worldAdapter;
 		this.worldAdapter.setManager( this );
 		this.chord = chord;
+		chord.addChordListener( this );
 	}
 
 	@Override

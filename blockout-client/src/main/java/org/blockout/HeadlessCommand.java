@@ -21,6 +21,9 @@ public class HeadlessCommand {
 	@Parameter(names = "--bootstrap", description = "IP-Address or hostname of peer to connect to by TCP/IP", converter = InetAddressConverter.class)
 	private InetAddress	bootstrapAddress;
 
+	@Parameter(names = "--bootstrapPort", description = "Port of the peer to bootstrap from")
+	private int			bootstrapPort;
+
 	public String getPlayerName() {
 		return playerName;
 	}
@@ -28,4 +31,9 @@ public class HeadlessCommand {
 	public InetAddress getBootstrapAddress() {
 		return bootstrapAddress;
 	}
+
+	public int getBootstrapPort() {
+		return bootstrapPort;
+	}
+
 }
