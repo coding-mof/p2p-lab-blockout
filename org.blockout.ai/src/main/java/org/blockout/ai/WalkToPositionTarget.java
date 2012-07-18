@@ -24,8 +24,10 @@ public class WalkToPositionTarget implements ITarget {
 	protected boolean				initiated;
 	protected boolean				aborted;
 	protected int					priority;
+	private final String			reason;
 
-	public WalkToPositionTarget(final TileCoordinate coord, final AIContext context, final int priority) {
+	public WalkToPositionTarget(final TileCoordinate coord, final AIContext context, final int priority,
+			final String reason) {
 
 		Preconditions.checkNotNull( coord );
 		Preconditions.checkNotNull( context );
@@ -33,6 +35,7 @@ public class WalkToPositionTarget implements ITarget {
 		this.coord = coord;
 		this.context = context;
 		this.priority = priority;
+		this.reason = reason;
 	}
 
 	@Override
@@ -60,6 +63,6 @@ public class WalkToPositionTarget implements ITarget {
 
 	@Override
 	public String toString() {
-		return getClass().getName() + "[dest=" + coord + "]";
+		return getClass().getName() + "[dest=" + coord + ", reason=" + reason + "]";
 	}
 }

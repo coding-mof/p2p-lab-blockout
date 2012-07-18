@@ -80,32 +80,43 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 		if ( crate != null && crate.getItem() != null ) {
 			return new OpenCrateTarget( crate, this );
 		}
+
+		crate = findNearestEntity( currentPos, Crate.class, getGameState().getPlayer() );
+		enemy = findNearestEntity( currentPos, Actor.class, getGameState().getPlayer() );
+
+		String reason = null;
+		TileCoordinate walkToCoord = null;
 		//
 		// 3. Walk to closest crate - if any visible
 		//
-		crate = findNearestEntity( currentPos, Crate.class );
 		if ( crate != null && crate.getItem() != null ) {
 			TileCoordinate tile = getWorld().findTile( crate );
-			TileCoordinate coordinate = AIUtils.findWalkableTileNextTo( this, tile );
-			if ( coordinate != null ) {
-				return new WalkToPositionTarget( coordinate, this, 2 );
-			} else {
-				// Crate is unreachable
-			}
+			logger.debug( "Found nearest crate " + crate + " at " + tile );
+			walkToCoord = AIUtils.findWalkableTileNextTo( this, tile, currentPos );
+			reason = "Walk to Crate";
 		}
 		//
 		// 4. Walk to closest enemy - if any visible
 		//
-		enemy = findNearestEntity( currentPos, Actor.class );
 		if ( enemy != null ) {
 			TileCoordinate tile = getWorld().findTile( enemy );
-			TileCoordinate coordinate = AIUtils.findWalkableTileNextTo( this, tile );
+			logger.debug( "Found nearest enemy " + enemy + " at " + tile );
+			TileCoordinate coordinate = AIUtils.findWalkableTileNextTo( this, tile, currentPos );
 			if ( coordinate != null ) {
-				return new WalkToPositionTarget( coordinate, this, 1 );
-			} else {
-				// Enemy is unreachable
+				if ( walkToCoord == null
+						|| TileCoordinate.computeEuclidianDistance( coordinate, currentPos ) < TileCoordinate
+								.computeEuclidianDistance( walkToCoord, currentPos ) ) {
+					walkToCoord = coordinate;
+					reason = "Walk to Enemy";
+				}
 			}
 		}
+		if ( walkToCoord != null ) {
+			return new WalkToPositionTarget( walkToCoord, this, 2, reason );
+		} else {
+			// Nothing visible or reachable
+		}
+
 		//
 		// 5. Walk to random position
 		//
@@ -113,10 +124,11 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 		int halfWidth = localCamera.getNumHorTiles() / 2;
 		int halfHeight = localCamera.getNumVerTiles() / 2;
 		return new WalkToPositionTarget( currentPos.plus( rand.nextInt( localCamera.getNumHorTiles() ) - halfWidth,
-				rand.nextInt( localCamera.getNumVerTiles() ) - halfHeight ), this, 0 );
+				rand.nextInt( localCamera.getNumVerTiles() ) - halfHeight ), this, 0, "Random Walking" );
 	}
 
-	private <T extends Entity> T findNearestEntity( final TileCoordinate center, final Class<T> clazz ) {
+	private <T extends Entity> T findNearestEntity( final TileCoordinate center, final Class<T> clazz,
+			final Entity except ) {
 		// locks the camera state
 		Camera localCamera = getCamera().getReadOnly();
 		double distance = Double.MAX_VALUE;
@@ -126,7 +138,7 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 			for ( int x = 0; x < localCamera.getNumHorTiles(); x++ ) {
 				TileCoordinate currentTile = center.plus( x, y );
 				T entity = getEntityOrNull( currentTile, clazz );
-				if ( entity != null ) {
+				if ( entity != null && !entity.equals( except ) ) {
 					double dist = TileCoordinate.computeSquaredEuclidianDistance( center, currentTile );
 					if ( dist < distance ) {
 						distance = dist;

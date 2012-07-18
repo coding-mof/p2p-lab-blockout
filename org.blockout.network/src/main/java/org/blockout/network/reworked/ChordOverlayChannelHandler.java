@@ -226,7 +226,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 
 		routeMessage( msg, msg.getKey() );
-		// successorChannel.write( msg );
 	}
 
 	/**

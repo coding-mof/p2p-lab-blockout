@@ -68,7 +68,9 @@ public class FindSuccessorFuture implements ObservableFuture<IHash> {
 				return;
 			}
 			this.successor = successor;
-			managedSet.remove( this );
+			synchronized ( managedSet ) {
+				managedSet.remove( this );
+			}
 			lock.notifyAll();
 		}
 		fireFutureCompleted();
@@ -84,7 +86,9 @@ public class FindSuccessorFuture implements ObservableFuture<IHash> {
 			if ( successor != null ) {
 				return false;
 			}
-			managedSet.remove( this );
+			synchronized ( managedSet ) {
+				managedSet.remove( this );
+			}
 			canceled = true;
 			lock.notifyAll();
 		}

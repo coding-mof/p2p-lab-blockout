@@ -4,10 +4,18 @@ import org.blockout.common.TileCoordinate;
 import org.blockout.ui.Camera;
 import org.newdawn.slick.util.pathfinding.Path;
 import org.newdawn.slick.util.pathfinding.Path.Step;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
 public class AIUtils {
+
+	private static final Logger	logger;
+	static {
+		logger = LoggerFactory.getLogger( AIUtils.class );
+	}
+
 	/**
 	 * Move the AI to a tile position
 	 * 
@@ -36,17 +44,20 @@ public class AIUtils {
 
 		float cameraCenterX = localCamera.getCenterX();
 		float cameraCenterY = localCamera.getCenterY();
+		logger.debug( "cameraCenterX: {}, cameraCenterY: {}", cameraCenterX, cameraCenterY );
 
 		int tileX = Camera.worldToTile( coord.getX() );
 		int tileY = Camera.worldToTile( coord.getY() );
 		int centerX = Camera.worldToTile( cameraCenterX );
 		int centerY = Camera.worldToTile( cameraCenterY );
+		logger.debug( "tileX: {}, tileY: {}, centerX: {}, centerY: {}", new Object[] { tileX, tileY, centerX, centerY } );
 
 		// Handle Movements
 		int fromX = centerX - localCamera.getStartTileX();
 		int fromY = centerY - localCamera.getStartTileY();
 		int toX = tileX - localCamera.getStartTileX();
 		int toY = tileY - localCamera.getStartTileY();
+		logger.debug( "fromX: {}, fromY: {}, toX: {}, toY: {}", new Object[] { fromX, fromY, toX, toY } );
 
 		Path path = context.getPathfinder().findPath( context.getGameState().getPlayer(), fromX, fromY, toX, toY );
 		if ( path == null || path.getLength() == 0 ) {
@@ -63,9 +74,11 @@ public class AIUtils {
 		return worldPath;
 	}
 
-	public static TileCoordinate findWalkableTileNextTo( final AIContext context, final TileCoordinate coord ) {
+	public static TileCoordinate findWalkableTileNextTo( final AIContext context, final TileCoordinate coord,
+			final TileCoordinate closestTo ) {
 		Path path;
 		TileCoordinate neighbourTile;
+		TileCoordinate result = null;
 
 		Camera camera = context.getCamera().getReadOnly();
 
@@ -73,7 +86,7 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				result = neighbourTile;
 			}
 		}
 
@@ -81,7 +94,11 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				if ( result == null
+						|| TileCoordinate.computeEuclidianDistance( neighbourTile, closestTo ) < TileCoordinate
+								.computeEuclidianDistance( result, closestTo ) ) {
+					result = neighbourTile;
+				}
 			}
 		}
 
@@ -89,7 +106,11 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				if ( result == null
+						|| TileCoordinate.computeEuclidianDistance( neighbourTile, closestTo ) < TileCoordinate
+								.computeEuclidianDistance( result, closestTo ) ) {
+					result = neighbourTile;
+				}
 			}
 		}
 
@@ -97,7 +118,11 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				if ( result == null
+						|| TileCoordinate.computeEuclidianDistance( neighbourTile, closestTo ) < TileCoordinate
+								.computeEuclidianDistance( result, closestTo ) ) {
+					result = neighbourTile;
+				}
 			}
 		}
 
@@ -105,7 +130,11 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				if ( result == null
+						|| TileCoordinate.computeEuclidianDistance( neighbourTile, closestTo ) < TileCoordinate
+								.computeEuclidianDistance( result, closestTo ) ) {
+					result = neighbourTile;
+				}
 			}
 		}
 
@@ -114,7 +143,11 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				if ( result == null
+						|| TileCoordinate.computeEuclidianDistance( neighbourTile, closestTo ) < TileCoordinate
+								.computeEuclidianDistance( result, closestTo ) ) {
+					result = neighbourTile;
+				}
 			}
 		}
 
@@ -122,7 +155,11 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				if ( result == null
+						|| TileCoordinate.computeEuclidianDistance( neighbourTile, closestTo ) < TileCoordinate
+								.computeEuclidianDistance( result, closestTo ) ) {
+					result = neighbourTile;
+				}
 			}
 		}
 
@@ -130,10 +167,14 @@ public class AIUtils {
 		if ( camera.isInFrustum( neighbourTile ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
-				return neighbourTile;
+				if ( result == null
+						|| TileCoordinate.computeEuclidianDistance( neighbourTile, closestTo ) < TileCoordinate
+								.computeEuclidianDistance( result, closestTo ) ) {
+					result = neighbourTile;
+				}
 			}
 		}
 
-		return null;
+		return result;
 	}
 }
