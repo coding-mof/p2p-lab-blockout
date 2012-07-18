@@ -97,6 +97,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 		if ( interceptors != null && interceptors.length > 0 ) {
 			for ( ChannelInterceptor interceptor : interceptors ) {
 				addChannelInterceptor( interceptor );
+				interceptor.init( this );
 			}
 		}
 	}

@@ -25,6 +25,7 @@
 	<bean name="chordOverlay" class="org.blockout.network.reworked.ChordOverlayChannelHandler">
 		<constructor-arg ref="localNode"/>
 		<constructor-arg ref="threadPool"/>
+		<constructor-arg value="${stabilizationRate}"/>
 	</bean>
 
 	<bean name="connectionMgr" class="org.blockout.network.reworked.ConnectionManager" init-method="init">
