@@ -117,15 +117,23 @@ public class TestWorld {
 		for(int i = -2; i< 3; i++){
 			for(int j = -2; j< 3; j++){
 				w.getChunk(new TileCoordinate(i, j));
+				w.responseChunk(w.getChunk(new TileCoordinate(i, j)));
 			}
 		}
 		
 		TileCoordinate playerOld = w.findTile(p);
 		assertEquals(p, w.getTile(playerOld.getX(), playerOld.getY()).getEntityOnTile());
-		TileCoordinate playerNew = new TileCoordinate(-(Chunk.CHUNK_SIZE+3), -(Chunk.CHUNK_SIZE+7));
+		TileCoordinate playerNew = new TileCoordinate(-(Chunk.CHUNK_SIZE-3), -(Chunk.CHUNK_SIZE-7));
 		w.setPlayerPosition(p, playerNew);
 		assertEquals(playerNew, w.findTile(p));
 		assertEquals(p, w.getTile(playerNew.getX(), playerNew.getY()).getEntityOnTile());
 		assertNull(w.getTile(playerOld.getX(), playerOld.getY()).getEntityOnTile());
+	}
+	
+	@Test
+	public void isReady(){
+		assertFalse(w.isReady());
+		Player p = initW();
+		assertTrue(w.isReady());
 	}
 }
