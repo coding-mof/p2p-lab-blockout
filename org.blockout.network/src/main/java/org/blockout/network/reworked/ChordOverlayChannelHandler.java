@@ -148,6 +148,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		} else if ( message instanceof IAmMessage ) {
 			handleIAmMessage( connectionMgr, e, (IAmMessage) message );
 		} else if ( message instanceof ChordEnvelope ) {
+			logger.debug( "Envelope: " + message );
 			ChordEnvelope envelope = (ChordEnvelope) message;
 			fireMessageReceived( envelope.getSenderId(), envelope.getContent() );
 		} else if ( message instanceof WelcomeMessage ) {
@@ -440,6 +441,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 				@Override
 				public void run() {
+					logger.debug( "Passing message " + message + " to " + l );
 					l.receivedMessage( ChordOverlayChannelHandler.this, message, from );
 				}
 			}, Calendar.getInstance().getTime() );
@@ -448,15 +450,17 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 	@Override
 	public void sendMessage( final Serializable message, final IHash nodeId ) {
+		if ( responsibility.contains( nodeId ) ) {
+
+			fireMessageReceived( nodeId, message );
+
+			return;
+		}
 		routeMessage( new ChordEnvelope( localNode.getNodeId(), nodeId, message ), nodeId );
 	}
 
 	private void routeMessage( final Serializable message, final IHash nodeId ) {
 		logger.debug( "Routing message " + message + " to " + nodeId );
-		if ( responsibility.contains( nodeId ) ) {
-			fireMessageReceived( nodeId, message );
-			return;
-		}
 
 		Channel channel;
 		IHash higherKey = lookupTable.higherKey( nodeId );

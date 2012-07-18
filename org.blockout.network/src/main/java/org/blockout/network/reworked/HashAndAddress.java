@@ -52,4 +52,9 @@ public class HashAndAddress implements IHash {
 	public int getM() {
 		return hash.getM();
 	}
+
+	@Override
+	public String toString() {
+		return "HashAndAddress[hash=" + getHash() + ", address=" + getAddress() + "]";
+	}
 }
