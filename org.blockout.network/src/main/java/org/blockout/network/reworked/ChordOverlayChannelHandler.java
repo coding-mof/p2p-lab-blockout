@@ -224,7 +224,9 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			String description = "Forwarding successor lookup to own successor {} ({})";
 			logger.debug( description, successorChannel.getRemoteAddress(), successorId );
 		}
-		successorChannel.write( msg );
+
+		routeMessage( msg, msg.getKey() );
+		// successorChannel.write( msg );
 	}
 
 	/**

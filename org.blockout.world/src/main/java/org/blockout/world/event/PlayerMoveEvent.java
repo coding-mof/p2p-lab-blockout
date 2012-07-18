@@ -90,7 +90,7 @@ public class PlayerMoveEvent extends AbstractEvent<PlayerMoveEvent> {
 	@Override
 	public String toString() {
 		StringBuilder buf = new StringBuilder();
-		buf.append( "Player moved from (" );
+		buf.append( "Event[Player moved from (" );
 		buf.append( oldX );
 		buf.append( "," );
 		buf.append( oldY );
@@ -98,7 +98,9 @@ public class PlayerMoveEvent extends AbstractEvent<PlayerMoveEvent> {
 		buf.append( newX );
 		buf.append( "," );
 		buf.append( newY );
-		buf.append( ")." );
+		buf.append( "), id=" );
+		buf.append( getId() );
+		buf.append( "]" );
 		return buf.toString();
 	}
 
