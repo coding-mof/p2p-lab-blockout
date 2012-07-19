@@ -67,10 +67,17 @@
 	<bean class="org.blockout.world.BasicChunkGenerator" />
 	<bean class="org.blockout.world.BasicChunkLoader" />
 	<bean name="world" class="org.blockout.world.World" />
-	<bean class="org.blockout.world.DefaultChunkManager">
+	<bean name="manager" class="org.blockout.world.DefaultChunkManager">
 		<constructor-arg ref="world"/>
 		<constructor-arg ref="chordOverlay"/>
 	</bean>
+	<bean class="org.blockout.world.ReplicationHandler">
+		<constructor-arg ref="world"/>
+		<constructor-arg ref="chordOverlay"/>
+		<constructor-arg ref="manager"/>
+	</bean>
+	
+	
 	<bean class="org.blockout.world.LocalGameState" />
 	<bean class="org.blockout.logic.PlayerManager" />
 	<bean class="org.blockout.logic.FogOfWar" />

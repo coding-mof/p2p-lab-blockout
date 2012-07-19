@@ -30,4 +30,8 @@ public interface IChunkManager {
 	public void stopUpdating(TileCoordinate position);
 	
 	public void enterGame(Player player);
+	
+	public void addListener(ChunkManagerListener listener);
+	
+	public void removeListener(ChunkManagerListener listener);
 }

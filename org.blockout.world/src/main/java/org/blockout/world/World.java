@@ -211,18 +211,22 @@ public class World implements IWorld, WorldAdapter {
 	 * method will remove all chunks no longer needed to buffer
 	 */
 	private void cleanView() {
-		int x, y;
-		ArrayList<TileCoordinate> toRemove = new ArrayList<TileCoordinate>();
-		for ( TileCoordinate coord : view.keySet() ) {
-			x = Math.abs( coord.getX() - pos.getX() );
-			y = Math.abs( coord.getY() - pos.getY() );
-			if ( x > 1 || y > 1 ) {
-				toRemove.add( coord );
+		
+		synchronized (view) {
+			int x, y;
+			ArrayList<TileCoordinate> toRemove = new ArrayList<TileCoordinate>();
+			for ( TileCoordinate coord : view.keySet() ) {
+				x = Math.abs( coord.getX() - pos.getX() );
+				y = Math.abs( coord.getY() - pos.getY() );
+				if ( x > 1 || y > 1 ) {
+					toRemove.add( coord );
+				}
+			}
+			for ( TileCoordinate tileCoordinate : toRemove ) {
+				view.remove( tileCoordinate );
 			}
 		}
-		for ( TileCoordinate tileCoordinate : toRemove ) {
-			view.remove( tileCoordinate );
-		}
+		
 	}
 
 	/**

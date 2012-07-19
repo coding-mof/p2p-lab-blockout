@@ -2,11 +2,13 @@ package org.blockout.world;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.network.dht.Hash;
 import org.blockout.network.dht.IHash;
 import org.blockout.network.dht.WrappedRange;
+import org.blockout.network.message.IMessage;
 import org.blockout.network.reworked.ChordListener;
 import org.blockout.network.reworked.IChordOverlay;
 import org.blockout.world.entity.Player;
@@ -42,6 +44,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private final WorldAdapter									worldAdapter;
 
 	private final IChordOverlay									chord;
+	
+	private List<ChunkManagerListener> 							listener;
 
 	private final Hashtable<TileCoordinate, ArrayList<IHash>>	receiver;
 
@@ -53,6 +57,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		this.worldAdapter = worldAdapter;
 		this.worldAdapter.setManager( this );
 		this.chord = chord;
+		listener = new ArrayList<ChunkManagerListener>();
 		chord.addChordListener( this );
 	}
 
@@ -69,6 +74,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		logger.debug( "Event committed " + event );
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
+			fireChunkUpdate( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ));
 			for ( IHash address : receiver.get( coordinate ) ) {
 				chord.sendMessage( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ), address );
 			}
@@ -258,6 +264,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		chord.sendMessage( new GameEnteredMessage( c, (ArrayList<IHash>) receiver.get( c.getPosition() ).clone() ),
 				origin );
 		receiver.get( c.getPosition() ).add( origin );
+		
+		logger.debug("Player: "+msg.getPlayer().getName()+" ["+origin+"] joined the Game");
 	}
 
 	public void receive( final GameEnteredMessage msg, final IHash origin ) {
@@ -302,6 +310,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		}
 
 	}
+	
 
 	@Override
 	public void receivedMessage( final IChordOverlay chord, final Object message, final IHash senderId ) {
@@ -324,7 +333,24 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		} else if ( message instanceof ManageMessage ) {
 			receive( (ManageMessage) message, senderId );
 		}
+	}
 
+	@Override
+	public void addListener(ChunkManagerListener listener) {
+		this.listener.add(listener);
+	}
+
+	@Override
+	public void removeListener(ChunkManagerListener listener) {
+		this.listener.remove(listener);
+	}
+	
+	private void fireChunkUpdate(IMessage message){
+		synchronized (listener) {
+			for (ChunkManagerListener listener : this.listener) {
+				listener.chunkUpdated(message);
+			}
+		}
 	}
 
 }
