@@ -44,20 +44,17 @@ public class AIUtils {
 
 		float cameraCenterX = localCamera.getCenterX();
 		float cameraCenterY = localCamera.getCenterY();
-		logger.debug( "cameraCenterX: {}, cameraCenterY: {}", cameraCenterX, cameraCenterY );
 
 		int tileX = Camera.worldToTile( coord.getX() );
 		int tileY = Camera.worldToTile( coord.getY() );
 		int centerX = Camera.worldToTile( cameraCenterX );
 		int centerY = Camera.worldToTile( cameraCenterY );
-		logger.debug( "tileX: {}, tileY: {}, centerX: {}, centerY: {}", new Object[] { tileX, tileY, centerX, centerY } );
 
 		// Handle Movements
 		int fromX = centerX - localCamera.getStartTileX();
 		int fromY = centerY - localCamera.getStartTileY();
 		int toX = tileX - localCamera.getStartTileX();
 		int toY = tileY - localCamera.getStartTileY();
-		logger.debug( "fromX: {}, fromY: {}, toX: {}, toY: {}", new Object[] { fromX, fromY, toX, toY } );
 
 		Path path = context.getPathfinder().findPath( context.getGameState().getPlayer(), fromX, fromY, toX, toY );
 		if ( path == null || path.getLength() == 0 ) {
@@ -83,7 +80,7 @@ public class AIUtils {
 		Camera camera = context.getCamera().getReadOnly();
 
 		neighbourTile = coord.plus( 1, 1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				result = neighbourTile;
@@ -91,7 +88,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 1, 0 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -103,7 +100,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 1, -1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -115,7 +112,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( -1, 1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -127,7 +124,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( -1, 0 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -140,7 +137,7 @@ public class AIUtils {
 
 		neighbourTile = coord.plus( -1, -1 );
 
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -152,7 +149,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 0, 1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -164,7 +161,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 0, -1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
