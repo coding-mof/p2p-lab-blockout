@@ -36,4 +36,8 @@ public class PlayerDiedEvent extends AbstractEvent<PlayerDiedEvent> {
 		return deathCoord;
 	}
 
+	@Override
+	public String toString() {
+		return "PlayerDiedEvent[player=" + player + ", coord=" + deathCoord + ", id=" + getId() + "]";
+	}
 }

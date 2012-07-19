@@ -80,4 +80,8 @@ public class Crate implements Entity {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Crate[item=" + getItem() + ", id=" + getId() + "]";
+	}
 }

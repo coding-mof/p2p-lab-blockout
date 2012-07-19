@@ -31,4 +31,9 @@ public class RewardXPEvent extends AbstractEvent<RewardXPEvent> {
 	public TileCoordinate getResponsibleTile() {
 		return new TileCoordinate( 0, 0 );
 	}
+
+	@Override
+	public String toString() {
+		return "RewardXPEvent[player=" + player + ", xp=" + experience + ", id=" + getId() + "]";
+	}
 }
