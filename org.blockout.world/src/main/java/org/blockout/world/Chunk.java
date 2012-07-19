@@ -150,7 +150,7 @@ public class Chunk implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends Entity> T findEntity( final UUID id, final Class<T> clazz ) {
+	public synchronized <T extends Entity> T findEntity( final UUID id, final Class<T> clazz ) {
 		for ( Entity e : entities.keySet() ) {
 			if ( e.getId().equals( id ) && clazz.isInstance( e ) ) {
 				return (T) e;
@@ -169,7 +169,7 @@ public class Chunk implements Serializable {
 	 * @param x
 	 * @param y
 	 */
-	public void setEntityCoordinate( final Entity e, final int x, final int y ) {
+	public synchronized void setEntityCoordinate( final Entity e, final int x, final int y ) {
 		TileCoordinate coord = entities.get( e );
 		if ( coord != null ) {
 			TileCoordinate tile = toArrayIndex( coord );
@@ -188,7 +188,7 @@ public class Chunk implements Serializable {
 	 * @param e
 	 *            entity which should be moved
 	 */
-	public void removeEntity( final Entity e ) {
+	public synchronized void removeEntity( final Entity e ) {
 		TileCoordinate coord = entities.get( e );
 		if ( coord != null ) {
 			TileCoordinate tile = toArrayIndex( coord );

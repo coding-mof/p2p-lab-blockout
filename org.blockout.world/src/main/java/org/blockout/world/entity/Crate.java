@@ -1,9 +1,14 @@
 package org.blockout.world.entity;
 
+import java.util.Random;
 import java.util.UUID;
 
 import org.blockout.engine.SpriteType;
+import org.blockout.world.items.Armor;
+import org.blockout.world.items.Helm;
 import org.blockout.world.items.Item;
+import org.blockout.world.items.Shield;
+import org.blockout.world.items.Shoes;
 import org.blockout.world.items.Weapon;
 
 /**
@@ -23,7 +28,27 @@ public class Crate implements Entity {
 
 	public Crate() {
 		id = UUID.randomUUID();
-		item = new Weapon( 10 );
+
+		Random rand = new Random( System.currentTimeMillis() );
+		switch ( rand.nextInt( 5 ) ) {
+			case 0:
+				item = new Weapon( rand.nextInt( 40 ) + 1 );
+				break;
+			case 1:
+				item = new Helm( rand.nextInt( 20 ) + 1 );
+				break;
+			case 2:
+				item = new Shield( rand.nextInt( 30 ) + 1 );
+				break;
+			case 3:
+				item = new Shoes( rand.nextInt( 10 ) + 1 );
+				break;
+			case 4:
+				item = new Armor( rand.nextInt( 50 ) + 1 );
+				break;
+			default:
+				item = null;
+		}
 	}
 
 	public Item removeItem() {

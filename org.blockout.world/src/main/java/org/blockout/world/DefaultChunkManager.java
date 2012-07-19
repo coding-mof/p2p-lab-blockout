@@ -17,6 +17,7 @@ import org.blockout.world.messeges.ChunkEnteredMessage;
 import org.blockout.world.messeges.EnterGameMessage;
 import org.blockout.world.messeges.EntityAddedMessage;
 import org.blockout.world.messeges.GameEnteredMessage;
+import org.blockout.world.messeges.ManageMessage;
 import org.blockout.world.messeges.StateMessage;
 import org.blockout.world.messeges.StopUpdatesMessage;
 import org.blockout.world.state.IStateMachine;
@@ -223,40 +224,32 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		// TODO save local connections?
 	}
 
-	/*
-	 * public void receive( final UnmanageMessage msg, final IHash origin ) {
-	 * IComparator comparator = msg.getComparator(); ManageMessage manageMessage
-	 * = new ManageMessage(); for ( TileCoordinate coordinate :
-	 * receiver.keySet() ) { if ( !comparator.compare( coordinate ) ) {
-	 * manageMessage.add( worldAdapter.unmanageChunk( coordinate ),
-	 * receiver.remove( coordinate ) ); } } chord.sendMessage( manageMessage,
-	 * origin ); }
-	 * 
-	 * public void receive( final ManageMessage msg, final IHash origin ) {
-	 * 
-	 * ArrayList<Chunk> chunks = msg.getChunks(); ArrayList<ArrayList<IHash>>
-	 * addresses = msg.getReceivers();
-	 * 
-	 * for ( int i = 0; i < chunks.size(); i++ ) { receiver.put( chunks.get( i
-	 * ).getPosition(), addresses.get( i ) ); worldAdapter.manageChunk(
-	 * chunks.get( i ) ); }
-	 * 
-	 * }
-	 * 
-	 * public void receive( final FallbackMessage msg, final IHash origin ) {
-	 * 
-	 * // TODO save local connections?
-	 * 
-	 * if ( !receiver.containsKey( msg.getChunk().getPosition() ) ) {
-	 * worldAdapter.manageChunk( msg.getChunk() ); } }
-	 */
+	
+	public void receive(final ManageMessage msg, final IHash origin) {
+
+		ArrayList<Chunk> chunks = msg.getChunks();
+		ArrayList<ArrayList<IHash>> addresses = msg.getReceivers();
+		synchronized (receiver) {
+			synchronized (worldAdapter) {
+				for (int i = 0; i < chunks.size(); i++) {
+					receiver.put(chunks.get(i).getPosition(), addresses.get(i));
+					worldAdapter.manageChunk(chunks.get(i));
+				}
+			}
+		}
+		
+
+	}
+	 
 
 	public void receive( final EnterGameMessage msg, final IHash origin ) {
 		Chunk c = worldAdapter.getChunk( new TileCoordinate( 0, 0 ) );
 
 		// TODO better player placement
-		TileCoordinate coord = c.findFreeTile();
-		c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
+		synchronized (c) {
+			TileCoordinate coord = c.findFreeTile();
+			c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
+		}
 
 		if ( !receiver.containsKey( c.getPosition() ) ) {
 			logger.debug( "Clearing receivers for " + c.getPosition() );
@@ -287,7 +280,26 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	@Override
 	public void responsibilityChanged( final IChordOverlay chord, final WrappedRange<IHash> from,
 			final WrappedRange<IHash> to ) {
-		// TODO Auto-generated method stub
+		synchronized (receiver) {
+			synchronized (worldAdapter) {
+				ManageMessage msg = new ManageMessage();
+				for (TileCoordinate coordinate : receiver.keySet()) {
+					if (!to.contains(new Hash(coordinate))) {
+						msg.add(worldAdapter.unmanageChunk(coordinate), receiver.get(coordinate));
+					}
+				}
+				
+				if(msg.getChunks().size() > 0){
+					chord.sendMessage(msg, new Hash(msg.getChunks().get(0).getPosition()));
+					
+					for (Chunk c : msg.getChunks()) {
+						receiver.remove(c.getPosition());
+					}
+				}
+			
+				
+			}
+		}
 
 	}
 
@@ -309,6 +321,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 			receive( (EnterGameMessage) message, senderId );
 		} else if ( message instanceof EntityAddedMessage ) {
 			receive( (EntityAddedMessage) message, senderId );
+		} else if ( message instanceof ManageMessage ) {
+			receive( (ManageMessage) message, senderId );
 		}
 
 	}

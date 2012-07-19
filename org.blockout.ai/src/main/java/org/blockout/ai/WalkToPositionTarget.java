@@ -45,6 +45,15 @@ public class WalkToPositionTarget implements ITarget {
 
 	@Override
 	public void approach() {
+		if ( initiated ) {
+			TileCoordinate currentDestination = AIUtils.getCurrentDestination( context );
+			if ( !currentDestination.equals( coord ) ) {
+				// re-initiate if the destination differs
+				logger.debug( "Re-initiating walking since current destination " + currentDestination
+						+ " is not the desired " + coord );
+				initiated = false;
+			}
+		}
 		if ( !initiated ) {
 			if ( !AIUtils.gotoTile( context, coord ) ) {
 				// no way to get to destination
