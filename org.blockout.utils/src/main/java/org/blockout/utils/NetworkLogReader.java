@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
-import com.google.common.base.Preconditions;
+import org.blockout.common.NetworkLogMessage;
 
 /**
  * Class to read several message from a blockout network log
@@ -33,14 +33,13 @@ public class NetworkLogReader extends BufferedReader {
      * 
      * @throws IOException
      *             Thrown if there is a problem while reading the log file
-     * @throws IllegalStateException
-     *             Thrown if the reader is not ready
      */
     public NetworkLogMessage readMessage() throws IOException {
-        Preconditions.checkState( ready(), "reader is not ready" );
+        if( !ready() )
+            return null;
+
         String line = readLine();
 
-        // end of file?
         if( null == line )
             return null;
 
