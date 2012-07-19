@@ -100,4 +100,24 @@ public class Player extends Actor {
 	public String toString() {
 		return "Player[name='" + getName() + "']";
 	}
+
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
+
+	@Override
+	public boolean equals( final Object obj ) {
+		if ( this == obj ) {
+			return true;
+		}
+		if ( !super.equals( obj ) ) {
+			return false;
+		}
+		if ( getClass() != obj.getClass() ) {
+			return false;
+		}
+		Player other = (Player) obj;
+		return getId().equals( other.getId() );
+	}
 }
