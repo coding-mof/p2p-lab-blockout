@@ -5,8 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
+import org.blockout.common.NetworkLogMessage;
 import org.blockout.network.dht.IHash;
 import org.blockout.network.dht.WrappedRange;
 import org.blockout.network.reworked.ChordListener;
@@ -41,26 +41,26 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
         this.chordOverlay.addChordListener( this );
 
         localChordId = chordOverlay.getLocalId();
-        // currentPredecessor = chordOverlay.getPredecessor();
-        // currentSuccessor = chordOverlay.getSuccessor();
+        currentPredecessor = chordOverlay.getPredecessor();
+        currentSuccessor = chordOverlay.getSuccessor();
 
         connectionMgr.addConnectionListener( this );
         dateFormat = new SimpleDateFormat( "yyyy.MM.dd HH:mm:ss.SSS Z" );
 
         try {
-            File logFile = new File( new SimpleDateFormat(
-                    "yyyy.MM.dd-HHmmssSSS" ).format( new Date() ) + ".log" );
+            File logFile = new File( localChordId.getValue() + ".log" );
             if( !logFile.exists() )
                 logFile.createNewFile();
 
             logWriter = new FileWriter( logFile );
 
-            logWriter
-                    .append( "#=======================================================\n" );
-            logWriter.append( "#Start new connection log @ "
-                    + dateFormat.format( new Date() ) + "\n" );
-            logWriter
-                    .append( "#=======================================================\n" );
+            // NetworkLogMessage msg = new NetworkLogMessage();
+            // msg.setExtra( "chord", "init" );
+            // msg.setExtra( "id", localChordId.getValue() );
+            //
+            // logWriter.append( msg.toString() + "\n" );
+            // logWriter.flush();
+
         } catch ( IOException e ) {
             throw new RuntimeException( "failed to open connectionlog file" );
         }
@@ -73,9 +73,12 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
 
             if( null != currentPredecessor ) {
                 try {
-                    logWriter.append( dateFormat.format( new Date() ) + "|id:"
-                            + localChordId + "|chord:predecessor|predid:"
-                            + currentPredecessor + "\n" );
+                    NetworkLogMessage msg = new NetworkLogMessage();
+                    msg.setExtra( "chord", "predecessor" );
+                    msg.setExtra( "id", localChordId.getValue() );
+                    msg.setExtra( "predid", currentPredecessor.getValue() );
+
+                    logWriter.append( msg.toString() + "\n" );
                     logWriter.flush();
                 } catch ( IOException e ) {
                     e.printStackTrace();
@@ -89,9 +92,12 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
 
             if( null != currentSuccessor ) {
                 try {
-                    logWriter.append( dateFormat.format( new Date() ) + "|id:"
-                            + localChordId + "|chord:successor|predid:"
-                            + currentSuccessor + "\n" );
+                    NetworkLogMessage msg = new NetworkLogMessage();
+                    msg.setExtra( "chord", "successor" );
+                    msg.setExtra( "id", localChordId.getValue() );
+                    msg.setExtra( "succid", currentSuccessor.getValue() );
+
+                    logWriter.append( msg.toString() + "\n" );
                     logWriter.flush();
                 } catch ( IOException e ) {
                     e.printStackTrace();
@@ -103,7 +109,6 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
     @Override
     public void connected( IConnectionManager connectionMgr,
             SocketAddress localAddress, SocketAddress remoteAddress ) {
-
         updateNeighborhoodIfChanged();
     }
 
@@ -129,10 +134,15 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
     public void responsibilityChanged( IChordOverlay chord,
             WrappedRange<IHash> from, WrappedRange<IHash> to ) {
         try {
-            logWriter.append( dateFormat.format( new Date() )
- + "|id:"
-                    + localChordId + "|chord:respChanged|from:" + from + "|to:"
-                    + to + "\n" );
+            NetworkLogMessage msg = new NetworkLogMessage();
+            msg.setExtra( "chord", "responsibilityChanged" );
+            msg.setExtra( "id", localChordId.getValue() );
+            msg.setExtra( "old", "[" + from.getLowerBound().getValue() + ","
+                    + from.getUpperBound().getValue() + "]" );
+            msg.setExtra( "new", "[" + to.getLowerBound().getValue() + ","
+                    + to.getUpperBound().getValue() + "]" );
+            
+            logWriter.append( msg.toString() + "\n" );
             logWriter.flush();
         } catch ( IOException e ) {
             e.printStackTrace();
@@ -143,9 +153,12 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
     public void receivedMessage( IChordOverlay chord, Object message,
             IHash senderId ) {
         try {
-            logWriter.append( dateFormat.format( new Date() ) + "|id:"
-                    + localChordId + "|chord:messageRecv|sender:" + senderId
-                    + "\n" );
+            NetworkLogMessage msg = new NetworkLogMessage();
+            msg.setExtra( "chord", "messageReceived" );
+            msg.setExtra( "id", localChordId.getValue() );
+            msg.setExtra( "sender", senderId.getValue() );
+
+            logWriter.append( msg.toString() + "\n" );
             logWriter.flush();
         } catch ( IOException e ) {
             e.printStackTrace();

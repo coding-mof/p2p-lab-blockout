@@ -118,9 +118,12 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public void manageChunk( final Chunk chunk ) {
-		if ( !managedChunks.containsKey( chunk.getPosition() ) ) {
-			managedChunks.put( chunk.getPosition(), chunk );
+		synchronized (managedChunks) {
+			if ( !managedChunks.containsKey( chunk.getPosition() ) ) {
+				managedChunks.put( chunk.getPosition(), chunk );
+			}
 		}
+		
 	}
 
 	/**
@@ -128,7 +131,9 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public Chunk unmanageChunk( final TileCoordinate coord ) {
-		return managedChunks.remove( coord );
+		synchronized (managedChunks) {
+			return managedChunks.remove( coord );
+		}
 	}
 
 	/**
