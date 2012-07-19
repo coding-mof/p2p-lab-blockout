@@ -255,7 +255,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			return;
 		}
 
-		// Route message to successor of new node
+		// Forward message
 		ObservableFuture<IHash> future = findSuccessor( message.getNodeId().getNext() );
 		future.addFutureListener( new FutureListener<IHash>() {
 

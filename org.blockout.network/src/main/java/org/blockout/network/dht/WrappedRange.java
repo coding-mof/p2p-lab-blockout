@@ -44,7 +44,7 @@ public class WrappedRange<C extends Comparable<C>> implements Serializable {
 
 	@Override
 	public String toString() {
-		return "[ " + this.lowerBound + " , " + this.upperBound + " ] WA: " + this.wrapAround;
+		return "[" + this.lowerBound + ", " + this.upperBound + "]";
 	}
 
 	@Override
