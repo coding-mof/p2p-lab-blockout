@@ -2,14 +2,18 @@ package org.blockout.utils;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -20,7 +24,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JToolBar;
@@ -72,7 +75,6 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
     private JButton                             stopButton;
 
     private PlayerState                         state;
-    private File                                currentFile;
     private NetworkLogPlayer                    player;
 
     public NetworkLogPlayerFrame( String[] args ) {
@@ -137,63 +139,17 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         menuBar.add( fileMenu );
 
         JMenuItem open = new JMenuItem( new AbstractAction( "Open" ) {
+            private static final long serialVersionUID = -2668865400061916586L;
 
             @Override
             public void actionPerformed( ActionEvent e ) {
-                JFileChooser fileChooser = new JFileChooser( new File( "." ) );
-                fileChooser.addChoosableFileFilter( new FileFilter() {
-
-                    @Override
-                    public String getDescription() {
-                        // TODO Auto-generated method stub
-                        return "Logfiles (*.log)";
-                    }
-
-                    @Override
-                    public boolean accept( File f ) {
-                        return f.getName().endsWith( ".log" )
-                                || f.isDirectory();
-                    }
-                } );
-                fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
-                int status = fileChooser.showOpenDialog( NetworkLogPlayerFrame.this );
-
-                if( JFileChooser.APPROVE_OPTION == status ) {
-                    try {
-                        JOptionPane.showMessageDialog( null, fileChooser
-                                .getSelectedFile().getCanonicalFile()
-                                .toString(), "choosed File", 0 );
-
-                        currentFile = fileChooser.getSelectedFile();
-                        player = new NetworkLogPlayer( currentFile,
-                                NetworkLogPlayerFrame.this );
-                        player.setDelay( delaySlider.getValue() );
-                    } catch ( HeadlessException e1 ) {
-                        e1.printStackTrace();
-                        player = null;
-                        changePlayerState( PlayerState.NOT_LOADED );
-                        return;
-                    } catch ( FileNotFoundException e1 ) {
-                        JOptionPane.showMessageDialog( null,
-                                currentFile.getName() + " not found", "Error",
-                                0 );
-                        player = null;
-                        changePlayerState( PlayerState.NOT_LOADED );
-                        return;
-                    } catch ( IOException e1 ) {
-                        e1.printStackTrace();
-                        player = null;
-                        changePlayerState( PlayerState.NOT_LOADED );
-                        return;
-                    }
-
-                    changePlayerState( PlayerState.STOPPED );
-                }
+                onMenuOpen();
             }
         } );
         fileMenu.add( open );
 
         JMenuItem close = new JMenuItem( new AbstractAction( "Close" ) {
+            private static final long serialVersionUID = -4601171569276502914L;
 
             @Override
             public void actionPerformed( ActionEvent e ) {
@@ -275,10 +231,6 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         getContentPane().add( toolbar, BorderLayout.NORTH );
     }
 
-    private void onMenuOpen() {
-
-    }
-
     private void changePlayerState(final PlayerState newState){
         if(state == newState)
             return;
@@ -309,6 +261,62 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         }
     }
 
+    protected void onMenuOpen() {
+        JFileChooser fileChooser = new JFileChooser( new File( "." ) );
+        fileChooser.addChoosableFileFilter( new FileFilter() {
+
+            @Override
+            public String getDescription() {
+                return "Logfiles (*.log)";
+            }
+
+            @Override
+            public boolean accept( File f ) {
+                return f.getName().endsWith( ".log" ) || f.isDirectory();
+            }
+        } );
+        fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
+        fileChooser.setMultiSelectionEnabled( true );
+        int status = fileChooser.showOpenDialog( this );
+
+        if( JFileChooser.APPROVE_OPTION == status ) {
+            File[] files = fileChooser.getSelectedFiles();
+            List<NetworkLogMessage> messages = new LinkedList<NetworkLogMessage>();
+
+            NetworkLogReader reader;
+            for ( File file : files ) {
+                try {
+                    reader = new NetworkLogReader( new FileReader( file ) );
+                } catch ( FileNotFoundException e1 ) {
+                    e1.printStackTrace();
+                    continue;
+                }
+
+                NetworkLogMessage msg;
+
+                try {
+                    while ( null != ( msg = reader.readMessage() ) ) {
+                        messages.add( msg );
+                    }
+                } catch ( IOException e1 ) {
+                    e1.printStackTrace();
+                    continue;
+                }
+            }
+
+            Collections.sort( messages, new Comparator<NetworkLogMessage>() {
+                public int compare( NetworkLogMessage o1, NetworkLogMessage o2 ) {
+                    return new Long( o1.getTimestamp() ).compareTo( o2
+                            .getTimestamp() );
+                };
+            } );
+
+            player = new NetworkLogPlayer( messages, NetworkLogPlayerFrame.this );
+            player.setDelay( delaySlider.getValue() );
+            changePlayerState( PlayerState.STOPPED );
+        }
+    }
+
     private void onPlay() {
         changePlayerState( PlayerState.PLAYING );
         if( null != player )
@@ -324,18 +332,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         player.stop();
         graph = new SparseMultigraph<String, String>();
         updateGraph();
-        
-        try {
-            player = new NetworkLogPlayer( currentFile,
-                    NetworkLogPlayerFrame.this );
-            player.setDelay( delaySlider.getValue() );
-        } catch ( FileNotFoundException e ) {
-            JOptionPane.showMessageDialog( null, currentFile.getName()
-                    + " not found", "Error", 0 );
-            player = null;
-            changePlayerState( PlayerState.NOT_LOADED );
-            return;
-        }
+        player.reset();
 
         changePlayerState( PlayerState.STOPPED );
     }

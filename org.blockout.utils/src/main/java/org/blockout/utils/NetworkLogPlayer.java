@@ -1,9 +1,7 @@
 package org.blockout.utils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -20,23 +18,20 @@ public class NetworkLogPlayer implements Runnable {
     }
 
     Lock             playLock = new ReentrantLock();
-    NetworkLogReader reader;
     AtomicBoolean    play     = new AtomicBoolean();
     AtomicInteger    delay    = new AtomicInteger();
+    AtomicInteger     index    = new AtomicInteger();
     IMessageProcessor processor;
+    List<NetworkLogMessage> messages;
 
-    public NetworkLogPlayer( final File file, final IMessageProcessor processor )
-            throws FileNotFoundException {
-        Preconditions.checkNotNull( file );
+
+    public NetworkLogPlayer( final List<NetworkLogMessage> messages,
+            final IMessageProcessor processor ) {
+        Preconditions.checkNotNull( messages );
         Preconditions.checkNotNull( processor );
 
+        this.messages = new LinkedList<NetworkLogMessage>( messages );
         this.processor = processor;
-        reader = new NetworkLogReader( new FileReader( file ) );
-        try {
-            reader.mark( 0 );
-        } catch ( IOException e ) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -44,30 +39,18 @@ public class NetworkLogPlayer implements Runnable {
         playLock.lock();
         play.set( true );
 
-        NetworkLogMessage msg = null;
-        try {
-            msg = reader.readMessage();
-        } catch ( IOException e1 ) {
-            e1.printStackTrace();
-        }
-
-        while ( null != msg ) {
+        while ( index.get() < messages.size() ) {
             if( !play.get() )
                 break;
 
+            NetworkLogMessage msg = messages.get( index.get() );
             processor.process( msg );
+            index.incrementAndGet();
 
             try {
                 Thread.sleep( delay.get() );
             } catch ( InterruptedException e1 ) {
                 // ignore
-            }
-
-            try {
-                msg = reader.readMessage();
-            } catch ( IOException e ) {
-                e.printStackTrace();
-                break;
             }
         }
 
@@ -75,12 +58,9 @@ public class NetworkLogPlayer implements Runnable {
         playLock.unlock();
     }
 
-    public void reset() throws IOException {
+    public void reset() {
         stop();
-
-        playLock.lock();
-        reader.reset();
-        playLock.unlock();
+        index.set( 0 );
     }
 
     public void play() {
