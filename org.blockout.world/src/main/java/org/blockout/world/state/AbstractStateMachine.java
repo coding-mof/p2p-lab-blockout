@@ -3,12 +3,11 @@ package org.blockout.world.state;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
 import org.blockout.world.event.IEvent;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  * Abstract base class for all state machine implementations which provides
@@ -21,13 +20,12 @@ public abstract class AbstractStateMachine implements IStateMachine {
 
 	protected final List<IEventValidator>	validators;
 	protected List<IStateMachineListener>	listener;
-	protected ExecutorService				threadPool;
+	protected TaskExecutor					threadPool;
 
-	protected AbstractStateMachine() {
+	protected AbstractStateMachine(final TaskExecutor executor) {
 		validators = new ArrayList<IEventValidator>();
 		listener = new ArrayList<IStateMachineListener>();
-		// required to guarantee "happened-before" relations
-		threadPool = Executors.newSingleThreadExecutor();
+		threadPool = executor;
 	}
 
 	@Override

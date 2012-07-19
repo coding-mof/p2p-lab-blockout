@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.blockout.world.event.IEvent;
+import org.springframework.core.task.TaskExecutor;
 
 import com.google.common.base.Preconditions;
 
@@ -18,7 +19,8 @@ public class DefaultStateMachine extends AbstractStateMachine {
 
 	protected final Map<UUID, IEvent<?>>	events;
 
-	public DefaultStateMachine() {
+	public DefaultStateMachine(final TaskExecutor executor) {
+		super( executor );
 		events = new HashMap<UUID, IEvent<?>>();
 	}
 

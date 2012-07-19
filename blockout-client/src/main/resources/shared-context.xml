@@ -82,7 +82,11 @@
 	<bean class="org.blockout.logic.PlayerManager" />
 	<bean class="org.blockout.logic.FogOfWar" />
 
-	<bean class="org.blockout.world.state.DefaultStateMachine" />
+	<bean class="org.blockout.world.state.DefaultStateMachine">
+		<constructor-arg>
+			<bean class="org.springframework.scheduling.concurrent.ConcurrentTaskExecutor"/>
+		</constructor-arg>
+	</bean>
 	<bean class="org.blockout.logic.handler.DelayedEventDispatcher" />
 
 	<bean class="org.blockout.logic.handler.PlayerDeathHandler"/>

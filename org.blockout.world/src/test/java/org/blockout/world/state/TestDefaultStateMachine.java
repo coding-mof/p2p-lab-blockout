@@ -6,6 +6,7 @@ import org.blockout.world.event.IEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.springframework.core.task.SyncTaskExecutor;
 
 /**
  * Test the default implementation of the state machine.
@@ -20,7 +21,7 @@ public class TestDefaultStateMachine {
 
 	@Before
 	public void setUp() {
-		stateMachine = new DefaultStateMachine();
+		stateMachine = new DefaultStateMachine( new SyncTaskExecutor() );
 		listener = Mockito.mock( IStateMachineListener.class );
 		stateMachine.addIStateMachineListener( listener );
 	}
@@ -43,6 +44,8 @@ public class TestDefaultStateMachine {
 	/**
 	 * Tests whether the state machine allows pushed events when no validators
 	 * are defined.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@Test
 	public void testEventPerformedWithoutValidators() {
@@ -56,6 +59,8 @@ public class TestDefaultStateMachine {
 	/**
 	 * Tests whether the state machine denies pushed events if a single
 	 * validator denies it.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@Test
 	public void testSingleValidatorDeniesEvent() {
@@ -73,6 +78,8 @@ public class TestDefaultStateMachine {
 	/**
 	 * Tests whether the state machine allows pushed events if a single
 	 * validator allows it.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@Test
 	public void testSingleValidatorAllowsEvent() {
@@ -90,6 +97,8 @@ public class TestDefaultStateMachine {
 	/**
 	 * Tests whether the state machine allows pushed events if a single
 	 * validator skips it.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@Test
 	public void testSingleValidatorSkipsEvent() {
@@ -107,6 +116,8 @@ public class TestDefaultStateMachine {
 	/**
 	 * Tests whether the state machine denies pushed events if one validator
 	 * allows but another denies it.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@Test
 	public void testTwoDiscordantValidators() {
@@ -128,6 +139,8 @@ public class TestDefaultStateMachine {
 	/**
 	 * Tests whether committed events are preceeded by a perform event
 	 * invocations if not present.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@Test
 	public void testAutoCommitEvent() {
@@ -143,12 +156,15 @@ public class TestDefaultStateMachine {
 	/**
 	 * Tests whether committed events are preceeded by a perform event
 	 * invocations if not present.
+	 * 
+	 * @throws InterruptedException
 	 */
 	@Test
 	public void testExistingAutoCommitEvent() {
 		IEvent<?> event = mock( IEvent.class );
 
 		stateMachine.pushEvent( event );
+
 		Mockito.verify( listener ).eventPushed( event );
 
 		stateMachine.commitEvent( event );
