@@ -31,7 +31,6 @@ public class ReplicationHandler implements ChunkManagerListener, ChordListener{
 			WrappedRange<IHash> from, WrappedRange<IHash> to) {	
 	}
 
-	LoggerFrame logger = new LoggerFrame("Replication");
 	@Override
 	public void receivedMessage(IChordOverlay chord, Object message,
 			IHash senderId) {
