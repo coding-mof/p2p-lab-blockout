@@ -47,6 +47,29 @@ public class Equipment implements Serializable {
 		return belt[index];
 	}
 
+	public int getBeltSize() {
+		return 6;
+	}
+
+	public boolean isBeltFull() {
+		for ( int i = 0; i < getBeltSize(); i++ ) {
+			if ( belt[i] == null ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean putInBelt( final Elixir elixir ) {
+		for ( int i = 0; i < getBeltSize(); i++ ) {
+			if ( belt[i] == null ) {
+				belt[i] = elixir;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public void setBeltItem( final int index, final Elixir e ) {
 		belt[index] = e;
 	}

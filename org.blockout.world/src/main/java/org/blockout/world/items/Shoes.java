@@ -38,4 +38,9 @@ public class Shoes implements Item {
 	public SpriteType getSpriteType() {
 		return SpriteType.hell_hound_pup;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Shoes\nProtection: " + getProtection();
+	}
 }

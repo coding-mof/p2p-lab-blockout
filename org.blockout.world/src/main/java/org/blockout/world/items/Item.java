@@ -24,4 +24,6 @@ public interface Item extends Serializable {
 	 * @return The type of sprite used to render this item.
 	 */
 	public SpriteType getSpriteType();
+
+	public String getDescription();
 }

@@ -38,4 +38,9 @@ public class Gloves implements Item {
 	public SpriteType getSpriteType() {
 		return SpriteType.beholder;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Gloves\nProtection: " + getProtection();
+	}
 }

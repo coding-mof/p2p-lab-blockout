@@ -38,4 +38,9 @@ public class Shield implements Item {
 	public SpriteType getSpriteType() {
 		return SpriteType.goblin;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Shield\nProtection: " + getProtection();
+	}
 }

@@ -38,4 +38,9 @@ public class Weapon implements Item {
 	public SpriteType getSpriteType() {
 		return SpriteType.staircase_up;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Weapon\nHitPoints: " + getStrength();
+	}
 }

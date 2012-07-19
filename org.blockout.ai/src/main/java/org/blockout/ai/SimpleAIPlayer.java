@@ -15,6 +15,7 @@ import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
 import org.blockout.world.items.Armor;
+import org.blockout.world.items.Elixir;
 import org.blockout.world.items.Gloves;
 import org.blockout.world.items.Helm;
 import org.blockout.world.items.Shield;
@@ -141,6 +142,15 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 						+ gloves );
 				player.getEquipment().setGloves( gloves );
 			}
+		}
+
+		// Fill belt with elixirs
+		while ( !player.getEquipment().isBeltFull() ) {
+			Elixir elixir = player.getInventory().takeFirstItem( Elixir.class );
+			if ( elixir == null ) {
+				break;
+			}
+			player.getEquipment().putInBelt( elixir );
 		}
 
 		// Update player entity

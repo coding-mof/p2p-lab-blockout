@@ -2,7 +2,6 @@
 <nifty>
 
     <useStyles filename="nifty-default-styles.xml" />
-
     <useControls filename="nifty-default-controls.xml" />
     
     <style id="dropArea">
@@ -55,7 +54,7 @@
                 controller="org.blockout.ui.InventoryController" >
 				
                 <!-- Equipment -->
-                <control id="helm" name="droppable" style="dropArea" width="32px" height="32px" x="110" y="28" />
+                <control id="helm" name="droppable" style="dropArea" width="32px" height="32px" x="110" y="28"/>
                 <control id="armor" name="droppable" style="dropArea" width="32px" height="32px" x="110" y="76" />
                 <control id="shoes" name="droppable" style="dropArea" width="32px" height="32px" x="110" y="128" />
                 <control id="weapon" name="droppable" style="dropArea" width="32px" height="32px" x="39" y="76" />

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.blockout.engine.SpriteType;
 import org.blockout.world.items.Armor;
+import org.blockout.world.items.Elixir;
+import org.blockout.world.items.Elixir.Type;
 import org.blockout.world.items.Helm;
 import org.blockout.world.items.Item;
 import org.blockout.world.items.Shield;
@@ -30,7 +32,7 @@ public class Crate implements Entity {
 		id = UUID.randomUUID();
 
 		Random rand = new Random( System.currentTimeMillis() );
-		switch ( rand.nextInt( 5 ) ) {
+		switch ( rand.nextInt( 6 ) ) {
 			case 0:
 				item = new Weapon( rand.nextInt( 40 ) + 1 );
 				break;
@@ -45,6 +47,9 @@ public class Crate implements Entity {
 				break;
 			case 4:
 				item = new Armor( rand.nextInt( 50 ) + 1 );
+				break;
+			case 5:
+				item = new Elixir( Type.Health, rand.nextInt( 50 ) + 10 );
 				break;
 			default:
 				item = null;

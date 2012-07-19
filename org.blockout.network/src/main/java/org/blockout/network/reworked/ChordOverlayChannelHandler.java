@@ -190,6 +190,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		WrappedRange<IHash> tmp = responsibility;
 		if ( !newResponsibility.equals( tmp ) ) {
 			logger.info( "Responsibility changed from " + tmp + " to " + newResponsibility );
+			new Throwable().printStackTrace();
 			responsibility = newResponsibility;
 			fireResponsibilityChanged( tmp, newResponsibility );
 		}

@@ -38,4 +38,9 @@ public class Armor implements Item {
 	public SpriteType getSpriteType() {
 		return SpriteType.altar;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Armor\nProtection: " + getProtection();
+	}
 }

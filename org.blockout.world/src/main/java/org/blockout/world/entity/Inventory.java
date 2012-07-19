@@ -72,6 +72,20 @@ public class Inventory implements Serializable {
 		items[x][y] = item;
 	}
 
+	public <T extends Item> T takeFirstItem( final Class<T> clazz ) {
+		for ( int x = 0; x < 5; x++ ) {
+			for ( int y = 0; y < 6; y++ ) {
+				if ( clazz.isInstance( items[x][y] ) ) {
+					@SuppressWarnings("unchecked")
+					T tmp = (T) items[x][y];
+					items[x][y] = null;
+					return tmp;
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Stores the item in the first free slot in the inventory. Returns whether
 	 * there was a free slot to store.

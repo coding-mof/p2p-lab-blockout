@@ -40,4 +40,9 @@ public class Helm implements Item {
 		return SpriteType.blue_jelly;
 	}
 
+	@Override
+	public String getDescription() {
+		return "Helm\nProtection: " + getProtection();
+	}
+
 }

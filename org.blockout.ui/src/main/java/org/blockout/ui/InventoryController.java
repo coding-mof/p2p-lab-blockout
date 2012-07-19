@@ -20,6 +20,7 @@ import org.blockout.world.items.Weapon;
 import de.lessvoid.nifty.EndNotify;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.NiftyEventSubscriber;
+import de.lessvoid.nifty.builder.HoverEffectBuilder;
 import de.lessvoid.nifty.controls.Controller;
 import de.lessvoid.nifty.controls.Draggable;
 import de.lessvoid.nifty.controls.Droppable;
@@ -184,11 +185,12 @@ public class InventoryController implements Controller {
 			element.markForRemoval();
 		}
 		if ( item != null ) {
-			createDraggableItem( parentId, itemId, item.getSpriteType() );
+			createDraggableItem( parentId, itemId, item.getSpriteType(), item.getDescription() );
 		}
 	}
 
-	public void createDraggableItem( final String parentId, final String newId, final SpriteType spriteType ) {
+	public void createDraggableItem( final String parentId, final String newId, final SpriteType spriteType,
+			final String hintText ) {
 		final DraggableBuilder builder = new DraggableBuilder() {
 			{
 				backgroundImage( spriteType.name() );
@@ -199,6 +201,11 @@ public class InventoryController implements Controller {
 				height( "32px" );
 				backgroundColor( "#00F3" );
 				childLayoutCenter();
+				onHoverEffect( new HoverEffectBuilder( "hint" ) {
+					{
+						effectParameter( "hintText", hintText );
+					}
+				} );
 			}
 		};
 		final Droppable droppable = screen.findNiftyControl( parentId, Droppable.class );

@@ -54,4 +54,9 @@ public class Elixir implements Item {
 	public SpriteType getSpriteType() {
 		return SpriteType.rock_piercer;
 	}
+
+	@Override
+	public String getDescription() {
+		return "Elixir\nHealthPoints: " + getPoints() + "\n\nPut into belt and press <Space>\nto heal your character.";
+	}
 }
