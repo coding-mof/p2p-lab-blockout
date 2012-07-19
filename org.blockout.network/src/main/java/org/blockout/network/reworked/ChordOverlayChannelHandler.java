@@ -448,7 +448,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		if ( responsibility.contains( nodeId ) ) {
 
 			logger.debug( "Message " + message + " passed through loopback." );
-			fireMessageReceived( nodeId, message );
+			fireMessageReceived( localNode.getNodeId(), message );
 
 			return;
 		}
