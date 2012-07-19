@@ -90,11 +90,11 @@ public class PlayerMoveEvent extends AbstractEvent<PlayerMoveEvent> {
 	@Override
 	public String toString() {
 		StringBuilder buf = new StringBuilder();
-		buf.append( "Event[Player " + player + " moved from (" );
+		buf.append( "PlayerMoveEvent[player=" + player + ", from=(" );
 		buf.append( oldX );
 		buf.append( "," );
 		buf.append( oldY );
-		buf.append( ") to (" );
+		buf.append( "), to=(" );
 		buf.append( newX );
 		buf.append( "," );
 		buf.append( newY );

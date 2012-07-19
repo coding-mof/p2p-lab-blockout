@@ -55,4 +55,8 @@ public class GameEnteredMessage implements IMessage {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "GameEnteredMessage[chunk=" + chunk + ", players=" + localPlayer + "]";
+	}
 }

@@ -59,7 +59,6 @@ public class OpenCrateTarget implements ITarget {
 		}
 		if ( playerPos.isNeighbour( tile ) ) {
 			if ( crate.getItem() != null ) {
-
 				logger.debug( "Taking " + crate.getItem() + " out of crate " + crate );
 
 				CrateOpenedEvent event = new CrateOpenedEvent( context.getGameState().getPlayer(), crate, tile );
@@ -79,5 +78,4 @@ public class OpenCrateTarget implements ITarget {
 	public boolean achieved() {
 		return achieved;
 	}
-
 }

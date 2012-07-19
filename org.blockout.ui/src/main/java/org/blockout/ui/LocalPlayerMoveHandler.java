@@ -121,6 +121,16 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 		return path.getStep( nextStep );
 	}
 
+	public TileCoordinate getDestination() {
+		synchronized ( pathLock ) {
+			if ( path == null || path.getLength() == 0 ) {
+				return null;
+			}
+			Step step = path.getStep( path.getLength() - 1 );
+			return new TileCoordinate( step.getX(), step.getY() );
+		}
+	}
+
 	@Override
 	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
 		if ( !(event instanceof PlayerMoveEvent) ) {
@@ -157,7 +167,8 @@ public class LocalPlayerMoveHandler implements IEventHandler {
 			return;
 		}
 
-		world.setPlayerPosition( pme.getPlayer(), new TileCoordinate( pme.getNewX(), pme.getNewY() ) );
+		// world.setPlayerPosition( pme.getPlayer(), new TileCoordinate(
+		// pme.getNewX(), pme.getNewY() ) );
 
 		synchronized ( pathLock ) {
 			nextStep++;

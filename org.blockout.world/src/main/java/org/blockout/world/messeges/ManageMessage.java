@@ -61,4 +61,9 @@ public class ManageMessage implements IMessage {
 		}
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "ManageMessage[chunks=" + chunks + ", receivers=" + receivers + "]";
+	}
 }

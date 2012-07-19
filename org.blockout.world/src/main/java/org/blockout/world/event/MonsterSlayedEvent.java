@@ -61,6 +61,6 @@ public class MonsterSlayedEvent extends AbstractEvent<MonsterSlayedEvent> {
 
 	@Override
 	public String toString() {
-		return actor + " slayed " + monster;
+		return "MonsterSlayedEvent[attacker=" + actor + ", victim=" + monster + ", id=" + getId() + "]";
 	}
 }

@@ -60,6 +60,7 @@ public class CrateOpenedEvent extends AbstractEvent<CrateOpenedEvent> {
 
 	@Override
 	public String toString() {
-		return player + " opened crate " + crate;
+		return "CrateOpenedEvent[player=" + player + ", crate=" + crate + ", coord=" + crateCoord + ", id=" + getId()
+				+ "]";
 	}
 }

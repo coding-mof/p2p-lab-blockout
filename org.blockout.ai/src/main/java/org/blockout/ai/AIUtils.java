@@ -2,6 +2,14 @@ package org.blockout.ai;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.ui.Camera;
+import org.blockout.world.entity.Inventory;
+import org.blockout.world.items.Armor;
+import org.blockout.world.items.Gloves;
+import org.blockout.world.items.Helm;
+import org.blockout.world.items.Item;
+import org.blockout.world.items.Shield;
+import org.blockout.world.items.Shoes;
+import org.blockout.world.items.Weapon;
 import org.newdawn.slick.util.pathfinding.Path;
 import org.newdawn.slick.util.pathfinding.Path.Step;
 import org.slf4j.Logger;
@@ -35,8 +43,139 @@ public class AIUtils {
 		if ( worldPath == null ) {
 			return false;
 		}
+
 		context.getPlayerController().setPath( context.getStateMachine(), worldPath );
 		return true;
+	}
+
+	public static TileCoordinate getCurrentDestination( final AIContext context ) {
+		return context.getPlayerController().getDestination();
+	}
+
+	public static Armor takeBestArmor( final Inventory inventory ) {
+		Armor current = null;
+		int fromX = 0, fromY = 0;
+		for ( int x = 0; x < inventory.getWidth(); x++ ) {
+			for ( int y = 0; y < inventory.getHeight(); y++ ) {
+				Item item = inventory.getItem( x, y );
+				if ( item instanceof Armor ) {
+					if ( current == null || ((Armor) item).getProtection() > current.getProtection() ) {
+						current = (Armor) item;
+						fromX = x;
+						fromY = y;
+					}
+				}
+			}
+		}
+		if ( current != null ) {
+			inventory.removeItem( fromX, fromY );
+		}
+		return current;
+	}
+
+	public static Weapon takeBestWeapon( final Inventory inventory ) {
+		Weapon current = null;
+		int fromX = 0, fromY = 0;
+		for ( int x = 0; x < inventory.getWidth(); x++ ) {
+			for ( int y = 0; y < inventory.getHeight(); y++ ) {
+				Item item = inventory.getItem( x, y );
+				if ( item instanceof Weapon ) {
+					if ( current == null || ((Weapon) item).getStrength() > current.getStrength() ) {
+						current = (Weapon) item;
+						fromX = x;
+						fromY = y;
+					}
+				}
+			}
+		}
+		if ( current != null ) {
+			inventory.removeItem( fromX, fromY );
+		}
+		return current;
+	}
+
+	public static Shoes takeBestShoes( final Inventory inventory ) {
+		Shoes current = null;
+		int fromX = 0, fromY = 0;
+		for ( int x = 0; x < inventory.getWidth(); x++ ) {
+			for ( int y = 0; y < inventory.getHeight(); y++ ) {
+				Item item = inventory.getItem( x, y );
+				if ( item instanceof Shoes ) {
+					if ( current == null || ((Shoes) item).getProtection() > current.getProtection() ) {
+						current = (Shoes) item;
+						fromX = x;
+						fromY = y;
+					}
+				}
+			}
+		}
+		if ( current != null ) {
+			inventory.removeItem( fromX, fromY );
+		}
+		return current;
+	}
+
+	public static Helm takeBestHelm( final Inventory inventory ) {
+		Helm current = null;
+		int fromX = 0, fromY = 0;
+		for ( int x = 0; x < inventory.getWidth(); x++ ) {
+			for ( int y = 0; y < inventory.getHeight(); y++ ) {
+				Item item = inventory.getItem( x, y );
+				if ( item instanceof Helm ) {
+					if ( current == null || ((Helm) item).getProtection() > current.getProtection() ) {
+						current = (Helm) item;
+						fromX = x;
+						fromY = y;
+					}
+				}
+			}
+		}
+		if ( current != null ) {
+			inventory.removeItem( fromX, fromY );
+		}
+		return current;
+	}
+
+	public static Shield takeBestShield( final Inventory inventory ) {
+		Shield current = null;
+		int fromX = 0, fromY = 0;
+		for ( int x = 0; x < inventory.getWidth(); x++ ) {
+			for ( int y = 0; y < inventory.getHeight(); y++ ) {
+				Item item = inventory.getItem( x, y );
+				if ( item instanceof Shield ) {
+					if ( current == null || ((Shield) item).getProtection() > current.getProtection() ) {
+						current = (Shield) item;
+						fromX = x;
+						fromY = y;
+					}
+				}
+			}
+		}
+		if ( current != null ) {
+			inventory.removeItem( fromX, fromY );
+		}
+		return current;
+	}
+
+	public static Gloves takeBestGloves( final Inventory inventory ) {
+		Gloves current = null;
+		int fromX = 0, fromY = 0;
+		for ( int x = 0; x < inventory.getWidth(); x++ ) {
+			for ( int y = 0; y < inventory.getHeight(); y++ ) {
+				Item item = inventory.getItem( x, y );
+				if ( item instanceof Gloves ) {
+					if ( current == null || ((Gloves) item).getProtection() > current.getProtection() ) {
+						current = (Gloves) item;
+						fromX = x;
+						fromY = y;
+					}
+				}
+			}
+		}
+		if ( current != null ) {
+			inventory.removeItem( fromX, fromY );
+		}
+		return current;
 	}
 
 	private static Path findPathTo( final AIContext context, final TileCoordinate coord ) {
@@ -44,20 +183,17 @@ public class AIUtils {
 
 		float cameraCenterX = localCamera.getCenterX();
 		float cameraCenterY = localCamera.getCenterY();
-		logger.debug( "cameraCenterX: {}, cameraCenterY: {}", cameraCenterX, cameraCenterY );
 
-		int tileX = Camera.worldToTile( coord.getX() );
-		int tileY = Camera.worldToTile( coord.getY() );
+		int tileX = coord.getX();
+		int tileY = coord.getY();
 		int centerX = Camera.worldToTile( cameraCenterX );
 		int centerY = Camera.worldToTile( cameraCenterY );
-		logger.debug( "tileX: {}, tileY: {}, centerX: {}, centerY: {}", new Object[] { tileX, tileY, centerX, centerY } );
 
 		// Handle Movements
 		int fromX = centerX - localCamera.getStartTileX();
 		int fromY = centerY - localCamera.getStartTileY();
 		int toX = tileX - localCamera.getStartTileX();
 		int toY = tileY - localCamera.getStartTileY();
-		logger.debug( "fromX: {}, fromY: {}, toX: {}, toY: {}", new Object[] { fromX, fromY, toX, toY } );
 
 		Path path = context.getPathfinder().findPath( context.getGameState().getPlayer(), fromX, fromY, toX, toY );
 		if ( path == null || path.getLength() == 0 ) {
@@ -83,7 +219,7 @@ public class AIUtils {
 		Camera camera = context.getCamera().getReadOnly();
 
 		neighbourTile = coord.plus( 1, 1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				result = neighbourTile;
@@ -91,7 +227,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 1, 0 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -103,7 +239,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 1, -1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -115,7 +251,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( -1, 1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -127,7 +263,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( -1, 0 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -140,7 +276,7 @@ public class AIUtils {
 
 		neighbourTile = coord.plus( -1, -1 );
 
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -152,7 +288,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 0, 1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null
@@ -164,7 +300,7 @@ public class AIUtils {
 		}
 
 		neighbourTile = coord.plus( 0, -1 );
-		if ( camera.isInFrustum( neighbourTile ) ) {
+		if ( camera.isInFrustum( Camera.worldToTile( neighbourTile ) ) ) {
 			path = findPathTo( context, neighbourTile );
 			if ( path != null ) {
 				if ( result == null

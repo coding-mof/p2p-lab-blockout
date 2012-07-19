@@ -4,12 +4,12 @@ import org.blockout.network.message.IMessage;
 import org.blockout.world.entity.Player;
 
 public class EnterGameMessage implements IMessage {
-	
-	private static final long serialVersionUID = -8748709948028506863L;
-	
-	private Player player;
 
-	public EnterGameMessage(Player player) {
+	private static final long	serialVersionUID	= -8748709948028506863L;
+
+	private final Player		player;
+
+	public EnterGameMessage(final Player player) {
 		this.player = player;
 	}
 
@@ -18,21 +18,29 @@ public class EnterGameMessage implements IMessage {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals( final Object obj ) {
+		if ( this == obj ) {
 			return true;
-		if (obj == null)
+		}
+		if ( obj == null ) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if ( getClass() != obj.getClass() ) {
 			return false;
+		}
 		EnterGameMessage other = (EnterGameMessage) obj;
-		if (player == null) {
-			if (other.player != null)
+		if ( player == null ) {
+			if ( other.player != null ) {
 				return false;
-		} else if (!player.equals(other.player))
+			}
+		} else if ( !player.equals( other.player ) ) {
 			return false;
+		}
 		return true;
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return "EnterGameMessage[player=" + player + "]";
+	}
 }

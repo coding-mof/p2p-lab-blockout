@@ -31,9 +31,21 @@ public class PlayerDiedEvent extends AbstractEvent<PlayerDiedEvent> {
 		return 100;
 	}
 
+	public Player getPlayer() {
+		return player;
+	}
+
+	public TileCoordinate getDeathCoord() {
+		return deathCoord;
+	}
+
 	@Override
 	public TileCoordinate getResponsibleTile() {
 		return deathCoord;
 	}
 
+	@Override
+	public String toString() {
+		return "PlayerDiedEvent[player=" + player + ", coord=" + deathCoord + ", id=" + getId() + "]";
+	}
 }

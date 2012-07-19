@@ -52,6 +52,7 @@ public class AttackEvent extends AbstractEvent<AttackEvent> {
 
 	@Override
 	public String toString() {
-		return "AttackEvent[aggressor=" + aggressor + ", victim=" + victim + ", at=" + victimCoord + "]";
+		return "AttackEvent[aggressor=" + aggressor + ", victim=" + victim + ", at=" + victimCoord + ", id=" + getId()
+				+ "]";
 	}
 }

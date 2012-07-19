@@ -56,4 +56,8 @@ public class ChunkDeliveryMessage implements IMessage {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "ChunkDeliveryMessage[chunk=" + chunk + ", players=" + localPlayers + "]";
+	}
 }

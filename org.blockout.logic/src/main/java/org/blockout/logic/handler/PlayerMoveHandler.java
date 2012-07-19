@@ -45,10 +45,10 @@ public class PlayerMoveHandler implements IEventHandler {
 			return;
 		}
 		PlayerMoveEvent pme = (PlayerMoveEvent) event;
-		if ( pme.getPlayer().equals( gameState.getPlayer() ) ) {
-			// we handle only the movements of "strangers"
-			return;
-		}
+		// if ( pme.getPlayer().equals( gameState.getPlayer() ) ) {
+		// // we handle only the movements of "strangers"
+		// return;
+		// }
 		logger.info( "Player " + pme.getPlayer() + " moved from tile " + pme.getOldPos() + " to tile "
 				+ pme.getNewPos() );
 		world.setPlayerPosition( pme.getPlayer(), pme.getNewPos() );

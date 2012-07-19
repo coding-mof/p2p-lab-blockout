@@ -13,6 +13,13 @@ import org.blockout.world.Tile;
 import org.blockout.world.entity.Actor;
 import org.blockout.world.entity.Crate;
 import org.blockout.world.entity.Entity;
+import org.blockout.world.entity.Player;
+import org.blockout.world.items.Armor;
+import org.blockout.world.items.Gloves;
+import org.blockout.world.items.Helm;
+import org.blockout.world.items.Shield;
+import org.blockout.world.items.Shoes;
+import org.blockout.world.items.Weapon;
 import org.blockout.world.state.IStateMachine;
 import org.newdawn.slick.util.pathfinding.PathFinder;
 import org.slf4j.Logger;
@@ -59,9 +66,85 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 				}
 			}
 
-			logger.debug( "Current target: " + currentTarget );
+			handleInventory();
+
+			logger.debug( "Current target: " + currentTarget + ", current position: "
+					+ getWorld().findTile( getGameState().getPlayer() ) );
 			currentTarget.approach();
 		}
+	}
+
+	private void handleInventory() {
+		Player player = getGameState().getPlayer();
+
+		// Select best armor of inventory and discard old one
+		Armor armor = AIUtils.takeBestArmor( player.getInventory() );
+		if ( armor != null ) {
+			if ( player.getEquipment().getArmor() == null
+					|| player.getEquipment().getArmor().getProtection() < armor.getProtection() ) {
+				logger.info( player + " found better armor. Replacing " + player.getEquipment().getArmor() + " with "
+						+ armor );
+				player.getEquipment().setArmor( armor );
+			}
+		}
+
+		// Select best weapon of inventory and discard old one
+		Weapon weapon = AIUtils.takeBestWeapon( player.getInventory() );
+		if ( weapon != null ) {
+			if ( player.getEquipment().getWeapon() == null
+					|| player.getEquipment().getWeapon().getStrength() < weapon.getStrength() ) {
+				logger.info( player + " found better weapon. Replacing " + player.getEquipment().getWeapon() + " with "
+						+ weapon );
+				player.getEquipment().setWeapon( weapon );
+			}
+		}
+
+		// Select best shoes of inventory and discard old one
+		Shoes shoes = AIUtils.takeBestShoes( player.getInventory() );
+		if ( shoes != null ) {
+			if ( player.getEquipment().getShoes() == null
+					|| player.getEquipment().getShoes().getProtection() < shoes.getProtection() ) {
+				logger.info( player + " found better shoes. Replacing " + player.getEquipment().getShoes() + " with "
+						+ shoes );
+				player.getEquipment().setShoes( shoes );
+			}
+		}
+
+		// Select best shield of inventory and discard old one
+		Shield shield = AIUtils.takeBestShield( player.getInventory() );
+		if ( shield != null ) {
+			if ( player.getEquipment().getShield() == null
+					|| player.getEquipment().getShield().getProtection() < shield.getProtection() ) {
+				logger.info( player + " found better shield. Replacing " + player.getEquipment().getShield() + " with "
+						+ shield );
+				player.getEquipment().setShield( shield );
+			}
+		}
+
+		// Select best helm of inventory and discard old one
+		Helm helm = AIUtils.takeBestHelm( player.getInventory() );
+		if ( helm != null ) {
+			if ( player.getEquipment().getHelm() == null
+					|| player.getEquipment().getHelm().getProtection() < helm.getProtection() ) {
+				logger.info( player + " found better helm. Replacing " + player.getEquipment().getHelm() + " with "
+						+ helm );
+				player.getEquipment().setHelm( helm );
+			}
+		}
+
+		// Select best gloves of inventory and discard old one
+		Gloves gloves = AIUtils.takeBestGloves( player.getInventory() );
+		if ( gloves != null ) {
+			if ( player.getEquipment().getGloves() == null
+					|| player.getEquipment().getGloves().getProtection() < gloves.getProtection() ) {
+				logger.info( player + " found better gloves. Replacing " + player.getEquipment().getGloves() + " with "
+						+ gloves );
+				player.getEquipment().setGloves( gloves );
+			}
+		}
+
+		// Update player entity
+		getWorld().setEnityPosition( player, getWorld().findTile( player ) );
 	}
 
 	private ITarget findTarget() {
@@ -134,9 +217,14 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 		double distance = Double.MAX_VALUE;
 		T result = null;
 
-		for ( int y = 0; y < localCamera.getNumVerTiles(); y++ ) {
-			for ( int x = 0; x < localCamera.getNumHorTiles(); x++ ) {
+		int halfVerTile = localCamera.getNumVerTiles() / 2;
+		int halfHorTiles = localCamera.getNumHorTiles() / 2;
+
+		for ( int y = -halfVerTile; y < halfVerTile; y++ ) {
+			for ( int x = -halfHorTiles; x < halfHorTiles; x++ ) {
+
 				TileCoordinate currentTile = center.plus( x, y );
+
 				T entity = getEntityOrNull( currentTile, clazz );
 				if ( entity != null && !entity.equals( except ) ) {
 					double dist = TileCoordinate.computeSquaredEuclidianDistance( center, currentTile );

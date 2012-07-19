@@ -12,7 +12,6 @@ import org.blockout.common.TileCoordinate;
 import org.blockout.network.dht.Hash;
 import org.blockout.network.dht.IHash;
 import org.blockout.network.message.IMessage;
-import org.blockout.network.message.IMessagePassing;
 import org.blockout.network.reworked.IChordOverlay;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.messeges.ChuckRequestMessage;
@@ -82,13 +81,13 @@ public class DefaultChunkManagerTest {
 	private void addreceivers() throws IllegalArgumentException, SecurityException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		IMessage msg = new ChuckRequestMessage( coord1 );
-		manager.receivedMessage(chord ,msg, a1 );
+		manager.receivedMessage( chord, msg, a1 );
 		msg = new ChuckRequestMessage( coord2 );
-		manager.receivedMessage(chord , msg, a1 );
+		manager.receivedMessage( chord, msg, a1 );
 		msg = new ChuckRequestMessage( coord2 );
-		manager.receivedMessage(chord , msg, a2 );
+		manager.receivedMessage( chord, msg, a2 );
 		msg = new ChuckRequestMessage( coord3 );
-		manager.receivedMessage(chord , msg, a2 );
+		manager.receivedMessage( chord, msg, a2 );
 	}
 
 	@Test
@@ -98,16 +97,16 @@ public class DefaultChunkManagerTest {
 		stub( event.getResponsibleTile() ).toReturn( coord1 );
 		IHash origin = mock( IHash.class );
 		// commit
-		IMessage msg = new StateMessage( event, StateMessage.COMMIT_MESSAGE );
-		manager.receivedMessage(chord , msg, origin );
+		IMessage msg = new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE );
+		manager.receivedMessage( chord, msg, origin );
 		verify( iStateMachine ).commitEvent( event );
 		// push
-		msg = new StateMessage( event, StateMessage.PUSH_MESSAGE );
-		manager.receivedMessage(chord , msg, origin );
+		msg = new StateMessage( event, StateMessage.Type.PUSH_MESSAGE );
+		manager.receivedMessage( chord, msg, origin );
 		verify( iStateMachine ).pushEvent( event );
 		// rollback
-		msg = new StateMessage( event, StateMessage.ROLLBAK_MESSAGE );
-		manager.receivedMessage(chord , msg, origin );
+		msg = new StateMessage( event, StateMessage.Type.ROLLBAK_MESSAGE );
+		manager.receivedMessage( chord, msg, origin );
 		verify( iStateMachine ).rollbackEvent( event );
 	}
 
@@ -115,23 +114,23 @@ public class DefaultChunkManagerTest {
 	public void chunkRequest() throws IllegalArgumentException, SecurityException, IllegalAccessException,
 			InvocationTargetException, NoSuchMethodException {
 		IMessage msg = new ChuckRequestMessage( coord1 );
-		manager.receivedMessage(chord , msg, a1 );
+		manager.receivedMessage( chord, msg, a1 );
 		verify( worldAdapter ).getChunk( coord1 );
 		ArrayList<IHash> addresses = new ArrayList<IHash>();
 		verify( chord ).sendMessage( new ChunkDeliveryMessage( chunk1, addresses ), a1 );
 		// coord2
 		msg = new ChuckRequestMessage( coord2 );
-		manager.receivedMessage(chord , msg, a1 );
+		manager.receivedMessage( chord, msg, a1 );
 		verify( worldAdapter ).getChunk( coord2 );
 		addresses = new ArrayList<IHash>();
 		verify( chord ).sendMessage( new ChunkDeliveryMessage( chunk2, addresses ), a1 );
 		addresses.add( a1 );
 		msg = new ChuckRequestMessage( coord2 );
-		manager.receivedMessage(chord , msg, a2 );
+		manager.receivedMessage( chord, msg, a2 );
 		verify( chord ).sendMessage( new ChunkDeliveryMessage( chunk2, addresses ), a2 );
 		// coord3
 		msg = new ChuckRequestMessage( coord3 );
-		manager.receivedMessage(chord , msg, a2 );
+		manager.receivedMessage( chord, msg, a2 );
 		verify( worldAdapter ).getChunk( coord3 );
 		verify( chord ).sendMessage( new ChunkDeliveryMessage( chunk3, new ArrayList<IHash>() ), a2 );
 	}
@@ -151,7 +150,7 @@ public class DefaultChunkManagerTest {
 		verify( iStateMachine ).commitEvent( e3 );
 		manager.eventPushed( e4 );
 		verify( iStateMachine, never() ).commitEvent( e4 );
-		verify( chord ).sendMessage( new StateMessage( e4, StateMessage.PUSH_MESSAGE ), new Hash( coord4 ) );
+		verify( chord ).sendMessage( new StateMessage( e4, StateMessage.Type.PUSH_MESSAGE ), new Hash( coord4 ) );
 	}
 
 	@Test
@@ -161,14 +160,14 @@ public class DefaultChunkManagerTest {
 
 		// commit
 		manager.eventCommitted( e1 );
-		verify( chord ).sendMessage( new StateMessage( e1, StateMessage.COMMIT_MESSAGE ), a1 );
-		verify( chord, never() ).sendMessage( new StateMessage( e1, StateMessage.COMMIT_MESSAGE ), a2 );
+		verify( chord ).sendMessage( new StateMessage( e1, StateMessage.Type.COMMIT_MESSAGE ), a1 );
+		verify( chord, never() ).sendMessage( new StateMessage( e1, StateMessage.Type.COMMIT_MESSAGE ), a2 );
 		manager.eventCommitted( e2 );
-		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.COMMIT_MESSAGE ), a1 );
-		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.COMMIT_MESSAGE ), a2 );
+		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.COMMIT_MESSAGE ), a1 );
+		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.COMMIT_MESSAGE ), a2 );
 		manager.eventCommitted( e3 );
-		verify( chord, never() ).sendMessage( new StateMessage( e3, StateMessage.COMMIT_MESSAGE ), a1 );
-		verify( chord ).sendMessage( new StateMessage( e3, StateMessage.COMMIT_MESSAGE ), a2 );
+		verify( chord, never() ).sendMessage( new StateMessage( e3, StateMessage.Type.COMMIT_MESSAGE ), a1 );
+		verify( chord ).sendMessage( new StateMessage( e3, StateMessage.Type.COMMIT_MESSAGE ), a2 );
 	}
 
 	@Test
@@ -179,14 +178,14 @@ public class DefaultChunkManagerTest {
 		addreceivers();
 
 		manager.eventRolledBack( e1 );
-		verify( chord ).sendMessage( new StateMessage( e1, StateMessage.ROLLBAK_MESSAGE ), a1 );
-		verify( chord, never() ).sendMessage( new StateMessage( e1, StateMessage.ROLLBAK_MESSAGE ), a2 );
+		verify( chord ).sendMessage( new StateMessage( e1, StateMessage.Type.ROLLBAK_MESSAGE ), a1 );
+		verify( chord, never() ).sendMessage( new StateMessage( e1, StateMessage.Type.ROLLBAK_MESSAGE ), a2 );
 		manager.eventRolledBack( e2 );
-		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.ROLLBAK_MESSAGE ), a1 );
-		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.ROLLBAK_MESSAGE ), a2 );
+		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.ROLLBAK_MESSAGE ), a1 );
+		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.ROLLBAK_MESSAGE ), a2 );
 		manager.eventRolledBack( e3 );
-		verify( chord, never() ).sendMessage( new StateMessage( e3, StateMessage.ROLLBAK_MESSAGE ), a1 );
-		verify( chord ).sendMessage( new StateMessage( e3, StateMessage.ROLLBAK_MESSAGE ), a2 );
+		verify( chord, never() ).sendMessage( new StateMessage( e3, StateMessage.Type.ROLLBAK_MESSAGE ), a1 );
+		verify( chord ).sendMessage( new StateMessage( e3, StateMessage.Type.ROLLBAK_MESSAGE ), a2 );
 	}
 
 	@Test
@@ -198,9 +197,9 @@ public class DefaultChunkManagerTest {
 
 		// stopUpdate
 		IMessage msg = new StopUpdatesMessage( coord2 );
-		manager.receivedMessage(chord , msg, a1 );
+		manager.receivedMessage( chord, msg, a1 );
 		manager.eventCommitted( e2 );
-		verify( chord, never() ).sendMessage( new StateMessage( e2, StateMessage.COMMIT_MESSAGE ), a1 );
-		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.COMMIT_MESSAGE ), a2 );
+		verify( chord, never() ).sendMessage( new StateMessage( e2, StateMessage.Type.COMMIT_MESSAGE ), a1 );
+		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.COMMIT_MESSAGE ), a2 );
 	}
 }

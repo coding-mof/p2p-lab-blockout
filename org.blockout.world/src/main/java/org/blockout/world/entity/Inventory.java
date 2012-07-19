@@ -27,6 +27,25 @@ public class Inventory implements Serializable {
 		}
 	}
 
+	public boolean isFull() {
+		for ( Item[] row : items ) {
+			for ( Item item : row ) {
+				if ( item == null ) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public int getWidth() {
+		return 5;
+	}
+
+	public int getHeight() {
+		return 6;
+	}
+
 	/**
 	 * Sets an item at the given location in the inventory.
 	 * 

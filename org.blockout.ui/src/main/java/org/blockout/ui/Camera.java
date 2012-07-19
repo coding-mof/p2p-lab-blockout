@@ -148,6 +148,10 @@ public final class Camera {
 		return (int) worldCoordinate - 1;
 	}
 
+	public static TileCoordinate worldToTile( final TileCoordinate worldCoordinate ) {
+		return new TileCoordinate( worldToTile( worldCoordinate.getX() ), worldToTile( worldCoordinate.getY() ) );
+	}
+
 	public float screenToWorldX( final int screenX ) {
 		float worldX0 = data.centerX - (data.halfWidth / data.tileSize);
 		return worldX0 + (screenX / ((float) data.tileSize));
