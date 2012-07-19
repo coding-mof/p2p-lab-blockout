@@ -69,7 +69,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
 			for ( IHash address : receiver.get( coordinate ) ) {
-				chord.sendMessage( new StateMessage( event, StateMessage.COMMIT_MESSAGE ), address );
+				chord.sendMessage( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ), address );
 			}
 		}
 	}
@@ -82,10 +82,10 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		logger.debug( "Event pushed " + event );
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( !receiver.containsKey( coordinate ) ) {
-			chord.sendMessage( new StateMessage( event, StateMessage.PUSH_MESSAGE ), new Hash( coordinate ) );
+			chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), new Hash( coordinate ) );
 			if ( local.containsKey( coordinate ) ) {
 				for ( IHash address : local.get( coordinate ) ) {
-					chord.sendMessage( new StateMessage( event, StateMessage.PUSH_MESSAGE ), address );
+					chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), address );
 				}
 			}
 
@@ -102,12 +102,12 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
 			for ( IHash address : receiver.get( coordinate ) ) {
-				chord.sendMessage( new StateMessage( event, StateMessage.ROLLBAK_MESSAGE ), address );
+				chord.sendMessage( new StateMessage( event, StateMessage.Type.ROLLBAK_MESSAGE ), address );
 			}
 		}
 		if ( local.contains( coordinate ) ) {
 			for ( IHash address : local.get( coordinate ) ) {
-				chord.sendMessage( new StateMessage( event, StateMessage.ROLLBAK_MESSAGE ), address );
+				chord.sendMessage( new StateMessage( event, StateMessage.Type.ROLLBAK_MESSAGE ), address );
 			}
 		}
 	}
@@ -156,13 +156,13 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private void receive( final StateMessage msg, final IHash origin ) {
 		logger.debug( "Received message " + msg + " from " + origin );
 		switch ( msg.getType() ) {
-			case StateMessage.ROLLBAK_MESSAGE:
+			case ROLLBAK_MESSAGE:
 				stateMachine.rollbackEvent( msg.getEvent() );
 				break;
-			case StateMessage.COMMIT_MESSAGE:
+			case COMMIT_MESSAGE:
 				stateMachine.commitEvent( msg.getEvent() );
 				break;
-			case StateMessage.PUSH_MESSAGE:
+			case PUSH_MESSAGE:
 				ValidationResult result = stateMachine.pushEvent( msg.getEvent() );
 				if ( result == ValidationResult.Invalid ) {
 					eventRolledBack( msg.getEvent() );
@@ -181,6 +181,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private void receive( final ChuckRequestMessage msg, final IHash origin ) {
 		Chunk c = worldAdapter.getChunk( msg.getCoordinate() );
 		if ( !receiver.containsKey( c.getPosition() ) ) {
+			logger.debug( "Clearing receivers for " + c.getPosition() );
 			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
 		chord.sendMessage(
@@ -193,6 +194,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		if ( receiver.containsKey( c.getPosition() ) ) {
 			receiver.get( c.getPosition() ).remove( origin );
 		} else if ( local.containsKey( c.getPosition() ) ) {
+			logger.debug( "Adding receiver " + msg.getLocalPlayers() + " for " + c.getPosition() );
 			receiver.put( c.getPosition(), msg.getLocalPlayers() );
 
 			worldAdapter.responseChunk( c );
@@ -257,6 +259,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
 
 		if ( !receiver.containsKey( c.getPosition() ) ) {
+			logger.debug( "Clearing receivers for " + c.getPosition() );
 			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
 		chord.sendMessage( new GameEnteredMessage( c, (ArrayList<IHash>) receiver.get( c.getPosition() ).clone() ),

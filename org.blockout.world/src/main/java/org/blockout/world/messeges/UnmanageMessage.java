@@ -5,21 +5,24 @@ import org.blockout.network.dht.IHash;
 import org.blockout.network.message.IMessage;
 
 public class UnmanageMessage implements IMessage {
-	
-	private static final long serialVersionUID = 6901320317556924447L;
-	
-	private IComparator comparator;
-	private IHash hash;
-	
+
+	private static final long	serialVersionUID	= 6901320317556924447L;
+
+	private final IComparator	comparator;
+	private final IHash			hash;
+
 	/**
 	 * 
-	 * @param hash			the hash to whichthe {@link TileCoordinate}'s should be compared
-	 * @param comparator	the {@link IComparator} that should be used for comparing
+	 * @param hash
+	 *            the hash to whichthe {@link TileCoordinate}'s should be
+	 *            compared
+	 * @param comparator
+	 *            the {@link IComparator} that should be used for comparing
 	 */
-	public UnmanageMessage(IHash hash, IComparator comparator) {
+	public UnmanageMessage(final IHash hash, final IComparator comparator) {
 		this.comparator = comparator;
 		this.hash = hash;
-		comparator.setHash(hash);
+		comparator.setHash( hash );
 	}
 
 	public IComparator getComparator() {
@@ -31,27 +34,36 @@ public class UnmanageMessage implements IMessage {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals( final Object obj ) {
+		if ( this == obj ) {
 			return true;
-		if (obj == null)
+		}
+		if ( obj == null ) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if ( getClass() != obj.getClass() ) {
 			return false;
+		}
 		UnmanageMessage other = (UnmanageMessage) obj;
-		if (comparator == null) {
-			if (other.comparator != null)
+		if ( comparator == null ) {
+			if ( other.comparator != null ) {
 				return false;
-		} else if (!comparator.equals(other.comparator))
+			}
+		} else if ( !comparator.equals( other.comparator ) ) {
 			return false;
-		if (hash == null) {
-			if (other.hash != null)
+		}
+		if ( hash == null ) {
+			if ( other.hash != null ) {
 				return false;
-		} else if (!hash.equals(other.hash))
+			}
+		} else if ( !hash.equals( other.hash ) ) {
 			return false;
+		}
 		return true;
 	}
-	
-	
-	
+
+	@Override
+	public String toString() {
+		return "UnmanageMessage[hash=" + hash + "]";
+	}
 }

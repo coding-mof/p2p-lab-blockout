@@ -67,4 +67,8 @@ public class EntityAddedMessage implements IMessage {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "EntityAddedMessage[coord=" + coordinate + ", entity=" + entity + ", owner=" + owner + "]";
+	}
 }
