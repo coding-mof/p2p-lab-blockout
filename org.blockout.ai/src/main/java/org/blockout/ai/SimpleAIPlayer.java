@@ -134,9 +134,14 @@ public class SimpleAIPlayer extends AbstractAIPlayer {
 		double distance = Double.MAX_VALUE;
 		T result = null;
 
-		for ( int y = 0; y < localCamera.getNumVerTiles(); y++ ) {
-			for ( int x = 0; x < localCamera.getNumHorTiles(); x++ ) {
+		int halfVerTile = localCamera.getNumVerTiles() / 2;
+		int halfHorTiles = localCamera.getNumHorTiles() / 2;
+
+		for ( int y = -halfVerTile; y < halfVerTile; y++ ) {
+			for ( int x = -halfHorTiles; x < halfHorTiles; x++ ) {
+
 				TileCoordinate currentTile = center.plus( x, y );
+
 				T entity = getEntityOrNull( currentTile, clazz );
 				if ( entity != null && !entity.equals( except ) ) {
 					double dist = TileCoordinate.computeSquaredEuclidianDistance( center, currentTile );
