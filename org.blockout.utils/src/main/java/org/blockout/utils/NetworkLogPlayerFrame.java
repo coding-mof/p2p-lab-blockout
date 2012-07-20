@@ -1,7 +1,11 @@
 package org.blockout.utils;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Paint;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -26,12 +30,15 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.DefaultCaret;
 
+import org.apache.commons.collections15.Transformer;
 import org.blockout.common.NetworkLogMessage;
 import org.blockout.utils.NetworkLogPlayer.IMessageProcessor;
 
@@ -63,19 +70,20 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
     private enum PlayerState {
         PLAYING, PAUSED, STOPPED, NOT_LOADED;
     }
-    
-    private Graph<String, String>                    graph;
-    private VisualizationViewer<String, String> visViewer;
-    private Layout<String, String>              layout;
 
-    private JSlider                             delaySlider;
-    private JLabel                              currentDelayLabel;
-    private JButton                             playButton;
-    private JButton                             pauseButton;
-    private JButton                             stopButton;
+    private Graph<NetworkVertex, NetworkEdge>               graph;
+    private VisualizationViewer<NetworkVertex, NetworkEdge> visViewer;
+    private Layout<NetworkVertex, NetworkEdge>              layout;
 
-    private PlayerState                         state;
-    private NetworkLogPlayer                    player;
+    private JSlider                                         delaySlider;
+    private JLabel                                          currentDelayLabel;
+    private JButton                                         playButton;
+    private JButton                                         pauseButton;
+    private JButton                                         stopButton;
+    private JTextArea                                       logMessagesArea;
+
+    private PlayerState                                     state;
+    private NetworkLogPlayer                                player;
 
     public NetworkLogPlayerFrame( String[] args ) {
         initGraph();
@@ -84,19 +92,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
     }
 
     private void initGraph() {
-        graph = new SparseMultigraph<String, String>();
-
-        // add sample nodes
-        // graph.addVertex( "A" );
-        // graph.addVertex( "B" );
-        // graph.addVertex( "C" );
-        // graph.addVertex( "D" );
-        // graph.addEdge( "a", "A", "B", EdgeType.DIRECTED );
-        // graph.addEdge( "b", "B", "C", EdgeType.DIRECTED );
-        // graph.addEdge( "c", "C", "A", EdgeType.DIRECTED );
-        // graph.addEdge( "d", "D", "A", EdgeType.UNDIRECTED );
+        graph = new SparseMultigraph<NetworkVertex, NetworkEdge>();
     }
-    
+
     private void initLayout() {
         Preconditions.checkNotNull( graph, "No graph to display" );
 
@@ -104,30 +102,78 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         setLocation( 100, 100 );
         setTitle( "NetworkLogPlayer" );
         setDefaultCloseOperation( EXIT_ON_CLOSE );
-        
+
         initMenuBar();
         initToolBar();
 
-        layout = new CircleLayout<String, String>( graph );
-        layout.setSize( new Dimension( 400, 400 ) );
-        visViewer = new VisualizationViewer<String, String>( layout );
+        layout = new CircleLayout<NetworkVertex, NetworkEdge>( graph );
+        layout.setSize( new Dimension( 800, 800 ) );
+
+        visViewer = new VisualizationViewer<NetworkVertex, NetworkEdge>( layout );
         visViewer.setPreferredSize( new Dimension( 400, 400 ) );
 
         // Render Labels
         visViewer.getRenderContext().setVertexLabelTransformer(
-                new ToStringLabeller<String>() );
+                new ToStringLabeller<NetworkVertex>() );
+
+        Transformer<NetworkEdge, Paint> edgeDrawPaintTransformer = new Transformer<NetworkEdge, Paint>() {
+            @Override
+            public Paint transform( NetworkEdge edge ) {
+                if( "net".equals( edge.getType() ) )
+                    return Color.GRAY;
+                else if( "chord".equals( edge.getType() ) )
+                    return Color.RED;
+
+                return Color.BLACK;
+            }
+        };
+
+        visViewer.getRenderContext().setEdgeDrawPaintTransformer(
+                edgeDrawPaintTransformer );
+        visViewer.getRenderContext().setArrowDrawPaintTransformer(
+                edgeDrawPaintTransformer );
+        visViewer.getRenderContext().setArrowFillPaintTransformer(
+                edgeDrawPaintTransformer );
+
+        float dash[] = { 10.0f };
+        final Stroke edgeStroke = new BasicStroke( 1.0f, BasicStroke.CAP_BUTT,
+                BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f );
+        Transformer<NetworkEdge, Stroke> edgeStrokeTransformer = new Transformer<NetworkEdge, Stroke>() {
+            public Stroke transform( NetworkEdge edge ) {
+
+                if( "net".equals( edge.getType() ) )
+                    return edgeStroke;
+
+                return new BasicStroke( 2.0f );
+            }
+        };
+        visViewer.getRenderContext().setEdgeStrokeTransformer(
+                edgeStrokeTransformer );
+
         visViewer.getRenderContext().setEdgeLabelTransformer(
-                new ToStringLabeller<String>() );
-        // visViewer.getRenderer().getVertexLabelRenderer()
-        // .setPosition( Position.CNTR );
+                new ToStringLabeller<NetworkEdge>() );
 
         // Add mouse controls for zooming and panning
-        DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<String, String>();
+        DefaultModalGraphMouse<NetworkVertex, NetworkEdge> gm = new DefaultModalGraphMouse<NetworkVertex, NetworkEdge>();
         gm.setMode( ModalGraphMouse.Mode.TRANSFORMING );
         visViewer.setGraphMouse( gm );
 
         getContentPane()
                 .add( new JScrollPane( visViewer ), BorderLayout.CENTER );
+
+        logMessagesArea = new JTextArea();
+        logMessagesArea.setEditable( false );
+        logMessagesArea.setPreferredSize( new Dimension( 400, 150 ) );
+
+        DefaultCaret caret = (DefaultCaret) logMessagesArea.getCaret();
+        caret.setUpdatePolicy( DefaultCaret.ALWAYS_UPDATE );
+
+        JScrollPane srcPane = new JScrollPane( logMessagesArea );
+        srcPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
+
+        // TODO: fix autoscroll
+        // getContentPane().add( srcPane, BorderLayout.SOUTH );
+
         pack();
     }
 
@@ -189,9 +235,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         toolbar.add( currentDelayLabel );
         toolbar.addSeparator();
 
-
-        playButton = new JButton( new ImageIcon(
- "icons/play_18x24.png" ) );
+        playButton = new JButton( new ImageIcon( "icons/play_18x24.png" ) );
         playButton.addActionListener( new ActionListener() {
 
             @Override
@@ -203,8 +247,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         toolbar.add( playButton );
         toolbar.addSeparator();
 
-        pauseButton = new JButton( new ImageIcon(
-                "icons/pause_18x24.png" ) );
+        pauseButton = new JButton( new ImageIcon( "icons/pause_18x24.png" ) );
         pauseButton.setEnabled( false );
         pauseButton.addActionListener( new ActionListener() {
             @Override
@@ -215,8 +258,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         toolbar.add( pauseButton );
         toolbar.addSeparator();
 
-        stopButton = new JButton(
-                new ImageIcon( "icons/stop_24x24.png" ) );
+        stopButton = new JButton( new ImageIcon( "icons/stop_24x24.png" ) );
         stopButton.setEnabled( false );
         stopButton.addActionListener( new ActionListener() {
 
@@ -231,13 +273,13 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         getContentPane().add( toolbar, BorderLayout.NORTH );
     }
 
-    private void changePlayerState(final PlayerState newState){
-        if(state == newState)
+    private void changePlayerState( final PlayerState newState ) {
+        if( state == newState )
             return;
-        
+
         state = newState;
-        
-        switch(state){
+
+        switch ( state ) {
         case PLAYING:
             playButton.setEnabled( false );
             pauseButton.setEnabled( true );
@@ -330,43 +372,175 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 
     private void onStop() {
         player.stop();
-        graph = new SparseMultigraph<String, String>();
+        reset();
         updateGraph();
-        player.reset();
 
         changePlayerState( PlayerState.STOPPED );
     }
 
+    public void reset() {
+        graph = new SparseMultigraph<NetworkVertex, NetworkEdge>();
+        pendingConnect.clear();
+        player.reset();
+    }
+
+    public NetworkVertex findVertexById( final String id ) {
+        for ( NetworkVertex vertex : graph.getVertices() ) {
+            if( vertex.getId().equals( id ) )
+                return vertex;
+        }
+
+        return null;
+    }
+
+    public NetworkVertex findVertexByConnection( final String address ) {
+        for ( NetworkVertex vertex : graph.getVertices() ) {
+
+            for ( String conn : vertex.getConnections() ) {
+                if( conn.equals( address ) )
+                    return vertex;
+            }
+        }
+
+        return null;
+    }
+
     @Override
-    public void process( NetworkLogMessage message ) {
-        System.out.println( message );
+    public void process( final NetworkLogMessage message ) {
+
+        SwingUtilities.invokeLater( new Runnable() {
+            @Override
+            public void run() {
+                logMessagesArea.append( message + "\n" );
+                logMessagesArea.setCaretPosition( logMessagesArea.getDocument()
+                        .getLength() );
+                NetworkLogPlayerFrame.this.invalidate();
+            }
+        } );
 
         if( message.hasExtra( "chord" ) ) {
             String type = (String) message.getExtra( "chord" );
             if( "predecessor".equals( type ) ) {
-                String id = (String) message.getExtra( "id" );
-                String pred = (String) message.getExtra( "predid" );
+                updatePredecessor( message );
+            }
+        }
 
-                if( !graph.containsVertex( id ) )
-                    graph.addVertex( id );
+        if( message.hasExtra( "net" ) ) {
+            String type = (String) message.getExtra( "net" );
 
-                if( !graph.containsVertex( pred ) )
-                    graph.addVertex( pred );
-
-                Collection<String> edges = graph.getIncidentEdges( id );
-                for(String edge : edges){
-                    if( ( "predecessor of " + id ).equals( edge ) ) {
-                        graph.removeEdge( edge );
-                    }
-                }
-                
-                if( !id.equals( pred ) )
-                    graph.addEdge( "predecessor of " + id, pred, id,
-                            EdgeType.DIRECTED );
+            if( "connect".equals( type ) ) {
+                updateConnected( message );
+            } else if( "disconnect".equals( type ) ) {
+                updateDisconnected( message );
             }
         }
 
         updateGraph();
+    }
+
+    private List<NetworkLogMessage> pendingConnect = new LinkedList<NetworkLogMessage>();
+
+    private NetworkLogMessage findPendingConnect( String localAddr1,
+            String remoteAddr1 ) {
+
+        NetworkLogMessage result = null;
+        for ( NetworkLogMessage msg : pendingConnect ) {
+            String localAddr2 = (String) msg.getExtra( "localaddr" );
+            String remoteAddr2 = (String) msg.getExtra( "remoteaddr" );
+
+            if( localAddr1.equals( remoteAddr2 )
+                    && remoteAddr1.equals( localAddr2 ) ) {
+                result = msg;
+                break;
+            }
+        }
+
+        if( null != result )
+            pendingConnect.remove( result );
+
+        return result;
+    }
+
+    private void updateConnected( NetworkLogMessage message ) {
+        String id1 = (String) message.getExtra( "id" );
+        String localaddr1 = (String) message.getExtra( "localaddr" );
+        String remoteaddr1 = (String) message.getExtra( "remoteaddr" );
+
+        NetworkLogMessage pending = findPendingConnect( localaddr1, remoteaddr1 );
+
+        if( null == pending ) {
+            pendingConnect.add( message );
+            return;
+        }
+
+        String id2 = (String) pending.getExtra( "id" );
+        String localaddr2 = (String) pending.getExtra( "localaddr" );
+
+        NetworkVertex a = findVertexById( id1 );
+        if( null == a ) {
+            a = new NetworkVertex( id1 );
+            a.addConnection( localaddr1 );
+            graph.addVertex( a );
+        }
+
+        NetworkVertex b = findVertexById( id2 );
+        if( null == b ) {
+            b = new NetworkVertex( id2 );
+            b.addConnection( localaddr2 );
+            graph.addVertex( b );
+        }
+
+        graph.addEdge( new NetworkEdge( "net", localaddr1 ), a, b,
+                EdgeType.DIRECTED );
+        graph.addEdge( new NetworkEdge( "net", localaddr2 ), b, a,
+                EdgeType.DIRECTED );
+    }
+
+    private void updateDisconnected( NetworkLogMessage message ) {
+        String id = (String) message.getExtra( "id" );
+        String localaddr = (String) message.getExtra( "localaddr" );
+
+        NetworkVertex local = findVertexById( id );
+        if( null == local )
+            return;
+
+        Collection<NetworkEdge> edges = graph.getOutEdges( local );
+        for ( NetworkEdge edge : edges ) {
+            if( edge.getLabel().equals( localaddr ) ) {
+                graph.removeEdge( edge );
+                break;
+            }
+        }
+    }
+
+    private void updatePredecessor( NetworkLogMessage message ) {
+        String id = (String) message.getExtra( "id" );
+        String pred = (String) message.getExtra( "predid" );
+
+        NetworkVertex to = findVertexById( id );
+        NetworkVertex from = findVertexById( pred );
+
+        if( null == from ) {
+            from = new NetworkVertex( pred );
+            graph.addVertex( from );
+        }
+
+        if( null == to ) {
+            to = new NetworkVertex( id );
+            graph.addVertex( to );
+        }
+
+        Collection<NetworkEdge> edges = graph.getInEdges( to );
+        for ( NetworkEdge edge : edges ) {
+            if( "predecessor".equals( edge.getLabel() ) ) {
+                graph.removeEdge( edge );
+                break;
+            }
+        }
+
+        if( !id.equals( pred ) )
+            graph.addEdge( new NetworkEdge( "chord", "predecessor" ), from, to,
+                    EdgeType.DIRECTED );
     }
 
     private void updateGraph() {
@@ -375,7 +549,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
             public void run() {
                 // need to create new layout to update node positions
                 visViewer
-.setGraphLayout( new CircleLayout<String, String>(
+                        .setGraphLayout( new CircleLayout<NetworkVertex, NetworkEdge>(
                                 graph ) );
                 visViewer.repaint();
                 NetworkLogPlayerFrame.this.repaint();

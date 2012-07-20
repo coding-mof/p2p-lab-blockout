@@ -3,6 +3,7 @@ package org.blockout.network;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import org.blockout.common.NetworkLogMessage;
@@ -24,129 +25,163 @@ import com.google.common.base.Preconditions;
  * 
  */
 public class ConnectionDebugLogger implements ConnectionListener, ChordListener {
-	private FileWriter			logWriter;
+    private FileWriter    logWriter;
 
-	private final IChordOverlay	chordOverlay;
-	private final IHash			localChordId;
-	private IHash				currentPredecessor;
-	private IHash				currentSuccessor;
+    private IChordOverlay chordOverlay;
+    private IHash         localChordId;
 
-	public ConnectionDebugLogger(final ConnectionManager connectionMgr, final IChordOverlay chordOverlay) {
-		Preconditions.checkNotNull( connectionMgr );
+    public ConnectionDebugLogger( final ConnectionManager connectionMgr,
+            final IChordOverlay chordOverlay ) {
+        Preconditions.checkNotNull( connectionMgr );
 
-		this.chordOverlay = chordOverlay;
-		this.chordOverlay.addChordListener( this );
+        this.chordOverlay = chordOverlay;
+        this.chordOverlay.addChordListener( this );
 
-		localChordId = chordOverlay.getLocalId();
-		currentPredecessor = chordOverlay.getPredecessor();
-		currentSuccessor = chordOverlay.getSuccessor();
+        localChordId = chordOverlay.getLocalId();
+        connectionMgr.addConnectionListener( this );
 
-		connectionMgr.addConnectionListener( this );
+        try {
+            File logFile = new File( localChordId.getValue() + ".log" );
+            if( !logFile.exists() )
+                logFile.createNewFile();
 
-		try {
-			File logFile = new File( localChordId.getValue() + ".log" );
-			if ( !logFile.exists() ) {
-				logFile.createNewFile();
-			}
+            logWriter = new FileWriter( logFile );
+        } catch ( IOException e ) {
+            throw new RuntimeException( "failed to open connectionlog file" );
+        }
+    }
 
-			logWriter = new FileWriter( logFile );
+    @Override
+    public void connected( IConnectionManager connectionMgr,
+            SocketAddress localAddress, SocketAddress remoteAddress ) {
+        NetworkLogMessage msg = new NetworkLogMessage();
+        msg.setExtra( "id", localChordId.getValue() );
+        msg.setExtra( "net", "connect" );
+        msg.setExtra( "initiator", "local" );
 
-		} catch ( IOException e ) {
-			throw new RuntimeException( "failed to open connectionlog file" );
-		}
-	}
+        InetSocketAddress localAddr = (InetSocketAddress) localAddress;
+        InetSocketAddress remoteAddr = (InetSocketAddress) remoteAddress;
+        msg.setExtra( "localaddr", localAddr.getAddress().getHostAddress()
+                + "/" + localAddr.getPort() );
+        msg.setExtra( "remoteaddr", remoteAddr.getAddress().getHostAddress()
+                + "/" + remoteAddr.getPort() );
 
-	private void updateNeighborhoodIfChanged() {
-		if ( null == currentPredecessor || !currentPredecessor.equals( chordOverlay.getPredecessor() ) ) {
-			currentPredecessor = chordOverlay.getPredecessor();
+        try {
+            logWriter.append( msg.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
 
-			if ( null != currentPredecessor ) {
-				try {
-					NetworkLogMessage msg = new NetworkLogMessage();
-					msg.setExtra( "chord", "predecessor" );
-					msg.setExtra( "id", localChordId.getValue() );
-					msg.setExtra( "predid", currentPredecessor.getValue() );
+    @Override
+    public void disconnected( IConnectionManager connectionMgr,
+            SocketAddress localAddress, SocketAddress remoteAddress ) {
+        NetworkLogMessage msg = new NetworkLogMessage();
+        msg.setExtra( "id", localChordId.getValue() );
+        msg.setExtra( "net", "disconnect" );
+        msg.setExtra( "initiator", "local" );
 
-					logWriter.append( msg.toString() + "\n" );
-					logWriter.flush();
-				} catch ( IOException e ) {
-					e.printStackTrace();
-				}
-			}
-		}
+        InetSocketAddress localAddr = (InetSocketAddress) localAddress;
+        InetSocketAddress remoteAddr = (InetSocketAddress) remoteAddress;
+        msg.setExtra( "localaddr", localAddr.getAddress().getHostAddress()
+                + "/" + localAddr.getPort() );
+        msg.setExtra( "remoteaddr", remoteAddr.getAddress().getHostAddress()
+                + "/" + remoteAddr.getPort() );
 
-		if ( null == currentSuccessor || !currentSuccessor.equals( chordOverlay.getSuccessor() ) ) {
-			currentSuccessor = chordOverlay.getSuccessor();
+        try {
+            logWriter.append( msg.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
 
-			if ( null != currentSuccessor ) {
-				try {
-					NetworkLogMessage msg = new NetworkLogMessage();
-					msg.setExtra( "chord", "successor" );
-					msg.setExtra( "id", localChordId.getValue() );
-					msg.setExtra( "succid", currentSuccessor.getValue() );
+    @Override
+    public void clientConnected( IConnectionManager connectionMgr,
+            SocketAddress localAddress, SocketAddress remoteAddress ) {
 
-					logWriter.append( msg.toString() + "\n" );
-					logWriter.flush();
-				} catch ( IOException e ) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+        NetworkLogMessage msg = new NetworkLogMessage();
+        msg.setExtra( "id", localChordId.getValue() );
+        msg.setExtra( "net", "connect" );
+        msg.setExtra( "initiator", "remote" );
 
-	@Override
-	public void connected( final IConnectionManager connectionMgr, final SocketAddress localAddress,
-			final SocketAddress remoteAddress ) {
-		updateNeighborhoodIfChanged();
-	}
+        InetSocketAddress localAddr = (InetSocketAddress) localAddress;
+        InetSocketAddress remoteAddr = (InetSocketAddress) remoteAddress;
+        msg.setExtra( "localaddr", localAddr.getAddress().getHostAddress()
+                + "/" + localAddr.getPort() );
+        msg.setExtra( "remoteaddr", remoteAddr.getAddress().getHostAddress()
+                + "/" + remoteAddr.getPort() );
 
-	@Override
-	public void disconnected( final IConnectionManager connectionMgr, final SocketAddress localAddress,
-			final SocketAddress remoteAddress ) {
-		updateNeighborhoodIfChanged();
-	}
+        try {
+            logWriter.append( msg.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
 
-	@Override
-	public void clientConnected( final IConnectionManager connectionMgr, final SocketAddress localAddress,
-			final SocketAddress remoteAddress ) {
-		updateNeighborhoodIfChanged();
-	}
+    @Override
+    public void clientDisconnected( IConnectionManager connectionMgr,
+            SocketAddress localAddress, SocketAddress remoteAddress ) {
+        NetworkLogMessage msg = new NetworkLogMessage();
+        msg.setExtra( "id", localChordId.getValue() );
+        msg.setExtra( "net", "connect" );
+        msg.setExtra( "initiator", "remote" );
 
-	@Override
-	public void clientDisconnected( final IConnectionManager connectionMgr, final SocketAddress localAddress,
-			final SocketAddress remoteAddress ) {
-		updateNeighborhoodIfChanged();
-	}
+        InetSocketAddress localAddr = (InetSocketAddress) localAddress;
+        InetSocketAddress remoteAddr = (InetSocketAddress) remoteAddress;
+        msg.setExtra( "localaddr", localAddr.getAddress().getHostAddress()
+                + "/" + localAddr.getPort() );
+        msg.setExtra( "remoteaddr", remoteAddr.getAddress().getHostAddress()
+                + "/" + remoteAddr.getPort() );
 
-	@Override
-	public void responsibilityChanged( final IChordOverlay chord, final WrappedRange<IHash> from,
-			final WrappedRange<IHash> to ) {
-		try {
-			NetworkLogMessage msg = new NetworkLogMessage();
-			msg.setExtra( "chord", "responsibilityChanged" );
-			msg.setExtra( "id", localChordId.getValue() );
-			msg.setExtra( "old", "[" + from.getLowerBound().getValue() + "," + from.getUpperBound().getValue() + "]" );
-			msg.setExtra( "new", "[" + to.getLowerBound().getValue() + "," + to.getUpperBound().getValue() + "]" );
+        try {
+            logWriter.append( msg.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
 
-			logWriter.append( msg.toString() + "\n" );
-			logWriter.flush();
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
-	}
+    @Override
+    public void responsibilityChanged( IChordOverlay chord,
+            WrappedRange<IHash> from, WrappedRange<IHash> to ) {
+        NetworkLogMessage resp = new NetworkLogMessage();
+        resp.setExtra( "chord", "responsibilityChanged" );
+        resp.setExtra( "id", localChordId.getValue() );
+        resp.setExtra( "old", "[" + from.getLowerBound().getValue() + ","
+                + from.getUpperBound().getValue() + "]" );
+        resp.setExtra( "new", "[" + to.getLowerBound().getValue() + ","
+                + to.getUpperBound().getValue() + "]" );
 
-	@Override
-	public void receivedMessage( final IChordOverlay chord, final Object message, final IHash senderId ) {
-		try {
-			NetworkLogMessage msg = new NetworkLogMessage();
-			msg.setExtra( "chord", "messageReceived" );
-			msg.setExtra( "id", localChordId.getValue() );
-			msg.setExtra( "sender", senderId.getValue() );
+        NetworkLogMessage pred = new NetworkLogMessage();
+        pred.setExtra( "chord", "predecessor" );
+        pred.setExtra( "id", localChordId.getValue() );
+        pred.setExtra( "predid", to.getLowerBound().getPrevious() );
 
-			logWriter.append( msg.toString() + "\n" );
-			logWriter.flush();
-		} catch ( IOException e ) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            logWriter.append( resp.toString() + "\n" );
+            logWriter.append( pred.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void receivedMessage( IChordOverlay chord, Object message,
+            IHash senderId ) {
+        NetworkLogMessage msg = new NetworkLogMessage();
+        msg.setExtra( "chord", "messageReceived" );
+        msg.setExtra( "id", localChordId.getValue() );
+        msg.setExtra( "sender", senderId.getValue() );
+
+        try {
+            logWriter.append( msg.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
 }
