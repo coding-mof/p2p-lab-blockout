@@ -3,7 +3,6 @@ package org.blockout.network.reworked;
 import java.io.Serializable;
 import java.net.SocketAddress;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -62,6 +61,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	private final ChannelGroup				channels;
 	private final LocalNode					localNode;
 	private final TaskScheduler				scheduler;
+	private final TaskExecutor				executor;
 	private final List<SocketAddress>		introductionFilter;
 
 	private IConnectionManager				connectionMgr;
@@ -79,14 +79,18 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	 *            An executor for dispatching the listener invocations.
 	 */
 	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskScheduler scheduler,
-			final long stabilizationRate) {
+			final TaskExecutor executor, final long stabilizationRate) {
 
 		Preconditions.checkNotNull( localNode );
 		Preconditions.checkNotNull( scheduler );
 
 		this.localNode = localNode;
 		this.scheduler = scheduler;
+		this.executor = executor;
 		this.stabilizationRate = stabilizationRate;
+
+		successorId = localNode.getNodeId();
+		predecessorId = localNode.getNodeId();
 
 		lookupTable = Maps.newTreeMap();
 		introductionFilter = Collections.synchronizedList( new ArrayList<SocketAddress>() );
@@ -190,7 +194,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		WrappedRange<IHash> tmp = responsibility;
 		if ( !newResponsibility.equals( tmp ) ) {
 			logger.info( "Responsibility changed from " + tmp + " to " + newResponsibility );
-			new Throwable().printStackTrace();
 			responsibility = newResponsibility;
 			fireResponsibilityChanged( tmp, newResponsibility );
 		}
@@ -419,27 +422,27 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	 */
 	private void fireResponsibilityChanged( final WrappedRange<IHash> from, final WrappedRange<IHash> to ) {
 		for ( final ChordListener l : listener ) {
-			scheduler.schedule( new Runnable() {
+			executor.execute( new Runnable() {
 
 				@Override
 				public void run() {
 					l.responsibilityChanged( ChordOverlayChannelHandler.this, from, to );
 				}
-			}, Calendar.getInstance().getTime() );
+			} );
 		}
 	}
 
 	private void fireMessageReceived( final IHash from, final Object message ) {
 		logger.info( "Received message " + message + " from " + from );
 		for ( final ChordListener l : listener ) {
-			scheduler.schedule( new Runnable() {
+			executor.execute( new Runnable() {
 
 				@Override
 				public void run() {
 					logger.debug( "Passing message " + message + " to " + l );
 					l.receivedMessage( ChordOverlayChannelHandler.this, message, from );
 				}
-			}, Calendar.getInstance().getTime() );
+			} );
 		}
 	}
 
