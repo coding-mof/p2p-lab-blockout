@@ -131,6 +131,51 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				}
 			}
 		}
+
+		// check if it was our predecessor
+		if ( e.getChannel().equals( predecessorChannel ) ) {
+			// replace predecessor with most closest node or ourself
+			// and adjust our responsibility
+			logger.info( "Channel " + e.getChannel() + " to our predecessor " + predecessorId + " has been closed." );
+			synchronized ( lookupTable ) {
+				IHash lowerKey = lookupTable.lowerKey( predecessorId );
+				if ( lowerKey == null ) {
+					lowerKey = lookupTable.lastKey();
+				}
+				if ( lowerKey == null ) {
+					predecessorId = localNode.getNodeId();
+					predecessorChannel = null;
+				} else {
+					predecessorId = lowerKey;
+					predecessorChannel = lookupTable.get( lowerKey );
+				}
+			}
+			logger.info( "New predecessor will be " + predecessorId + " at " + predecessorChannel );
+			updateResponsibility( predecessorId.getNext() );
+		}
+
+		// check if it was our successor
+		if ( e.getChannel().equals( successorChannel ) ) {
+			logger.info( "Channel " + e.getChannel() + " to our successor " + successorId + " has been closed." );
+			synchronized ( lookupTable ) {
+				IHash higherKey = lookupTable.higherKey( successorId );
+				if ( higherKey == null ) {
+					higherKey = lookupTable.firstKey();
+				}
+				if ( higherKey == null ) {
+					successorId = localNode.getNodeId();
+					successorChannel = null;
+				} else {
+					successorId = higherKey;
+					successorChannel = lookupTable.get( higherKey );
+				}
+			}
+			logger.info( "New successor will be " + successorId + " at " + successorChannel );
+			if ( successorChannel != null ) {
+				Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ),
+						connectionMgr.getServerAddress() );
+			}
+		}
 	}
 
 	@Override
@@ -459,35 +504,42 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	private void routeMessage( final Serializable message, final IHash nodeId ) {
-		Channel channel;
-		IHash destinationKey;
-		IHash higherKey = lookupTable.higherKey( nodeId );
-		if ( higherKey == null ) {
-			// either we passed the upper bound
-			// or the last finger is matching the key exactly
-			if ( lookupTable.lastKey().equals( nodeId ) ) {
-				channel = lookupTable.lastEntry().getValue();
-				destinationKey = lookupTable.lastEntry().getKey();
-				logger.debug( "Router: using last key" );
+		synchronized ( lookupTable ) {
+			if ( lookupTable.isEmpty() ) {
+				logger.warn( "Lookup table is empty. Routing message to us." );
+				fireMessageReceived( localNode.getNodeId(), message );
+				return;
+			}
+			Channel channel;
+			IHash destinationKey;
+			IHash higherKey = lookupTable.higherKey( nodeId );
+			if ( higherKey == null ) {
+				// either we passed the upper bound
+				// or the last finger is matching the key exactly
+				if ( lookupTable.lastKey().equals( nodeId ) ) {
+					channel = lookupTable.lastEntry().getValue();
+					destinationKey = lookupTable.lastEntry().getKey();
+					logger.debug( "Router: using last key" );
+				} else {
+					channel = lookupTable.firstEntry().getValue();
+					destinationKey = lookupTable.firstEntry().getKey();
+					logger.debug( "Router: using first key" );
+				}
 			} else {
-				channel = lookupTable.firstEntry().getValue();
-				destinationKey = lookupTable.firstEntry().getKey();
-				logger.debug( "Router: using first key" );
+				IHash lowerKey = lookupTable.lowerKey( higherKey );
+				if ( lowerKey == null ) {
+					logger.debug( "Router: no lower key found. using higher as lower." );
+					lowerKey = higherKey;
+				}
+				channel = lookupTable.get( lowerKey );
+				destinationKey = lowerKey;
+				logger.debug( "Router: using next higher key" );
 			}
-		} else {
-			IHash lowerKey = lookupTable.lowerKey( higherKey );
-			if ( lowerKey == null ) {
-				logger.debug( "Router: no lower key found. using higher as lower." );
-				lowerKey = higherKey;
-			}
-			channel = lookupTable.get( lowerKey );
-			destinationKey = lowerKey;
-			logger.debug( "Router: using next higher key" );
-		}
 
-		logger.debug( "Routing message " + message + "(destination=" + nodeId + ") using channel " + channel + "(to="
-				+ destinationKey + ")" );
-		Channels.write( channel, message );
+			logger.debug( "Routing message " + message + "(destination=" + nodeId + ") using channel " + channel
+					+ "(to=" + destinationKey + ")" );
+			Channels.write( channel, message );
+		}
 	}
 
 	@Override
