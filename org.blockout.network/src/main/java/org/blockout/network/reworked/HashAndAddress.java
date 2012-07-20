@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 
 public class HashAndAddress implements IHash {
 
+	private static final long	serialVersionUID	= 8447534468409117070L;
 	private final IHash			hash;
 	private final SocketAddress	address;
 
