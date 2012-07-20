@@ -191,6 +191,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 			logger.debug( "Clearing receivers for " + c.getPosition() );
 			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
+		fireChunkUpdate(new ChunkDeliveryMessage( c, null));
 		chord.sendMessage(
 				new ChunkDeliveryMessage( c, (ArrayList<IHash>) receiver.get( msg.getCoordinate() ).clone() ), origin );
 		receiver.get( c.getPosition() ).add( origin );
@@ -252,11 +253,14 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		Chunk c = worldAdapter.getChunk( new TileCoordinate( 0, 0 ) );
 
 		// TODO better player placement
+		TileCoordinate coord;
 		synchronized (c) {
-			TileCoordinate coord = c.findFreeTile();
+			coord = c.findFreeTile();
 			c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
 		}
-
+		fireChunkUpdate(new EntityAddedMessage(msg.getPlayer(), coord, origin));
+		
+		
 		if ( !receiver.containsKey( c.getPosition() ) ) {
 			logger.debug( "Clearing receivers for " + c.getPosition() );
 			receiver.put( c.getPosition(), new ArrayList<IHash>() );
@@ -293,6 +297,9 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 				ManageMessage msg = new ManageMessage();
 				for (TileCoordinate coordinate : receiver.keySet()) {
 					if (!to.contains(new Hash(coordinate))) {
+						if(local.containsKey(coordinate)){
+							receiver.get(coordinate).add(chord.getLocalId());
+						}
 						msg.add(worldAdapter.unmanageChunk(coordinate), receiver.get(coordinate));
 					}
 				}

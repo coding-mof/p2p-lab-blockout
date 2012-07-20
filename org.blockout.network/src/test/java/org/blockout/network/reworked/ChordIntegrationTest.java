@@ -25,10 +25,6 @@ public class ChordIntegrationTest {
 		return scheduler;
 	}
 
-	private IChordOverlay createAndConnectPeer( final LocalNode node ) {
-		return createAndConnectPeer( node, null );
-	}
-
 	private IChordOverlay createAndConnectPeer( final LocalNode node, final ChordListener listener ) {
 		ThreadPoolTaskScheduler scheduler = createPooledScheduler();
 		ChordOverlayChannelHandler overlay;
