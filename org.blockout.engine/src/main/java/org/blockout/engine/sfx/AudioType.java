@@ -21,6 +21,12 @@ public enum AudioType {
 	sfx_stonestep2,
 	sfx_stonestep3,
 	sfx_open_chest,
+	sfx_player_death1,
+	sfx_player_death2,
+	sfx_player_death3,
+	sfx_monster_death1,
+	sfx_monster_death2,
+	sfx_monster_death3,
 	
 	// Ambient music
 	music_irish_meadow
