@@ -90,8 +90,8 @@
 	</bean>
 	<bean class="org.blockout.logic.handler.DelayedEventDispatcher" />
 
-	<bean class="org.blockout.logic.handler.PlayerDeathHandler"/>
-	<bean class="org.blockout.logic.handler.MonsterDeathHandler" />
+	<!--bean class="org.blockout.logic.handler.PlayerDeathHandler"/-->
+	<!-- bean class="org.blockout.logic.handler.MonsterDeathHandler" /-->
 	<bean class="org.blockout.logic.handler.PlayerMoveHandler" />
 	<bean class="org.blockout.logic.handler.RewardXPHandler" />
 

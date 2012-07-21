@@ -1,11 +1,33 @@
 Music
 ===============================
-Irish Meadow 
+ambient/Marc_Teichert_-_Irish_Meadow.ogg
     Artist:     Marc Teichert - http://www.jamendo.com/en/artist/355362/marc-teichert
     License:    CC BY-SA 3.0 - http://creativecommons.org/licenses/by-sa/3.0/
 
 Graphics
 ===============================
-nethack_spritesheet 
+nethack_spritesheet.jpg
     Artist:     chubbs-99 - http://chubbs-99.deviantart.com/ 
     License:    CC BY-NC-SA 3.0 - http://creativecommons.org/licenses/by-nc-sa/3.0/
+	
+Sounds
+===============================
+
+sfx/player_death1.mp3
+sfx/player_death2.mp3
+sfx/monster_death2.mp3
+sfx/monster_death3.mp3
+	Artist:		Mike Koenig
+	Link:		player_death1:  http://soundbible.com/810-Dying.html (2012-07-21)
+				player_death2:  http://soundbible.com/774-Gag.html (2012-07-21)
+				monster_death2: http://soundbible.com/1033-Zombie-In-Pain.html (2012-07-21)
+				monster_death3: http://soundbible.com/1042-Zombie-Long-Death.html (2012-07-21)
+	License: 	CC BY 3.0 - http://creativecommons.org/licenses/by/3.0/	(2012-07-21)
+	
+sfx/monster_death1.mp3
+	Link:		http://soundbible.com/98-Evil-Yelling.html (2012-07-21)
+	License:	Personal Use Only
+	
+sfx/player_death3.mp3
+	Link:		http://soundbible.com/259-Scream-And-Die-Fx.html
+	License:	Personal Use Only

@@ -51,6 +51,18 @@ public class AudioMapping {
 				return "sfx/stonestep2.wav";
 			case sfx_open_chest:
 				return "sfx/open-chest.wav";
+        case sfx_player_death1:
+            return "sfx/player_death1.wav";
+        case sfx_player_death2:
+            return "sfx/player_death2.wav";
+        case sfx_player_death3:
+            return "sfx/player_death3.wav";
+        case sfx_monster_death1:
+            return "sfx/monster_death1.wav";
+        case sfx_monster_death2:
+            return "sfx/monster_death2.wav";
+        case sfx_monster_death3:
+            return "sfx/monster_death3.wav";
 				
 			case music_irish_meadow:
 				return "ambient/Marc_Teichert_-_Irish_Meadow.ogg";

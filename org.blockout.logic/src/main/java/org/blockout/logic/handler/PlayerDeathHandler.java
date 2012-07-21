@@ -5,6 +5,8 @@ import java.util.Random;
 import javax.inject.Inject;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.engine.sfx.AudioType;
+import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.IWorld;
 import org.blockout.world.entity.Player;
 import org.blockout.world.event.IEvent;
@@ -24,6 +26,9 @@ public class PlayerDeathHandler implements IEventHandler {
 	protected IWorld			world;
 	private final Random		rand;
 
+    private AudioType[]         dyingSounds;
+    private IAudioManager       audioManager;
+
 	@Inject
 	public PlayerDeathHandler(final IWorld world) {
 
@@ -31,7 +36,14 @@ public class PlayerDeathHandler implements IEventHandler {
 
 		this.world = world;
 		rand = new Random( System.currentTimeMillis() );
+
+        dyingSounds = new AudioType[] { AudioType.sfx_player_death1,
+                AudioType.sfx_player_death2, AudioType.sfx_player_death3 };
 	}
+
+    public void setAudioManager( final IAudioManager audioManager ) {
+        this.audioManager = audioManager;
+    }
 
 	@Override
 	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
@@ -45,6 +57,11 @@ public class PlayerDeathHandler implements IEventHandler {
 		}
 
 		PlayerDiedEvent evt = (PlayerDiedEvent) event;
+
+        if( null != audioManager ) {
+            int index = rand.nextInt( dyingSounds.length );
+            audioManager.getSound( dyingSounds[index] ).play();
+        }
 
 		// activate player object
 		Player player = world.findEntity( evt.getPlayer().getId(), Player.class );
