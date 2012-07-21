@@ -66,4 +66,9 @@ public class SuccessorFoundMessage implements Serializable {
 		return serverAddress;
 	}
 
+	@Override
+	public String toString() {
+		return "SuccessorFoundMessage[destination=" + getDestination() + ", key=" + getKey() + ", successor="
+				+ getSuccessor() + ", address=" + getServerAddress() + "]";
+	}
 }

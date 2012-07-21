@@ -129,7 +129,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	protected void updateGame( final GameContainer container, final StateBasedGame game, final int deltaMillis )
 			throws SlickException {
 
-		healthRenderer.update( deltaMillis );
+		getHealthRenderer().update( deltaMillis );
 
 		updateHUD();
 

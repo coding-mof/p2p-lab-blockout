@@ -101,6 +101,7 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 
 	@Override
 	public void eventRolledBack( final IEvent<?> event ) {
+		activeEvents.remove( event );
 	}
 
 	protected void fireEventStarted( final IEvent<?> event ) {

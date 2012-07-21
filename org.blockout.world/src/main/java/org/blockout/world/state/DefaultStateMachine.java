@@ -49,11 +49,11 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	public void commitEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
 		synchronized ( events ) {
-			if ( !events.containsKey( event.getId() ) ) {
-				fireEventPushed( event );
-			} else {
-				events.remove( event.getId() );
-			}
+			// if ( !events.containsKey( event.getId() ) ) {
+			// fireEventPushed( event );
+			// } else {
+			events.remove( event.getId() );
+			// }
 		}
 		fireEventCommitted( event );
 	}
