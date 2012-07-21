@@ -26,8 +26,8 @@ public class PlayerDeathHandler implements IEventHandler {
 	protected IWorld			world;
 	private final Random		rand;
 
-    private AudioType[]         dyingSounds;
-    private IAudioManager       audioManager;
+	private final AudioType[]	dyingSounds;
+	private IAudioManager		audioManager;
 
 	@Inject
 	public PlayerDeathHandler(final IWorld world) {
@@ -37,13 +37,13 @@ public class PlayerDeathHandler implements IEventHandler {
 		this.world = world;
 		rand = new Random( System.currentTimeMillis() );
 
-        dyingSounds = new AudioType[] { AudioType.sfx_player_death1,
-                AudioType.sfx_player_death2, AudioType.sfx_player_death3 };
+		dyingSounds = new AudioType[] { AudioType.sfx_player_death1, AudioType.sfx_player_death2,
+				AudioType.sfx_player_death3 };
 	}
 
-    public void setAudioManager( final IAudioManager audioManager ) {
-        this.audioManager = audioManager;
-    }
+	public void setAudioManager( final IAudioManager audioManager ) {
+		this.audioManager = audioManager;
+	}
 
 	@Override
 	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
@@ -57,11 +57,10 @@ public class PlayerDeathHandler implements IEventHandler {
 		}
 
 		PlayerDiedEvent evt = (PlayerDiedEvent) event;
-
-        if( null != audioManager ) {
-            int index = rand.nextInt( dyingSounds.length );
-            audioManager.getSound( dyingSounds[index] ).play();
-        }
+		if ( audioManager != null ) {
+			int index = rand.nextInt( dyingSounds.length );
+			audioManager.getSound( dyingSounds[index] ).play();
+		}
 
 		// activate player object
 		Player player = world.findEntity( evt.getPlayer().getId(), Player.class );

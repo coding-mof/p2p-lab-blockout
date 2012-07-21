@@ -205,14 +205,14 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	private void handleIAmYourPredeccessorMessage( final MessageEvent e, final IAmYourPredeccessor msg ) {
-		predecessorChannel = e.getChannel();
 		if ( !msg.getNodeId().equals( predecessorId ) ) {
 			logger.info( "Got notified about new predecessor " + predecessorId + " at " + predecessorChannel );
-			predecessorId = msg.getNodeId();
-
 			synchronized ( lookupTable ) {
-				lookupTable.put( predecessorId, predecessorChannel );
+				lookupTable.put( msg.getNodeId(), predecessorChannel );
 			}
+
+			predecessorId = msg.getNodeId();
+			predecessorChannel = e.getChannel();
 
 			updateResponsibility( predecessorId.getNext() );
 		}
@@ -507,7 +507,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		synchronized ( lookupTable ) {
 			if ( lookupTable.isEmpty() ) {
 				logger.warn( "Lookup table is empty. Discarding " + message );
-				// fireMessageReceived( localNode.getNodeId(), message );
 				return;
 			}
 			Channel channel;

@@ -36,9 +36,8 @@ public class MonsterDeathHandler implements IEventHandler {
 	protected IWorld			world;
 	private final Random		rand;
 
-    private AudioType[]         dyingSounds;
-    private IAudioManager       audioManager;
-
+	private final AudioType[]	dyingSounds;
+	private IAudioManager		audioManager;
 
 	@Inject
 	public MonsterDeathHandler(final IWorld world) {
@@ -47,17 +46,16 @@ public class MonsterDeathHandler implements IEventHandler {
 		this.world = world;
 		rand = new Random( System.currentTimeMillis() );
 
-        dyingSounds = new AudioType[] { AudioType.sfx_monster_death1,
-                AudioType.sfx_monster_death2, AudioType.sfx_monster_death3 };
+		dyingSounds = new AudioType[] { AudioType.sfx_monster_death1, AudioType.sfx_monster_death2,
+				AudioType.sfx_monster_death3 };
 	}
 
-    public void setAudioManager( final IAudioManager audioManager ) {
-        this.audioManager = audioManager;
-    }
+	public void setAudioManager( final IAudioManager audioManager ) {
+		this.audioManager = audioManager;
+	}
 
 	@Override
 	public void eventStarted( final IStateMachine stateMachine, final IEvent<?> event ) {
-
 	}
 
 	@Override
@@ -68,11 +66,10 @@ public class MonsterDeathHandler implements IEventHandler {
 
 		MonsterSlayedEvent mse = (MonsterSlayedEvent) event;
 
-        if( null != audioManager ) {
-            int index = rand.nextInt( dyingSounds.length );
-            audioManager.getSound( dyingSounds[index] ).play();
-        }
-
+		if ( audioManager != null ) {
+			int index = rand.nextInt( dyingSounds.length );
+			audioManager.getSound( dyingSounds[index] ).play();
+		}
 		if ( mse.getActor() instanceof Player ) {
 
 			// activate player object
@@ -95,6 +92,8 @@ public class MonsterDeathHandler implements IEventHandler {
 				logger.info( "Spawning crate on old monster position " + coordinate );
 				world.setEnityPosition( new Crate(), coordinate );
 			}
+		} else {
+			logger.warn( "Monster " + monster + " no longer exists." );
 		}
 	}
 }

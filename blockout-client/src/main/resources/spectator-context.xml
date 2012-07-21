@@ -33,7 +33,12 @@
 	<bean class="org.blockout.ui.LocalPlayerMoveHandler">
 		<property name="audioManager" ref="audioMgr"/>
 	</bean>
-	
+	<bean class="org.blockout.logic.handler.MonsterDeathHandler">
+        <property name="audioManager" ref="audioMgr"/>
+    </bean>
+    <bean class="org.blockout.logic.handler.PlayerDeathHandler">
+        <property name="audioManager" ref="audioMgr"/>
+    </bean>
 	
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location" value="conf/ai.properties"/>
