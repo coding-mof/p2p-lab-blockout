@@ -139,7 +139,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			logger.info( "Channel " + e.getChannel() + " to our predecessor " + predecessorId + " has been closed." );
 			synchronized ( lookupTable ) {
 				IHash lowerKey = lookupTable.lowerKey( predecessorId );
-				if ( lowerKey == null ) {
+				if ( lowerKey == null && !lookupTable.isEmpty() ) {
 					lowerKey = lookupTable.lastKey();
 				}
 				if ( lowerKey == null ) {
@@ -159,7 +159,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			logger.info( "Channel " + e.getChannel() + " to our successor " + successorId + " has been closed." );
 			synchronized ( lookupTable ) {
 				IHash higherKey = lookupTable.higherKey( successorId );
-				if ( higherKey == null ) {
+				if ( higherKey == null && !lookupTable.isEmpty() ) {
 					higherKey = lookupTable.firstKey();
 				}
 				if ( higherKey == null ) {
@@ -506,8 +506,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	private void routeMessage( final Serializable message, final IHash nodeId ) {
 		synchronized ( lookupTable ) {
 			if ( lookupTable.isEmpty() ) {
-				logger.warn( "Lookup table is empty. Routing message to us." );
-				fireMessageReceived( localNode.getNodeId(), message );
+				logger.warn( "Lookup table is empty. Discarding " + message );
+				// fireMessageReceived( localNode.getNodeId(), message );
 				return;
 			}
 			Channel channel;

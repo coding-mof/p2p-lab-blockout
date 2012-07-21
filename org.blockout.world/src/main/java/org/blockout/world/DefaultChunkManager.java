@@ -44,8 +44,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private final WorldAdapter									worldAdapter;
 
 	private final IChordOverlay									chord;
-	
-	private List<ChunkManagerListener> 							listener;
+
+	private final List<ChunkManagerListener>					listener;
 
 	private final Hashtable<TileCoordinate, ArrayList<IHash>>	receiver;
 
@@ -74,8 +74,9 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		logger.debug( "Event committed " + event );
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
-			fireChunkUpdate( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ));
+			fireChunkUpdate( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ) );
 			for ( IHash address : receiver.get( coordinate ) ) {
+				logger.debug( "Sending event " + event + " to " + address );
 				chord.sendMessage( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ), address );
 			}
 		}
@@ -87,6 +88,10 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	@Override
 	public void eventPushed( final IEvent<?> event ) {
 		logger.debug( "Event pushed " + event );
+		TileCoordinate responsibleTile = event.getResponsibleTile();
+		if ( chord.getResponsibility().contains( new Hash( responsibleTile ) ) ) {
+			stateMachine.commitEvent( event );
+		}
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( !receiver.containsKey( coordinate ) ) {
 			chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), new Hash( coordinate ) );
@@ -96,8 +101,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 				}
 			}
 
-		} else {
-			stateMachine.commitEvent( event );
 		}
 	}
 
@@ -191,7 +194,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 			logger.debug( "Clearing receivers for " + c.getPosition() );
 			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
-		fireChunkUpdate(new ChunkDeliveryMessage( c, null));
+		fireChunkUpdate( new ChunkDeliveryMessage( c, null ) );
 		chord.sendMessage(
 				new ChunkDeliveryMessage( c, (ArrayList<IHash>) receiver.get( msg.getCoordinate() ).clone() ), origin );
 		receiver.get( c.getPosition() ).add( origin );
@@ -202,8 +205,16 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		if ( receiver.containsKey( c.getPosition() ) ) {
 			receiver.get( c.getPosition() ).remove( origin );
 		} else if ( local.containsKey( c.getPosition() ) ) {
-			logger.debug( "Adding receiver " + msg.getLocalPlayers() + " for " + c.getPosition() );
-			receiver.put( c.getPosition(), msg.getLocalPlayers() );
+			ArrayList<IHash> localPlayers = msg.getLocalPlayers();
+			for ( IHash h : localPlayers ) {
+				if ( chord.getResponsibility().contains( h ) ) {
+					System.err.println( "Added local id to receivers" );
+					new Throwable().printStackTrace();
+					System.exit( -1 );
+				}
+			}
+			logger.debug( "Adding receiver " + localPlayers + " for " + c.getPosition() );
+			receiver.put( c.getPosition(), localPlayers );
 
 			worldAdapter.responseChunk( c );
 
@@ -231,36 +242,41 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		// TODO save local connections?
 	}
 
-	
-	public void receive(final ManageMessage msg, final IHash origin) {
+	public void receive( final ManageMessage msg, final IHash origin ) {
 
 		ArrayList<Chunk> chunks = msg.getChunks();
 		ArrayList<ArrayList<IHash>> addresses = msg.getReceivers();
-		synchronized (receiver) {
-			synchronized (worldAdapter) {
-				for (int i = 0; i < chunks.size(); i++) {
-					receiver.put(chunks.get(i).getPosition(), addresses.get(i));
-					worldAdapter.manageChunk(chunks.get(i));
+		synchronized ( receiver ) {
+			synchronized ( worldAdapter ) {
+				for ( int i = 0; i < chunks.size(); i++ ) {
+
+					ArrayList<IHash> value = addresses.get( i );
+					for ( IHash h : value ) {
+						if ( chord.getResponsibility().contains( h ) ) {
+							System.err.println( "Added local id to receivers" );
+							new Throwable().printStackTrace();
+							System.exit( -1 );
+						}
+					}
+					receiver.put( chunks.get( i ).getPosition(), value );
+					worldAdapter.manageChunk( chunks.get( i ) );
 				}
 			}
 		}
-		
 
 	}
-	 
 
 	public void receive( final EnterGameMessage msg, final IHash origin ) {
 		Chunk c = worldAdapter.getChunk( new TileCoordinate( 0, 0 ) );
 
 		// TODO better player placement
 		TileCoordinate coord;
-		synchronized (c) {
+		synchronized ( c ) {
 			coord = c.findFreeTile();
 			c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
 		}
-		fireChunkUpdate(new EntityAddedMessage(msg.getPlayer(), coord, origin));
-		
-		
+		fireChunkUpdate( new EntityAddedMessage( msg.getPlayer(), coord, origin ) );
+
 		if ( !receiver.containsKey( c.getPosition() ) ) {
 			logger.debug( "Clearing receivers for " + c.getPosition() );
 			receiver.put( c.getPosition(), new ArrayList<IHash>() );
@@ -268,8 +284,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		chord.sendMessage( new GameEnteredMessage( c, (ArrayList<IHash>) receiver.get( c.getPosition() ).clone() ),
 				origin );
 		receiver.get( c.getPosition() ).add( origin );
-		
-		logger.debug("Player: "+msg.getPlayer().getName()+" ["+origin+"] joined the Game");
+
+		logger.debug( "Player: " + msg.getPlayer().getName() + " [" + origin + "] joined the Game" );
 	}
 
 	public void receive( final GameEnteredMessage msg, final IHash origin ) {
@@ -292,32 +308,30 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	@Override
 	public void responsibilityChanged( final IChordOverlay chord, final WrappedRange<IHash> from,
 			final WrappedRange<IHash> to ) {
-		synchronized (receiver) {
-			synchronized (worldAdapter) {
+		synchronized ( receiver ) {
+			synchronized ( worldAdapter ) {
 				ManageMessage msg = new ManageMessage();
-				for (TileCoordinate coordinate : receiver.keySet()) {
-					if (!to.contains(new Hash(coordinate))) {
-						if(local.containsKey(coordinate)){
-							receiver.get(coordinate).add(chord.getLocalId());
+				for ( TileCoordinate coordinate : receiver.keySet() ) {
+					if ( !to.contains( new Hash( coordinate ) ) ) {
+						if ( local.containsKey( coordinate ) ) {
+							receiver.get( coordinate ).add( chord.getLocalId() );
 						}
-						msg.add(worldAdapter.unmanageChunk(coordinate), receiver.get(coordinate));
+						msg.add( worldAdapter.unmanageChunk( coordinate ), receiver.get( coordinate ) );
 					}
 				}
-				
-				if(msg.getChunks().size() > 0){
-					chord.sendMessage(msg, new Hash(msg.getChunks().get(0).getPosition()));
-					
-					for (Chunk c : msg.getChunks()) {
-						receiver.remove(c.getPosition());
+
+				if ( msg.getChunks().size() > 0 ) {
+					chord.sendMessage( msg, new Hash( msg.getChunks().get( 0 ).getPosition() ) );
+
+					for ( Chunk c : msg.getChunks() ) {
+						receiver.remove( c.getPosition() );
 					}
 				}
-			
-				
+
 			}
 		}
 
 	}
-	
 
 	@Override
 	public void receivedMessage( final IChordOverlay chord, final Object message, final IHash senderId ) {
@@ -343,19 +357,19 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	}
 
 	@Override
-	public void addListener(ChunkManagerListener listener) {
-		this.listener.add(listener);
+	public void addListener( final ChunkManagerListener listener ) {
+		this.listener.add( listener );
 	}
 
 	@Override
-	public void removeListener(ChunkManagerListener listener) {
-		this.listener.remove(listener);
+	public void removeListener( final ChunkManagerListener listener ) {
+		this.listener.remove( listener );
 	}
-	
-	private void fireChunkUpdate(IMessage message){
-		synchronized (listener) {
-			for (ChunkManagerListener listener : this.listener) {
-				listener.chunkUpdated(message);
+
+	private void fireChunkUpdate( final IMessage message ) {
+		synchronized ( listener ) {
+			for ( ChunkManagerListener listener : this.listener ) {
+				listener.chunkUpdated( message );
 			}
 		}
 	}

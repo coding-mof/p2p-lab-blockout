@@ -44,4 +44,9 @@ public class FindSuccessorMessage implements Serializable {
 	public IHash getOrigin() {
 		return origin;
 	}
+
+	@Override
+	public String toString() {
+		return "FindSuccessorMessage[key=" + getKey() + ", origin=" + getOrigin() + "]";
+	}
 }
