@@ -171,7 +171,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				}
 			}
 			logger.info( "New successor will be " + successorId + " at " + successorChannel );
-			if ( successorChannel != null ) {
+			if ( successorChannel != null && successorChannel.isConnected() ) {
 				Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ),
 						connectionMgr.getServerAddress() );
 			}
