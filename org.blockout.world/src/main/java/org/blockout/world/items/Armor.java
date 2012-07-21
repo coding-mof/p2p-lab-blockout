@@ -12,35 +12,36 @@ import com.google.common.base.Preconditions;
  */
 public class Armor implements Item {
 
-	private static final long	serialVersionUID	= -3696812770197615582L;
-	protected int				protection;
+    private static final long serialVersionUID = -3696812770197615582L;
+    protected int             protection;
 
-	public Armor(final int protection) {
-		Preconditions.checkArgument( protection >= 0, "Protection must be greater or equal to zero." );
-		this.protection = protection;
-	}
+    public Armor( final int protection ) {
+        Preconditions.checkArgument( protection >= 0,
+                "Protection must be greater or equal to zero." );
+        this.protection = protection;
+    }
 
-	public int getProtection() {
-		return protection;
-	}
+    public int getProtection() {
+        return protection;
+    }
 
-	@Override
-	public String getName() {
-		return "Armor";
-	}
+    @Override
+    public String getName() {
+        return "Armor";
+    }
 
-	@Override
-	public String toString() {
-		return "Armor[protection=" + protection + "]";
-	}
+    @Override
+    public String toString() {
+        return "Armor[protection=" + protection + "]";
+    }
 
-	@Override
-	public SpriteType getSpriteType() {
-		return SpriteType.altar;
-	}
+    @Override
+    public SpriteType getSpriteType() {
+        return SpriteType.Armor;
+    }
 
-	@Override
-	public String getDescription() {
-		return "Armor\nProtection: " + getProtection();
-	}
+    @Override
+    public String getDescription() {
+        return "Armor\nProtection: " + getProtection();
+    }
 }

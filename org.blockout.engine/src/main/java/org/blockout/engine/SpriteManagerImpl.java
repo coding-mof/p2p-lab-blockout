@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.newdawn.slick.Image;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -25,150 +27,163 @@ import de.lessvoid.nifty.slick2d.render.image.loader.SlickRenderImageLoader;
  * 
  */
 @Named
-public class SpriteManagerImpl implements ISpriteManager, SlickRenderImageLoader {
+public class SpriteManagerImpl implements ISpriteManager,
+        SlickRenderImageLoader {
+    private static final Logger           logger;
+    static {
+        logger = LoggerFactory.getLogger( SpriteManagerImpl.class );
+    }
 
-	ISpriteSheet							spriteSheet;
-	SpriteMapping							spriteMapping;
+    ISpriteSheet                          spriteSheet;
+    SpriteMapping                         spriteMapping;
 
-	private final HashMap<Integer, Image>	sprites;
+    private final HashMap<Integer, Image> sprites;
 
-	/**
-	 * Constructor to create a new SpriteManager with an internal cache
-	 * 
-	 * @param spriteSheet
-	 *            Spritesheet to handle with this manager
-	 * @throws IllegalArgumentException
-	 *             If <i>spriteSheet</i> is not yet loaded.
-	 */
-	@Inject
-	public SpriteManagerImpl(final ISpriteSheet spriteSheet) throws IllegalArgumentException {
-		Preconditions.checkNotNull( spriteSheet );
+    /**
+     * Constructor to create a new SpriteManager with an internal cache
+     * 
+     * @param spriteSheet
+     *            Spritesheet to handle with this manager
+     * @throws IllegalArgumentException
+     *             If <i>spriteSheet</i> is not yet loaded.
+     */
+    @Inject
+    public SpriteManagerImpl( final ISpriteSheet spriteSheet )
+            throws IllegalArgumentException {
+        Preconditions.checkNotNull( spriteSheet );
 
-		this.spriteSheet = spriteSheet;
-		spriteMapping = new SpriteMapping();
-		sprites = new HashMap<Integer, Image>();
+        this.spriteSheet = spriteSheet;
+        spriteMapping = new SpriteMapping();
+        sprites = new HashMap<Integer, Image>();
 
-		// Redirect resource requests from Nifty to this instance
-		SlickRenderImageLoaders.getInstance().addLoader( this, SlickAddLoaderLocation.first );
-	}
+        // Redirect resource requests from Nifty to this instance
+        SlickRenderImageLoaders.getInstance().addLoader( this,
+                SlickAddLoaderLocation.first );
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Image getSprite( final SpriteType type ) {
-		return getSprite( type, false );
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Image getSprite( final SpriteType type ) {
+        return getSprite( type, false );
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Image getSprite( final SpriteType type, final boolean excludeBackground ) {
-		Preconditions.checkNotNull( type );
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Image getSprite( final SpriteType type,
+            final boolean excludeBackground ) {
+        Preconditions.checkNotNull( type );
 
-		if ( !spriteSheet.isSpriteSheetLoaded() ) {
-			loadDefaultSpriteSheet();
-		}
+        if( !spriteSheet.isSpriteSheetLoaded() ) {
+            loadDefaultSpriteSheet();
+        }
 
-		int spriteId;
-		try {
-			spriteId = spriteMapping.getSpriteId( type );
-		} catch ( IllegalArgumentException e ) {
-			// there was no sprite with this type
-			return null;
-		}
+        int spriteId;
+        try {
+            spriteId = spriteMapping.getSpriteId( type );
+        } catch ( IllegalArgumentException e ) {
+            // there was no sprite with this type
+            logger.debug( "There is no sprite with the type " + type + "("
+                    + type.ordinal() + ")" );
+            return null;
+        }
 
-		int spriteKey = spriteId * 10;
-		if ( excludeBackground ) {
-			spriteKey++;
-		}
+        int spriteKey = spriteId * 10;
+        if( excludeBackground ) {
+            spriteKey++;
+        }
 
-		Image sprite = sprites.get( spriteKey );
-		if ( null == sprite ) {
-			sprite = spriteSheet.getSprite( spriteId );
+        Image sprite = sprites.get( spriteKey );
+        if( null == sprite ) {
+            sprite = spriteSheet.getSprite( spriteId );
 
-			if ( null != sprite ) {
-				if ( excludeBackground ) {
-					sprite = Utils.exclude( getSprite( SpriteType.stoneground ), sprite );
-				}
-				sprites.put( spriteKey, sprite );
-			}
-		}
+            if( null != sprite ) {
+                if( excludeBackground ) {
+                    sprite = Utils.exclude(
+                            getSprite( SpriteType.stoneground ), sprite );
+                }
+                sprites.put( spriteKey, sprite );
+            }
+        }
 
-		return sprite;
-	}
+        return sprite;
+    }
 
-	/**
-	 * Load a sprite to use it in nifty GUI
-	 * 
-	 * @throws NullPointerException
-	 *             If filename is null
-	 * @throws SlickLoadImageException
-	 *             If there is a problem while loading the image
-	 */
-	@Override
-	public SlickRenderImage loadImage( final String filename, final boolean filterLinear )
-			throws SlickLoadImageException {
-		Preconditions.checkNotNull( filename );
-		SpriteType type;
+    /**
+     * Load a sprite to use it in nifty GUI
+     * 
+     * @throws NullPointerException
+     *             If filename is null
+     * @throws SlickLoadImageException
+     *             If there is a problem while loading the image
+     */
+    @Override
+    public SlickRenderImage loadImage( final String filename,
+            final boolean filterLinear ) throws SlickLoadImageException {
+        Preconditions.checkNotNull( filename );
+        SpriteType type;
 
-		try {
-			type = SpriteType.valueOf( filename );
-		} catch ( IllegalArgumentException e ) {
-			throw new SlickLoadImageException( "There is no image with the name '" + filename + "'" );
-		}
+        try {
+            type = SpriteType.valueOf( filename );
+        } catch ( IllegalArgumentException e ) {
+            throw new SlickLoadImageException(
+                    "There is no image with the name '" + filename + "'" );
+        }
 
-		Image image = getSprite( type, true );
+        Image image = getSprite( type, true );
 
-		if ( null != image ) {
-			return new ImageSlickRenderImage( image );
-		}
+        if( null != image ) {
+            return new ImageSlickRenderImage( image );
+        }
 
-		throw new SlickLoadImageException( "Failed to load image with the name '" + filename + "'" );
-	}
+        throw new SlickLoadImageException(
+                "Failed to load image with the name '" + filename + "'" );
+    }
 
-	/**
-	 * @see ISpriteManager#startUse()
-	 */
-	@Override
-	public void startUse() {
-		if ( !spriteSheet.isSpriteSheetLoaded() ) {
-			loadDefaultSpriteSheet();
-		}
+    /**
+     * @see ISpriteManager#startUse()
+     */
+    @Override
+    public void startUse() {
+        if( !spriteSheet.isSpriteSheetLoaded() ) {
+            loadDefaultSpriteSheet();
+        }
 
-		spriteSheet.startUse();
-	}
+        spriteSheet.startUse();
+    }
 
-	/**
-	 * @see ISpriteManager#endUse()
-	 */
-	@Override
-	public void endUse() {
-		spriteSheet.endUse();
-	}
+    /**
+     * @see ISpriteManager#endUse()
+     */
+    @Override
+    public void endUse() {
+        spriteSheet.endUse();
+    }
 
-	/**
-	 * @see ISpriteManager#renderInUse(SpriteType, int, int)
-	 */
-	@Override
-	public void renderInUse( final SpriteType type, final int x, final int y ) {
-		Preconditions.checkNotNull( type );
+    /**
+     * @see ISpriteManager#renderInUse(SpriteType, int, int)
+     */
+    @Override
+    public void renderInUse( final SpriteType type, final int x, final int y ) {
+        Preconditions.checkNotNull( type );
 
-		if ( !spriteSheet.isSpriteSheetLoaded() ) {
-			loadDefaultSpriteSheet();
-		}
+        if( !spriteSheet.isSpriteSheetLoaded() ) {
+            loadDefaultSpriteSheet();
+        }
 
-		spriteSheet.renderInUse( spriteMapping.getSpriteId( type ), x, y );
-	}
+        spriteSheet.renderInUse( spriteMapping.getSpriteId( type ), x, y );
+    }
 
-	private void loadDefaultSpriteSheet() {
-		try {
-			spriteSheet.loadSpriteSheet( "nethack_spritesheet.jpg", 32, 32 );
-		} catch ( IllegalArgumentException e ) {
-			throw new RuntimeException( "Failed to load spritesheet.", e );
-		} catch ( IOException e ) {
-			throw new RuntimeException( "Failed to load spritesheet.", e );
-		}
-	}
+    private void loadDefaultSpriteSheet() {
+        try {
+            spriteSheet.loadSpriteSheet( "nethack_spritesheet.jpg", 32, 32 );
+        } catch ( IllegalArgumentException e ) {
+            throw new RuntimeException( "Failed to load spritesheet.", e );
+        } catch ( IOException e ) {
+            throw new RuntimeException( "Failed to load spritesheet.", e );
+        }
+    }
 }
