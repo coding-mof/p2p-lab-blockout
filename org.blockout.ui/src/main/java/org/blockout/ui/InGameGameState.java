@@ -4,6 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.engine.AnimationManager;
+import org.blockout.engine.Camera;
 import org.blockout.engine.Shader;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
@@ -32,150 +34,168 @@ import de.lessvoid.nifty.screen.ScreenController;
  * @see GameStates#InGame
  */
 @Named
-public final class InGameGameState extends HUDOverlayGameState implements ScreenController {
+public final class InGameGameState extends HUDOverlayGameState implements
+        ScreenController {
 
-	private static final Logger				logger;
-	static {
-		logger = LoggerFactory.getLogger( InGameGameState.class );
-	}
+    private static final Logger          logger;
+    static {
+        logger = LoggerFactory.getLogger( InGameGameState.class );
+    }
 
-	private Label							lblPlayer;
-	private Label							lblHealth;
-	private Label							lblXP;
-	private Label							lblLevel;
+    private Label                        lblPlayer;
+    private Label                        lblHealth;
+    private Label                        lblXP;
+    private Label                        lblLevel;
 
-	private final IWorldRenderer			worldRenderer;
-	private final LocalGameState			gameState;
-	private final InputHandler				inputHandler;
-	private final LocalPlayerMoveHandler	playerController;
+    private final IWorldRenderer         worldRenderer;
+    private final LocalGameState         gameState;
+    private final InputHandler           inputHandler;
+    private final LocalPlayerMoveHandler playerController;
 
-	private IHealthRenderer					healthRenderer;
-	private final IAudioManager				audioManager;
+    private IHealthRenderer              healthRenderer;
+    private final IAudioManager          audioManager;
 
-	protected AutowireCapableBeanFactory	beanFactory;
-	private Label							lblCurrentPos;
-	private final IWorld					world;
-	private final Camera					camera;
+    protected AutowireCapableBeanFactory beanFactory;
+    private Label                        lblCurrentPos;
+    private final IWorld                 world;
+    private final Camera                 camera;
 
-	@Inject
-	public InGameGameState(final IWorldRenderer worldRenderer, final InputHandler inputHandler,
-			final LocalGameState gameState, final Camera camera, final LocalPlayerMoveHandler playerController,
-			final IAudioManager audioManager, final AutowireCapableBeanFactory beanFactory, final IWorld world) {
-		super( inputHandler );
-		this.inputHandler = inputHandler;
-		this.gameState = gameState;
-		this.worldRenderer = worldRenderer;
-		this.playerController = playerController;
-		this.audioManager = audioManager;
-		this.world = world;
-		this.camera = camera;
+    private AnimationManager             animationManager;
 
-		this.beanFactory = beanFactory;
-	}
+    @Inject
+    public InGameGameState( final IWorldRenderer worldRenderer,
+            final InputHandler inputHandler, final LocalGameState gameState,
+            final Camera camera, final LocalPlayerMoveHandler playerController,
+            final IAudioManager audioManager,
+            final AutowireCapableBeanFactory beanFactory, final IWorld world,
+            final AnimationManager animationManager ) {
+        super( inputHandler );
+        this.inputHandler = inputHandler;
+        this.gameState = gameState;
+        this.worldRenderer = worldRenderer;
+        this.playerController = playerController;
+        this.audioManager = audioManager;
+        this.world = world;
+        this.camera = camera;
 
-	@Override
-	protected void prepareNifty( final Nifty nifty, final StateBasedGame game ) {
-		nifty.fromXml( "ingame-screen.xml", "start" );
-		// Since Nifty requires to create it's own instance of the Controller -
-		// we need to autowire it here
-		Controller ctrl = nifty.getCurrentScreen().findElementByName( "inventory" ).getControl( Controller.class );
-		beanFactory.autowireBean( ctrl );
+        this.beanFactory = beanFactory;
+        this.animationManager = animationManager;
+    }
 
-		inputHandler.setNifty( nifty );
-	}
+    @Override
+    protected void prepareNifty( final Nifty nifty, final StateBasedGame game ) {
+        nifty.fromXml( "ingame-screen.xml", "start" );
+        // Since Nifty requires to create it's own instance of the Controller -
+        // we need to autowire it here
+        Controller ctrl = nifty.getCurrentScreen()
+                .findElementByName( "inventory" ).getControl( Controller.class );
+        beanFactory.autowireBean( ctrl );
 
-	@Override
-	public int getID() {
-		return GameStates.InGame.ordinal();
-	}
+        inputHandler.setNifty( nifty );
+    }
 
-	@Override
-	protected void renderGame( final GameContainer container, final StateBasedGame game, final Graphics g )
-			throws SlickException {
+    @Override
+    public int getID() {
+        return GameStates.InGame.ordinal();
+    }
 
-		worldRenderer.render( g );
-	}
+    @Override
+    protected void renderGame( final GameContainer container,
+            final StateBasedGame game, final Graphics g ) throws SlickException {
 
-	@Override
-	protected void renderHUDOverlay( final GameContainer paramGameContainer, final StateBasedGame paramStateBasedGame,
-			final Graphics paramGraphics ) throws SlickException {
+        worldRenderer.render( g );
+        animationManager.render( g );
+    }
 
-		getHealthRenderer().render();
-	}
+    @Override
+    protected void renderHUDOverlay( final GameContainer paramGameContainer,
+            final StateBasedGame paramStateBasedGame,
+            final Graphics paramGraphics ) throws SlickException {
 
-	@Override
-	protected void enterState( final GameContainer container, final StateBasedGame game ) throws SlickException {
-		getNifty().gotoScreen( "start" );
+        getHealthRenderer().render();
+    }
 
-		audioManager.getMusic( AudioType.music_irish_meadow ).loop();
+    @Override
+    protected void enterState( final GameContainer container,
+            final StateBasedGame game ) throws SlickException {
+        getNifty().gotoScreen( "start" );
 
-		inputHandler.setGameContainer( container );
+        audioManager.getMusic( AudioType.music_irish_meadow ).loop();
 
-		// prepare camera
-		Player player = gameState.getPlayer();
-		TileCoordinate playerPos = world.findTile( player );
-		camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
+        inputHandler.setGameContainer( container );
 
-		gameState.setGameInitialized( true );
-	}
+        // prepare camera
+        Player player = gameState.getPlayer();
+        TileCoordinate playerPos = world.findTile( player );
+        camera.setViewCenter( playerPos.getX() + 0.5f, playerPos.getY() + 0.5f );
 
-	@Override
-	protected void updateGame( final GameContainer container, final StateBasedGame game, final int deltaMillis )
-			throws SlickException {
+        gameState.setGameInitialized( true );
+    }
 
-		getHealthRenderer().update( deltaMillis );
+    @Override
+    protected void updateGame( final GameContainer container,
+            final StateBasedGame game, final int deltaMillis )
+            throws SlickException {
 
-		updateHUD();
+        getHealthRenderer().update( deltaMillis );
 
-		playerController.update( deltaMillis );
-	}
+        updateHUD();
 
-	private void updateHUD() {
-		Screen screen = getNifty().getCurrentScreen();
+        playerController.update( deltaMillis );
 
-		lblPlayer = screen.findNiftyControl( "lblPlayer", Label.class );
-		lblHealth = screen.findNiftyControl( "lblHealth", Label.class );
-		lblXP = screen.findNiftyControl( "lblXP", Label.class );
-		lblLevel = screen.findNiftyControl( "lblLevel", Label.class );
+        animationManager.update( deltaMillis );
+    }
 
-		lblCurrentPos = screen.findNiftyControl( "lblCurrentPos", Label.class );
+    private void updateHUD() {
+        Screen screen = getNifty().getCurrentScreen();
 
-		lblPlayer.setText( gameState.getPlayer().getName() );
-		lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / " + gameState.getPlayer().getMaxHealth() );
-		lblXP.setText( "" + gameState.getPlayer().getExperience() + " / "
-				+ gameState.getPlayer().getRequiredExperience() );
-		lblLevel.setText( "" + gameState.getPlayer().getLevel() );
+        lblPlayer = screen.findNiftyControl( "lblPlayer", Label.class );
+        lblHealth = screen.findNiftyControl( "lblHealth", Label.class );
+        lblXP = screen.findNiftyControl( "lblXP", Label.class );
+        lblLevel = screen.findNiftyControl( "lblLevel", Label.class );
 
-		lblCurrentPos.setText( "" + (world.findTile( gameState.getPlayer() )) );
-	}
+        lblCurrentPos = screen.findNiftyControl( "lblCurrentPos", Label.class );
 
-	private IHealthRenderer getHealthRenderer() {
-		if ( healthRenderer == null ) {
-			if ( Shader.areSupported() ) {
-				healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
-			} else {
-				healthRenderer = new PrimitiveHealthRenderer( camera, gameState );
-			}
+        lblPlayer.setText( gameState.getPlayer().getName() );
+        lblHealth.setText( gameState.getPlayer().getCurrentHealth() + " / "
+                + gameState.getPlayer().getMaxHealth() );
+        lblXP.setText( "" + gameState.getPlayer().getExperience() + " / "
+                + gameState.getPlayer().getRequiredExperience() );
+        lblLevel.setText( "" + gameState.getPlayer().getLevel() );
 
-			healthRenderer.init();
-		}
+        lblCurrentPos
+                .setText( "" + ( world.findTile( gameState.getPlayer() ) ) );
+    }
 
-		return healthRenderer;
-	}
+    private IHealthRenderer getHealthRenderer() {
+        if( healthRenderer == null ) {
+            if( Shader.areSupported() ) {
+                healthRenderer = new ShaderBasedHealthRenderer( camera,
+                        gameState );
+            } else {
+                healthRenderer = new PrimitiveHealthRenderer( camera, gameState );
+            }
 
-	@Override
-	public void bind( final Nifty paramNifty, final Screen screen ) {
-	}
+            healthRenderer.init();
+        }
 
-	@Override
-	public void onStartScreen() {
-	}
+        return healthRenderer;
+    }
 
-	@Override
-	public void onEndScreen() {
-	}
+    @Override
+    public void bind( final Nifty paramNifty, final Screen screen ) {
+    }
 
-	@Override
-	protected void leaveState( final GameContainer container, final StateBasedGame arg1 ) throws SlickException {
-	}
+    @Override
+    public void onStartScreen() {
+    }
+
+    @Override
+    public void onEndScreen() {
+    }
+
+    @Override
+    protected void leaveState( final GameContainer container,
+            final StateBasedGame arg1 ) throws SlickException {
+    }
 }

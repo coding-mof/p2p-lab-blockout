@@ -1,6 +1,7 @@
-package org.blockout.ui;
+package org.blockout.engine;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.engine.CameraData;
 
 import com.google.common.base.Preconditions;
 

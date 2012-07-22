@@ -2,6 +2,8 @@ package org.blockout.engine;
 
 import java.io.IOException;
 
+import org.blockout.engine.animation.IAnimation;
+import org.blockout.engine.animation.SpriteAnimation;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
@@ -24,6 +26,8 @@ public class EngineTestbed extends BasicGame {
     }
 
     SpriteManagerImpl spriteManager;
+    ISpriteSheet      spriteSheet;
+    IAnimation        animation;
 
     public EngineTestbed( final String title ) {
         super( title );
@@ -50,6 +54,8 @@ public class EngineTestbed extends BasicGame {
                 y++;
             }
         }
+
+        animation.render( 0, 0 );
     }
 
     @Override
@@ -57,15 +63,27 @@ public class EngineTestbed extends BasicGame {
         try {
             spriteManager = new SpriteManagerImpl( new SpriteSheetImpl(
                     "src/main/resources/nethack_spritesheet.jpg", 32, 32 ) );
+
+            spriteSheet = new SpriteSheetImpl(
+                    "src/main/resources/testspritesheet.png", 32, 32 );
         } catch ( IllegalArgumentException e ) {
             e.printStackTrace();
         } catch ( IOException e ) {
             e.printStackTrace();
         }
+
+        animation = new SpriteAnimation( spriteSheet, new int[] { 0, 1, 2, 3,
+                4, 5, 6, 7, 8 }, 2000 );
+        animation.setLooping( true );
+        animation.start();
+
     }
 
     @Override
     public void update( final GameContainer container, final int delta )
             throws SlickException {
+
+        animation.update( delta );
+
     }
 }

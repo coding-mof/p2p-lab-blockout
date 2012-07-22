@@ -2,6 +2,7 @@ package org.blockout.ui;
 
 import java.util.Vector;
 
+import org.blockout.engine.Camera;
 import org.blockout.world.IWorld;
 import org.blockout.world.Tile;
 import org.newdawn.slick.Graphics;

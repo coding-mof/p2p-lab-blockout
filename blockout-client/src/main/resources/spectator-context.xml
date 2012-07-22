@@ -24,9 +24,11 @@
 	<bean class="org.blockout.world.state.StateMachineMonitorFrame"/>
 	
 	<bean name="audioMgr" class="org.blockout.engine.sfx.AudioManagerImpl"/>
-	<bean class="org.blockout.logic.handler.AttackHandler">
-		<property name="audioManager" ref="audioMgr"/>
-	</bean>
+    <bean name="animationMgr" class ="org.blockout.engine.AnimationManager" />
+    <bean class="org.blockout.logic.handler.AttackHandler">
+        <property name="audioManager" ref="audioMgr"/>
+        <property name="animationManager" ref="animationMgr"/>
+    </bean>
 	<bean class="org.blockout.logic.handler.CrateHandler">
 		<property name="audioManager" ref="audioMgr"/>
 	</bean>
@@ -35,9 +37,11 @@
 	</bean>
 	<bean class="org.blockout.logic.handler.MonsterDeathHandler">
         <property name="audioManager" ref="audioMgr"/>
+        <property name="animationManager" ref="animationMgr"/>
     </bean>
     <bean class="org.blockout.logic.handler.PlayerDeathHandler">
         <property name="audioManager" ref="audioMgr"/>
+        <property name="animationManager" ref="animationMgr"/>
     </bean>
 	
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

@@ -1,5 +1,6 @@
 package org.blockout.ui;
 
+import org.blockout.engine.Camera;
 import org.blockout.engine.Shader;
 import org.blockout.world.LocalGameState;
 import org.newdawn.slick.Image;

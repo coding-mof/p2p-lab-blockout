@@ -58,7 +58,7 @@
 		<constructor-arg ref="chordOverlay"/>
 	</bean>
 
-	<bean class="org.blockout.ui.Camera">
+	<bean class="org.blockout.engine.Camera">
 		<constructor-arg value="32" type="int" />
 		<constructor-arg value="1024" type="int" />
 		<constructor-arg value="768" type="int" />

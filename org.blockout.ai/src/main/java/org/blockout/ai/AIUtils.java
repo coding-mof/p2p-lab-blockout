@@ -1,7 +1,7 @@
 package org.blockout.ai;
 
 import org.blockout.common.TileCoordinate;
-import org.blockout.ui.Camera;
+import org.blockout.engine.Camera;
 import org.blockout.world.entity.Inventory;
 import org.blockout.world.items.Armor;
 import org.blockout.world.items.Gloves;
