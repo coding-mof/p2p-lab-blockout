@@ -6,8 +6,8 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.engine.Camera;
 import org.blockout.network.reworked.ConnectionManager;
-import org.blockout.ui.Camera;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;
 import org.blockout.world.entity.Player;

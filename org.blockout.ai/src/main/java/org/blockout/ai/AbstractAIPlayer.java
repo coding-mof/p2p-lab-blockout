@@ -1,6 +1,6 @@
 package org.blockout.ai;
 
-import org.blockout.ui.Camera;
+import org.blockout.engine.Camera;
 import org.blockout.ui.LocalPlayerMoveHandler;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;

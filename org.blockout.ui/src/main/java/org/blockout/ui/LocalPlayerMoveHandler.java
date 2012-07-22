@@ -6,6 +6,7 @@ import java.util.Random;
 import javax.inject.Inject;
 
 import org.blockout.common.TileCoordinate;
+import org.blockout.engine.Camera;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.logic.handler.IEventHandler;

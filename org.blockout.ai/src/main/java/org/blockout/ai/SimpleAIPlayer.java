@@ -5,7 +5,7 @@ import java.util.Random;
 import javax.inject.Inject;
 
 import org.blockout.common.TileCoordinate;
-import org.blockout.ui.Camera;
+import org.blockout.engine.Camera;
 import org.blockout.ui.LocalPlayerMoveHandler;
 import org.blockout.world.IWorld;
 import org.blockout.world.LocalGameState;

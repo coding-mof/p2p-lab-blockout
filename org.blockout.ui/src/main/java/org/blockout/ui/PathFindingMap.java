@@ -2,6 +2,7 @@ package org.blockout.ui;
 
 import javax.inject.Inject;
 
+import org.blockout.engine.Camera;
 import org.blockout.logic.FogOfWar;
 import org.blockout.world.IWorld;
 import org.blockout.world.Tile;

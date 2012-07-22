@@ -1,8 +1,8 @@
 package org.blockout.network.reworked;
 
-import java.io.Serializable;
+import org.blockout.network.dht.IHash;
 
-public class KeepAliveMessage implements Serializable {
+public class KeepAliveMessage extends AbstractMessage {
 	private static final long	serialVersionUID	= -2804957469122261061L;
 	private final boolean		ack;
 
@@ -12,5 +12,15 @@ public class KeepAliveMessage implements Serializable {
 
 	public boolean isAck() {
 		return ack;
+	}
+
+	@Override
+	public IHash getReceiver() {
+		return null;
+	}
+
+	@Override
+	public boolean isRoutable() {
+		return false;
 	}
 }

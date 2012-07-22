@@ -133,30 +133,32 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
                     return Color.GRAY;
                 else if( "chord".equals( edge.getType() ) )
                     return Color.RED;
-                
+
                 return Color.BLACK;
             }
         };
 
-        visViewer.getRenderContext().setEdgeIncludePredicate(new Predicate<Context<Graph<NetworkVertex,NetworkEdge>,NetworkEdge>>() {
-            
-            @Override
-            public boolean evaluate(
+        visViewer
+                .getRenderContext()
+                .setEdgeIncludePredicate(
+                        new Predicate<Context<Graph<NetworkVertex, NetworkEdge>, NetworkEdge>>() {
+
+                            @Override
+                            public boolean evaluate(
                                     Context<Graph<NetworkVertex, NetworkEdge>, NetworkEdge> arg ) {
 
                                 NetworkEdge edge = arg.element;
-                                switch(edgesToDisplay){
+                                switch ( edgesToDisplay ) {
                                 case NETWORK:
                                     return "net".equals( edge.getType() );
                                 case CHORD:
                                     return "chord".equals( edge.getType() );
-                                    default:
-                                        return true;
+                                default:
+                                    return true;
                                 }
-            }
+                            }
                         } );
-        
-        
+
         visViewer.getRenderContext().setEdgeDrawPaintTransformer(
                 edgeDrawPaintTransformer );
         visViewer.getRenderContext().setArrowDrawPaintTransformer(
@@ -241,14 +243,13 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         edgesMenu.setMnemonic( KeyEvent.VK_E );
         viewMenu.add( edgesMenu );
 
-        JMenuItem edgesAll = new JMenuItem(
- new AbstractAction(
+        JMenuItem edgesAll = new JMenuItem( new AbstractAction(
                 "Draw all edges" ) {
 
             @Override
             public void actionPerformed( ActionEvent e ) {
                 edgesToDisplay = EdgesToDisplayOptions.ALL;
-                        updateGraph();
+                updateGraph();
             }
         } );
         edgesMenu.add( edgesAll );
@@ -462,7 +463,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
     }
 
     public NetworkVertex findVertexById( final String id ) {
+        System.out.println( "---" );
         for ( NetworkVertex vertex : graph.getVertices() ) {
+            System.out.println( vertex );
             if( vertex.getId().equals( id ) )
                 return vertex;
         }
@@ -484,6 +487,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 
     @Override
     public void process( final NetworkLogMessage message ) {
+        System.out.println( message );
 
         SwingUtilities.invokeLater( new Runnable() {
             @Override
@@ -499,8 +503,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
             String type = (String) message.getExtra( "chord" );
             if( "predecessor".equals( type ) ) {
                 updatePredecessor( message );
-            }
- else if( "successor".equals( type ) ) {
+            } else if( "successor".equals( type ) ) {
                 updateSuccessor( message );
             }
 
@@ -604,7 +607,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 
     private void updateSuccessor( NetworkLogMessage message ) {
         String id = (String) message.getExtra( "id" );
-        String succ = (String) message.getExtra( "succdid" );
+        String succ = (String) message.getExtra( "succid" );
 
         NetworkVertex me = findVertexById( id );
         NetworkVertex other = findVertexById( succ );

@@ -1,4 +1,4 @@
-package org.blockout.ui;
+package org.blockout.engine;
 
 public class CameraData {
 	/**

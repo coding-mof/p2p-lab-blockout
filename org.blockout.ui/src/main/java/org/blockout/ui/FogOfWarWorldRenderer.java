@@ -3,6 +3,7 @@ package org.blockout.ui;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.blockout.engine.Camera;
 import org.blockout.engine.ISpriteManager;
 import org.blockout.engine.Shader;
 import org.blockout.engine.SpriteMapping;
