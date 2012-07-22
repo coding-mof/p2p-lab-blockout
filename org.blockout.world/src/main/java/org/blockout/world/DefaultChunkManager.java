@@ -190,14 +190,15 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		fireChunkUpdate( new ChunkDeliveryMessage( c, null ) );
 		chord.sendMessage(
 				new ChunkDeliveryMessage( c, (ArrayList<IHash>) receiver.get( msg.getCoordinate() ).clone() ), origin );
-		receiver.get( c.getPosition() ).add( origin );
+		//prevent sending updates to one self
+		if(!origin.equals(chord.getLocalId())){
+			receiver.get( c.getPosition() ).add( origin );
+		}
 	}
 
 	private void receive( final ChunkDeliveryMessage msg, final IHash origin ) {
 		Chunk c = msg.getChunk();
-		if ( receiver.containsKey( c.getPosition() ) ) {
-			receiver.get( c.getPosition() ).remove( origin );
-		} else if ( local.containsKey( c.getPosition() ) ) {
+		if ( local.containsKey( c.getPosition() ) ) {
 			ArrayList<IHash> localPlayers = msg.getLocalPlayers();
 			for ( IHash h : localPlayers ) {
 				if ( chord.getResponsibility().contains( h ) ) {
@@ -211,6 +212,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 			worldAdapter.responseChunk( c );
 
+			//telling players acting within this chunk to add this id to lacal connected players
 			for ( IHash address : local.get( c.getPosition() ) ) {
 				chord.sendMessage( new ChunkEnteredMessage( c.getPosition() ), address );
 			}
@@ -231,8 +233,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		if ( local.contains( msg.getCoordinate() ) ) {
 			local.get( msg.getCoordinate() ).remove( origin );
 		}
-
-		// TODO save local connections?
 	}
 
 	public void receive( final ManageMessage msg, final IHash origin ) {
@@ -258,33 +258,34 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	}
 
-	public void receive( final EnterGameMessage msg, final IHash origin ) {
-		Chunk c = worldAdapter.getChunk( new TileCoordinate( 0, 0 ) );
+	public void receive(final EnterGameMessage msg, final IHash origin) {
+		Chunk c = worldAdapter.getChunk(new TileCoordinate(0, 0));
 
 		// TODO better player placement
 		TileCoordinate coord;
-		synchronized ( c ) {
+		synchronized (c) {
 			coord = c.findFreeTile();
-			c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
+			c.setEntityCoordinate(msg.getPlayer(), coord.getX(), coord.getY());
 		}
-		fireChunkUpdate( new EntityAddedMessage( msg.getPlayer(), coord, origin ) );
+		fireChunkUpdate(new EntityAddedMessage(msg.getPlayer(), coord, origin));
 
-		if ( !receiver.containsKey( c.getPosition() ) ) {
-			logger.debug( "Clearing receivers for " + c.getPosition() );
-			receiver.put( c.getPosition(), new ArrayList<IHash>() );
+		if (!receiver.containsKey(c.getPosition())) {
+			logger.debug("Clearing receivers for " + c.getPosition());
+			receiver.put(c.getPosition(), new ArrayList<IHash>());
 		}
-		chord.sendMessage( new GameEnteredMessage( c, (ArrayList<IHash>) receiver.get( c.getPosition() ).clone() ),
-				origin );
-		receiver.get( c.getPosition() ).add( origin );
+		chord.sendMessage(new GameEnteredMessage(c, (ArrayList<IHash>) receiver
+				.get(c.getPosition()).clone()), origin);
 
-		logger.debug( "Player: " + msg.getPlayer().getName() + " [" + origin + "] joined the Game" );
+		// prevent sending updates to oneself
+		if (!origin.equals(chord.getLocalId())) {
+			receiver.get(c.getPosition()).add(origin);
+		}
+
+		logger.debug("Player: " + msg.getPlayer().getName() + " [" + origin
+				+ "] joined the Game");
 	}
 
 	public void receive( final GameEnteredMessage msg, final IHash origin ) {
-		
-		if ( receiver.containsKey( msg.getChunk().getPosition() ) ) {
-			receiver.get( msg.getChunk().getPosition() ).remove( origin );
-		}
 		worldAdapter.gameEntered( msg.getChunk() );
 		local.put( msg.getChunk().getPosition(), msg.getLocalPlayer() );
 	}
