@@ -136,10 +136,12 @@ public class NodeDiscovery extends SimpleChannelHandler implements INodeDiscover
 	}
 
 	private void fireNodeDiscoveredIfNewNode( final SocketAddress nodeAddress ) {
-		if ( !nodes.contains( nodeAddress ) ) {
-			nodes.add( nodeAddress );
-			connectionMgr.connectTo( nodeAddress );
-			fireNodeDiscovered( nodeAddress );
+		synchronized ( nodes ) {
+			if ( !nodes.contains( nodeAddress ) ) {
+				nodes.add( nodeAddress );
+				connectionMgr.connectTo( nodeAddress );
+				fireNodeDiscovered( nodeAddress );
+			}
 		}
 	}
 
