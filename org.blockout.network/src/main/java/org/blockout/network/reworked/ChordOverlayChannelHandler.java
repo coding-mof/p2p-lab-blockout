@@ -137,44 +137,45 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			// replace predecessor with most closest node or ourself
 			// and adjust our responsibility
 			logger.info( "Channel " + e.getChannel() + " to our predecessor " + predecessorId + " has been closed." );
+			IHash newId;
+			Channel newChannel;
 			synchronized ( lookupTable ) {
 				IHash lowerKey = lookupTable.lowerKey( predecessorId );
 				if ( lowerKey == null && !lookupTable.isEmpty() ) {
 					lowerKey = lookupTable.lastKey();
 				}
 				if ( lowerKey == null ) {
-					predecessorId = localNode.getNodeId();
-					predecessorChannel = null;
+					newId = localNode.getNodeId();
+					newChannel = null;
 				} else {
-					predecessorId = lowerKey;
-					predecessorChannel = lookupTable.get( lowerKey );
+					newId = lowerKey;
+					newChannel = lookupTable.get( lowerKey );
 				}
 			}
 			logger.info( "New predecessor will be " + predecessorId + " at " + predecessorChannel );
-			updateResponsibility( predecessorId.getNext() );
+			changePredecessor( newId, newChannel );
 		}
 
 		// check if it was our successor
 		if ( e.getChannel().equals( successorChannel ) ) {
 			logger.info( "Channel " + e.getChannel() + " to our successor " + successorId + " has been closed." );
+			IHash newId;
+			Channel newChannel;
 			synchronized ( lookupTable ) {
 				IHash higherKey = lookupTable.higherKey( successorId );
 				if ( higherKey == null && !lookupTable.isEmpty() ) {
 					higherKey = lookupTable.firstKey();
 				}
 				if ( higherKey == null ) {
-					successorId = localNode.getNodeId();
-					successorChannel = null;
+					newId = localNode.getNodeId();
+					newChannel = null;
 				} else {
-					successorId = higherKey;
-					successorChannel = lookupTable.get( higherKey );
+					newId = higherKey;
+					newChannel = lookupTable.get( higherKey );
 				}
 			}
 			logger.info( "New successor will be " + successorId + " at " + successorChannel );
-			if ( successorChannel != null && successorChannel.isConnected() ) {
-				Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ),
-						connectionMgr.getServerAddress() );
-			}
+			changeSuccessor( newId, newChannel );
 		}
 	}
 
@@ -239,10 +240,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				lookupTable.put( msg.getNodeId(), e.getChannel() );
 			}
 
-			predecessorId = msg.getNodeId();
-			predecessorChannel = e.getChannel();
-
-			updateResponsibility( predecessorId.getNext() );
+			changePredecessor( msg.getNodeId(), e.getChannel() );
 		}
 	}
 
@@ -255,10 +253,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		logger.info( "Joining chord ring. My successor will be " + msg.getSuccessorId() + " at "
 				+ msg.getSuccessorAddress() );
 
-		successorId = msg.getSuccessorId();
-		successorChannel = e.getChannel();
-
-		updateResponsibility( msg.getLowerBound() );
+		changeSuccessor( msg.getSuccessorId(), e.getChannel() );
+		changePredecessor( msg.getLowerBound().getPrevious(), null );
 	}
 
 	private void updateResponsibility( final IHash lowerBound ) {
@@ -323,10 +319,28 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		Channels.write( channel, welcomeMsg );
 
 		// Accept our new predecessor
-		predecessorChannel = channel;
-		predecessorId = nodeId;
+		changePredecessor( nodeId, channel );
+	}
 
-		updateResponsibility( nodeId.getNext() );
+	private void changePredecessor( final IHash newPredecessor, final Channel newChannel ) {
+		predecessorId = newPredecessor;
+		predecessorChannel = newChannel;
+		firePredecessorChanged( predecessorId );
+		updateResponsibility( predecessorId.getNext() );
+	}
+
+	private void changeSuccessor( final IHash newSuccessor, final Channel newChannel ) {
+		successorId = newSuccessor;
+		successorChannel = newChannel;
+		fireSuccessorChanged( successorId );
+		if ( successorChannel != null && successorChannel.isConnected() ) {
+			synchronized ( lookupTable ) {
+				lookupTable.put( successorId, successorChannel );
+			}
+			// Notify the new successor about us - so that
+			// he can adjust his responsibility
+			Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+		}
 	}
 
 	/**
@@ -444,6 +458,30 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 	}
 
+	private void fireSuccessorChanged( final IHash successor ) {
+		for ( final ChordListener l : listener ) {
+			executor.execute( new Runnable() {
+
+				@Override
+				public void run() {
+					l.successorChanged( ChordOverlayChannelHandler.this, successor );
+				}
+			} );
+		}
+	}
+
+	private void firePredecessorChanged( final IHash predecessor ) {
+		for ( final ChordListener l : listener ) {
+			executor.execute( new Runnable() {
+
+				@Override
+				public void run() {
+					l.predecessorChanged( ChordOverlayChannelHandler.this, predecessor );
+				}
+			} );
+		}
+	}
+
 	private void fireMessageReceived( final IHash from, final Object message ) {
 		logger.info( "Received message " + message + " from " + from );
 		for ( final ChordListener l : listener ) {
@@ -538,16 +576,7 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 						logger.warn( "Stabilization detected invalid successor. Current " + successorId + ", actual "
 								+ hash );
 
-						successorChannel = getOrCreateChannel( hash, hash.getAddress() );
-						successorId = hash;
-
-						synchronized ( lookupTable ) {
-							lookupTable.put( successorId, successorChannel );
-						}
-
-						// Notify the new successor about us - so that
-						// he can adjust his responsibility
-						Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+						changeSuccessor( hash, getOrCreateChannel( hash, hash.getAddress() ) );
 					}
 				} catch ( InterruptedException e ) {
 					logger.warn( "Stabilization interrupted.", e );
