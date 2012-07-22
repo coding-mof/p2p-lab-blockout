@@ -127,4 +127,16 @@ public class MessageBroker implements IMessagePassing, ChordListener {
 	public void receivedMessage( final IChordOverlay chord, final Object message, final IHash senderId ) {
 		fireMessageReceived( message, senderId );
 	}
+
+    @Override
+    public void predecessorChanged( IChordOverlay chord, IHash predecessor ) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void successorChanged( IChordOverlay chord, IHash successor ) {
+        // TODO Auto-generated method stub
+
+    }
 }
