@@ -1,6 +1,5 @@
 package org.blockout.network.reworked;
 
-import java.io.Serializable;
 import java.net.SocketAddress;
 
 import org.blockout.network.dht.IHash;
@@ -17,7 +16,7 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * 
  */
-public class IAmMessage implements Serializable {
+public class IAmMessage extends AbstractMessage {
 
 	private static final long	serialVersionUID	= -7039915306236068931L;
 	private final IHash			nodeId;
@@ -50,5 +49,15 @@ public class IAmMessage implements Serializable {
 	 */
 	public SocketAddress getAddress() {
 		return address;
+	}
+
+	@Override
+	public IHash getReceiver() {
+		return getNodeId().getNext();
+	}
+
+	@Override
+	public boolean isRoutable() {
+		return false;
 	}
 }

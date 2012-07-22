@@ -1,12 +1,10 @@
 package org.blockout.network.reworked;
 
-import java.io.Serializable;
-
 import org.blockout.network.dht.IHash;
 
 import com.google.common.base.Preconditions;
 
-public class IAmYourPredeccessor implements Serializable {
+public class IAmYourPredeccessor extends AbstractMessage {
 	private static final long	serialVersionUID	= -3266094817926621826L;
 	private final IHash			nodeId;
 
@@ -21,4 +19,13 @@ public class IAmYourPredeccessor implements Serializable {
 		return nodeId;
 	}
 
+	@Override
+	public IHash getReceiver() {
+		return null;
+	}
+
+	@Override
+	public boolean isRoutable() {
+		return false;
+	}
 }

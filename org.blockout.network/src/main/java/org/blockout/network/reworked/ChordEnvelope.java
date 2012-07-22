@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.blockout.network.dht.IHash;
 
-public class ChordEnvelope implements Serializable {
+public class ChordEnvelope extends AbstractMessage {
 
 	private static final long	serialVersionUID	= -1484555197910309758L;
 	private final IHash			senderId;
@@ -33,5 +33,10 @@ public class ChordEnvelope implements Serializable {
 	public String toString() {
 		return "ChordEnvelope[source=" + getSenderId() + ", destination=" + getReceiverId() + ", content="
 				+ getContent() + "]";
+	}
+
+	@Override
+	public IHash getReceiver() {
+		return getReceiverId();
 	}
 }
