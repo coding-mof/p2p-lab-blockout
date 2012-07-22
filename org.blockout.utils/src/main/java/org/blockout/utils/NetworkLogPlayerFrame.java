@@ -656,7 +656,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
             }
         }
 
-        graph.addEdge( new NetworkEdge( "chord", "predecessor" ), other, me,
+        graph.addEdge( new NetworkEdge( "chord", "predecessor" ), me, other,
                 EdgeType.DIRECTED );
     }
 
