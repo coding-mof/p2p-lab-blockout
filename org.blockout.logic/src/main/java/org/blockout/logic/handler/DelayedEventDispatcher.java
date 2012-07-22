@@ -78,6 +78,10 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 		}
 
 		Long startTime = activeEvents.get( event );
+		if ( startTime == null ) {
+			logger.warn( "Received commit without prior push event. Discarding " + event );
+			return;
+		}
 		final long remainingMillis = (startTime + event.getDuration()) - System.currentTimeMillis();
 		if ( remainingMillis <= 0 ) {
 			logger.debug( "Delayed event " + event + " finished. Deviance: " + (-remainingMillis) + " ms" );
