@@ -342,25 +342,31 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 	private void welcomeNode( final IConnectionManager connectionMgr, final MessageEvent e, final IAmMessage message ) {
 
-		// mark the new connection so that no I'm message will be sent
+		// mark the new connection so that no "I'm message" will be sent
 		introductionFilter.add( message.getAddress() );
 
 		logger.info( "Connecting to new node " + message.getAddress() + " to welcome it." );
-		ConnectionFuture future = connectionMgr.connectTo( message.getAddress() );
-		future.addListener( new ConnectionFutureListener() {
+		Channel channel = getOrCreateChannel( message.getNodeId(), message.getAddress() );
+		sendWelcomeMessage( connectionMgr, message, channel );
 
-			@Override
-			public void operationComplete( final ConnectionFuture connectFuture ) throws Exception {
-				if ( !connectFuture.isSuccess() ) {
-					logger.error( "Couldn't connect to new node " + message.getAddress(), connectFuture.getCause() );
-					return;
-				}
-
-				Channel channel = connectFuture.getChannel();
-
-				sendWelcomeMessage( connectionMgr, message, channel );
-			}
-		} );
+		// ConnectionFuture future = connectionMgr.connectTo(
+		// message.getAddress() );
+		// future.addListener( new ConnectionFutureListener() {
+		//
+		// @Override
+		// public void operationComplete( final ConnectionFuture connectFuture )
+		// throws Exception {
+		// if ( !connectFuture.isSuccess() ) {
+		// logger.error( "Couldn't connect to new node " + message.getAddress(),
+		// connectFuture.getCause() );
+		// return;
+		// }
+		//
+		// Channel channel = connectFuture.getChannel();
+		//
+		// sendWelcomeMessage( connectionMgr, message, channel );
+		// }
+		// } );
 	}
 
 	private void sendWelcomeMessage( final IConnectionManager connectionMgr, final IAmMessage message,
