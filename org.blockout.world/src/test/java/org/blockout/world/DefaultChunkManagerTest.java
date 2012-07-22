@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import org.blockout.common.TileCoordinate;
 import org.blockout.network.dht.Hash;
 import org.blockout.network.dht.IHash;
+import org.blockout.network.dht.WrappedRange;
 import org.blockout.network.message.IMessage;
 import org.blockout.network.reworked.IChordOverlay;
 import org.blockout.world.event.IEvent;
@@ -76,6 +77,11 @@ public class DefaultChunkManagerTest {
 		e4 = mock( IEvent.class );
 		stub( e4.getResponsibleTile() ).toReturn(
 				new TileCoordinate( -4 * Chunk.CHUNK_SIZE + 3, -4 * Chunk.CHUNK_SIZE + 3 ) );
+		
+		IHash top = new Hash(coord4);
+		WrappedRange<IHash> range = new WrappedRange<IHash>(top.getNext(), top.getPrevious());
+		
+		stub(chord.getResponsibility()).toReturn(range);
 	}
 
 	private void addreceivers() throws IllegalArgumentException, SecurityException, IllegalAccessException,

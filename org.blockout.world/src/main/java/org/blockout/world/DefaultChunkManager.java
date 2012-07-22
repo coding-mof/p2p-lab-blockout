@@ -82,11 +82,11 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	@Override
 	public void eventPushed( final IEvent<?> event ) {
 		logger.debug( "Event pushed " + event );
-		TileCoordinate responsibleTile = event.getResponsibleTile();
-		if ( chord.getResponsibility().contains( new Hash( responsibleTile ) ) ) {
+		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
+		if ( chord.getResponsibility().contains( new Hash( coordinate ) ) ) {
 			stateMachine.commitEvent( event );
 		}
-		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
+		
 		if ( !receiver.containsKey( coordinate ) ) {
 			chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), new Hash( coordinate ) );
 			if ( local.containsKey( coordinate ) ) {
@@ -230,8 +230,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		ArrayList<ArrayList<IHash>> addresses = msg.getReceivers();
 		synchronized ( receiver ) {
 			synchronized ( worldAdapter ) {
-				for ( int i = 0; i < chunks.size(); i++ ) {
-
+				for ( int i = 0; i < chunks.size(); i++ ) {					
 					ArrayList<IHash> value = addresses.get( i );
 					for ( IHash h : value ) {
 						if ( chord.getResponsibility().contains( h ) ) {
@@ -271,6 +270,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	}
 
 	public void receive( final GameEnteredMessage msg, final IHash origin ) {
+		
 		if ( receiver.containsKey( msg.getChunk().getPosition() ) ) {
 			receiver.get( msg.getChunk().getPosition() ).remove( origin );
 		}
