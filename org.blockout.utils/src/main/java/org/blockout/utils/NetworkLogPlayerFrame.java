@@ -649,7 +649,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         }
 
         Collection<NetworkEdge> edges = new LinkedList<NetworkEdge>(
-                graph.getInEdges( me ) );
+                graph.getOutEdges( me ) );
         for ( NetworkEdge edge : edges ) {
             if( "predecessor".equals( edge.getLabel() ) ) {
                 graph.removeEdge( edge );
