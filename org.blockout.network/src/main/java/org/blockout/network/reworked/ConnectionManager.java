@@ -174,18 +174,6 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	}
 
 	@Override
-	public void channelOpen( final ChannelHandlerContext ctx, final ChannelStateEvent e ) throws Exception {
-		super.channelOpen( ctx, e );
-
-		// Close channels to our own server socket
-		if ( e.getChannel().getFactory() instanceof ClientSocketChannelFactory ) {
-			if ( e.getChannel().getRemoteAddress().equals( getServerAddress() ) ) {
-				e.getChannel().close();
-			}
-		}
-	}
-
-	@Override
 	public Set<SocketAddress> listConnections() {
 		Set<SocketAddress> connections = new HashSet<SocketAddress>();
 		for ( Channel channel : allChannels ) {
@@ -196,6 +184,10 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 
 	@Override
 	public ConnectionFuture connectTo( final SocketAddress address ) {
+
+		if ( address.equals( getServerAddress() ) ) {
+			throw new RuntimeException( "Who did this?" );
+		}
 
 		Channel channel = findChannel( address );
 		if ( channel != null ) {
