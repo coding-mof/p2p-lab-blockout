@@ -18,6 +18,8 @@ import org.blockout.world.state.IStateMachineListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 /**
  * This class caches commit events until there duration has been expired. The
  * cached events are then forwarded through the {@link IEventHandler} interface.
@@ -67,6 +69,7 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 
 	@Override
 	public void eventCommitted( final IEvent<?> event ) {
+		Preconditions.checkNotNull( event );
 		if ( event.getDuration() == 0 ) {
 			logger.debug( "Direct event " + event + " finished." );
 			activeEvents.remove( event );
@@ -95,12 +98,14 @@ public class DelayedEventDispatcher implements IStateMachineListener {
 
 	@Override
 	public void eventPushed( final IEvent<?> event ) {
+		Preconditions.checkNotNull( event );
 		activeEvents.put( event, System.currentTimeMillis() );
 		fireEventStarted( event );
 	}
 
 	@Override
 	public void eventRolledBack( final IEvent<?> event ) {
+		Preconditions.checkNotNull( event );
 		activeEvents.remove( event );
 	}
 

@@ -299,6 +299,12 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 
 		if ( responsibility.contains( message.getNodeId() ) ) {
+			if ( message.getAddress().equals( connectionMgr.getServerAddress() ) ) {
+				// This happens when we are already connected to this peer
+				// through another channel of route in the ring
+				logger.debug( "Discarding own introduction message:" + message );
+				return;
+			}
 			// We are the new node's successor
 			welcomeNode( connectionMgr, e, message );
 			return;

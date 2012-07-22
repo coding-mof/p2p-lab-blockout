@@ -186,7 +186,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	public ConnectionFuture connectTo( final SocketAddress address ) {
 
 		if ( address.equals( getServerAddress() ) ) {
-			throw new RuntimeException( "Who did this?" );
+			throw new RuntimeException( "It's not allowed to connect to ourself." );
 		}
 
 		Channel channel = findChannel( address );
