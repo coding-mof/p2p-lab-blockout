@@ -28,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
@@ -38,6 +39,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.DefaultCaret;
 
+import org.apache.commons.collections15.Predicate;
 import org.apache.commons.collections15.Transformer;
 import org.blockout.common.NetworkLogMessage;
 import org.blockout.utils.NetworkLogPlayer.IMessageProcessor;
@@ -48,6 +50,7 @@ import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
+import edu.uci.ics.jung.graph.util.Context;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
@@ -68,7 +71,11 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
     public static final int MAX_DELAY_MS = 5000;
 
     private enum PlayerState {
-        PLAYING, PAUSED, STOPPED, NOT_LOADED;
+        PLAYING, PAUSED, STOPPED, NOT_LOADED, FINISHED;
+    }
+
+    private enum EdgesToDisplayOptions {
+        ALL, CHORD, NETWORK
     }
 
     private Graph<NetworkVertex, NetworkEdge>               graph;
@@ -84,8 +91,11 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 
     private PlayerState                                     state;
     private NetworkLogPlayer                                player;
+    private EdgesToDisplayOptions                           edgesToDisplay;
 
     public NetworkLogPlayerFrame( String[] args ) {
+        edgesToDisplay = EdgesToDisplayOptions.ALL;
+
         initGraph();
         initLayout();
         changePlayerState( PlayerState.NOT_LOADED );
@@ -123,11 +133,30 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
                     return Color.GRAY;
                 else if( "chord".equals( edge.getType() ) )
                     return Color.RED;
-
+                
                 return Color.BLACK;
             }
         };
 
+        visViewer.getRenderContext().setEdgeIncludePredicate(new Predicate<Context<Graph<NetworkVertex,NetworkEdge>,NetworkEdge>>() {
+            
+            @Override
+            public boolean evaluate(
+                                    Context<Graph<NetworkVertex, NetworkEdge>, NetworkEdge> arg ) {
+
+                                NetworkEdge edge = arg.element;
+                                switch(edgesToDisplay){
+                                case NETWORK:
+                                    return "net".equals( edge.getType() );
+                                case CHORD:
+                                    return "chord".equals( edge.getType() );
+                                    default:
+                                        return true;
+                                }
+            }
+                        } );
+        
+        
         visViewer.getRenderContext().setEdgeDrawPaintTransformer(
                 edgeDrawPaintTransformer );
         visViewer.getRenderContext().setArrowDrawPaintTransformer(
@@ -203,6 +232,49 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
             }
         } );
         fileMenu.add( close );
+
+        JMenu viewMenu = new JMenu( "View" );
+        viewMenu.setMnemonic( KeyEvent.VK_V );
+        menuBar.add( viewMenu );
+
+        JMenu edgesMenu = new JMenu( "Edges" );
+        edgesMenu.setMnemonic( KeyEvent.VK_E );
+        viewMenu.add( edgesMenu );
+
+        JMenuItem edgesAll = new JMenuItem(
+ new AbstractAction(
+                "Draw all edges" ) {
+
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                edgesToDisplay = EdgesToDisplayOptions.ALL;
+                        updateGraph();
+            }
+        } );
+        edgesMenu.add( edgesAll );
+
+        JMenuItem edgesChord = new JMenuItem( new AbstractAction(
+                "Draw chord edges" ) {
+
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                edgesToDisplay = EdgesToDisplayOptions.CHORD;
+                updateGraph();
+            }
+        } );
+        edgesMenu.add( edgesChord );
+
+        JMenuItem edgesNet = new JMenuItem( new AbstractAction(
+                "Draw network edges" ) {
+
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                edgesToDisplay = EdgesToDisplayOptions.NETWORK;
+                updateGraph();
+            }
+        } );
+        edgesMenu.add( edgesNet );
+
         setJMenuBar( menuBar );
     }
 
@@ -294,6 +366,11 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
             playButton.setEnabled( true );
             pauseButton.setEnabled( false );
             stopButton.setEnabled( false );
+            break;
+        case FINISHED:
+            playButton.setEnabled( false );
+            pauseButton.setEnabled( false );
+            stopButton.setEnabled( true );
             break;
         default:
             playButton.setEnabled( false );
@@ -423,6 +500,10 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
             if( "predecessor".equals( type ) ) {
                 updatePredecessor( message );
             }
+ else if( "successor".equals( type ) ) {
+                updateSuccessor( message );
+            }
+
         }
 
         if( message.hasExtra( "net" ) ) {
@@ -436,6 +517,14 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         }
 
         updateGraph();
+    }
+
+    @Override
+    public void finished() {
+        changePlayerState( PlayerState.FINISHED );
+        JOptionPane.showMessageDialog( this, "Log replay finished", "Done",
+                JOptionPane.INFORMATION_MESSAGE );
+
     }
 
     private List<NetworkLogMessage> pendingConnect = new LinkedList<NetworkLogMessage>();
@@ -504,7 +593,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         if( null == local )
             return;
 
-        Collection<NetworkEdge> edges = graph.getOutEdges( local );
+        Collection<NetworkEdge> edges = graph.getIncidentEdges( local );
         for ( NetworkEdge edge : edges ) {
             if( edge.getLabel().equals( localaddr ) ) {
                 graph.removeEdge( edge );
@@ -513,34 +602,62 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         }
     }
 
+    private void updateSuccessor( NetworkLogMessage message ) {
+        String id = (String) message.getExtra( "id" );
+        String succ = (String) message.getExtra( "succdid" );
+
+        NetworkVertex me = findVertexById( id );
+        NetworkVertex other = findVertexById( succ );
+
+        if( null == other ) {
+            other = new NetworkVertex( succ );
+            graph.addVertex( other );
+        }
+
+        if( null == me ) {
+            me = new NetworkVertex( id );
+            graph.addVertex( me );
+        }
+
+        Collection<NetworkEdge> edges = new LinkedList<NetworkEdge>(
+                graph.getOutEdges( me ) );
+        for ( NetworkEdge edge : edges ) {
+            if( "successor".equals( edge.getLabel() ) ) {
+                graph.removeEdge( edge );
+            }
+        }
+
+        graph.addEdge( new NetworkEdge( "chord", "successor" ), me, other,
+                EdgeType.DIRECTED );
+    }
+
     private void updatePredecessor( NetworkLogMessage message ) {
         String id = (String) message.getExtra( "id" );
         String pred = (String) message.getExtra( "predid" );
 
-        NetworkVertex to = findVertexById( id );
-        NetworkVertex from = findVertexById( pred );
+        NetworkVertex me = findVertexById( id );
+        NetworkVertex other = findVertexById( pred );
 
-        if( null == from ) {
-            from = new NetworkVertex( pred );
-            graph.addVertex( from );
+        if( null == other ) {
+            other = new NetworkVertex( pred );
+            graph.addVertex( other );
         }
 
-        if( null == to ) {
-            to = new NetworkVertex( id );
-            graph.addVertex( to );
+        if( null == me ) {
+            me = new NetworkVertex( id );
+            graph.addVertex( me );
         }
 
-        Collection<NetworkEdge> edges = graph.getInEdges( to );
+        Collection<NetworkEdge> edges = new LinkedList<NetworkEdge>(
+                graph.getInEdges( me ) );
         for ( NetworkEdge edge : edges ) {
             if( "predecessor".equals( edge.getLabel() ) ) {
                 graph.removeEdge( edge );
-                break;
             }
         }
 
-        if( !id.equals( pred ) )
-            graph.addEdge( new NetworkEdge( "chord", "predecessor" ), from, to,
-                    EdgeType.DIRECTED );
+        graph.addEdge( new NetworkEdge( "chord", "predecessor" ), other, me,
+                EdgeType.DIRECTED );
     }
 
     private void updateGraph() {

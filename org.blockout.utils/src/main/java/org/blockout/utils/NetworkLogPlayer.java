@@ -15,6 +15,8 @@ public class NetworkLogPlayer implements Runnable {
 
     public static interface IMessageProcessor {
         public void process( NetworkLogMessage message );
+
+        public void finished();
     }
 
     Lock             playLock = new ReentrantLock();
@@ -53,6 +55,9 @@ public class NetworkLogPlayer implements Runnable {
                 // ignore
             }
         }
+
+        if( index.get() == messages.size() )
+            processor.finished();
 
         play.set( false );
         playLock.unlock();
