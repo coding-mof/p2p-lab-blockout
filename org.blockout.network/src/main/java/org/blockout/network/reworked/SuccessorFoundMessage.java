@@ -1,6 +1,5 @@
 package org.blockout.network.reworked;
 
-import java.io.Serializable;
 import java.net.SocketAddress;
 
 import org.blockout.network.dht.IHash;
@@ -13,7 +12,7 @@ import com.google.common.base.Preconditions;
  * @author Marc-Christian Schulze
  * 
  */
-public class SuccessorFoundMessage implements Serializable {
+public class SuccessorFoundMessage extends AbstractMessage {
 
 	private static final long	serialVersionUID	= 7215804868666735216L;
 	private final IHash			destination;
@@ -70,5 +69,10 @@ public class SuccessorFoundMessage implements Serializable {
 	public String toString() {
 		return "SuccessorFoundMessage[destination=" + getDestination() + ", key=" + getKey() + ", successor="
 				+ getSuccessor() + ", address=" + getServerAddress() + "]";
+	}
+
+	@Override
+	public IHash getReceiver() {
+		return getDestination();
 	}
 }
