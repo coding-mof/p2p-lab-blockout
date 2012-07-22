@@ -155,14 +155,8 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
         resp.setExtra( "new", "[" + to.getLowerBound().getValue() + ","
                 + to.getUpperBound().getValue() + "]" );
 
-        NetworkLogMessage pred = new NetworkLogMessage();
-        pred.setExtra( "chord", "predecessor" );
-        pred.setExtra( "id", localChordId.getValue() );
-        pred.setExtra( "predid", to.getLowerBound().getPrevious() );
-
         try {
             logWriter.append( resp.toString() + "\n" );
-            logWriter.append( pred.toString() + "\n" );
             logWriter.flush();
         } catch ( IOException e ) {
             e.printStackTrace();
@@ -179,6 +173,36 @@ public class ConnectionDebugLogger implements ConnectionListener, ChordListener 
 
         try {
             logWriter.append( msg.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void predecessorChanged( IChordOverlay chord, IHash predecessor ) {
+        NetworkLogMessage pred = new NetworkLogMessage();
+        pred.setExtra( "chord", "predecessor" );
+        pred.setExtra( "id", localChordId.getValue() );
+        pred.setExtra( "predid", predecessor.getValue() );
+
+        try {
+            logWriter.append( pred.toString() + "\n" );
+            logWriter.flush();
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void successorChanged( IChordOverlay chord, IHash successor ) {
+        NetworkLogMessage succ = new NetworkLogMessage();
+        succ.setExtra( "chord", "successor" );
+        succ.setExtra( "id", localChordId.getValue() );
+        succ.setExtra( "succid", successor.getValue() );
+
+        try {
+            logWriter.append( succ.toString() + "\n" );
             logWriter.flush();
         } catch ( IOException e ) {
             e.printStackTrace();
