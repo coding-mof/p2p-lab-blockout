@@ -94,7 +94,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 					chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), address );
 				}
 			}
-
 		}
 	}
 

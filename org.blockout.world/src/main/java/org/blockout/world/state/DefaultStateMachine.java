@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.blockout.world.event.IEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
 
 import com.google.common.base.Preconditions;
@@ -17,6 +19,10 @@ import com.google.common.base.Preconditions;
  */
 public class DefaultStateMachine extends AbstractStateMachine {
 
+	private static final Logger				logger;
+	static {
+		logger = LoggerFactory.getLogger( DefaultStateMachine.class );
+	}
 	protected final Map<UUID, IEvent<?>>	events;
 
 	public DefaultStateMachine(final TaskExecutor executor) {
@@ -49,7 +55,12 @@ public class DefaultStateMachine extends AbstractStateMachine {
 	public void commitEvent( final IEvent<?> event ) {
 		Preconditions.checkNotNull( event );
 		synchronized ( events ) {
-			events.remove( event.getId() );
+			if ( !events.containsKey( event.getId() ) ) {
+				logger.warn( "Received commit for inactive event. Either we got no push event or the event has been rolled back. Discarding "
+						+ event );
+			} else {
+				events.remove( event.getId() );
+			}
 		}
 		fireEventCommitted( event );
 	}
