@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import org.blockout.world.event.IEvent;
 import org.springframework.core.task.TaskExecutor;
 
+import com.google.common.base.Preconditions;
+
 /**
  * Abstract base class for all state machine implementations which provides
  * listener management support.
@@ -73,6 +75,7 @@ public abstract class AbstractStateMachine implements IStateMachine {
 	}
 
 	protected ValidationResult validateEvent( final IEvent<?> event ) {
+		Preconditions.checkNotNull( event );
 		synchronized ( validators ) {
 			for ( IEventValidator validator : validators ) {
 				if ( validator.validateEvent( event ) == ValidationResult.Invalid ) {
@@ -84,6 +87,7 @@ public abstract class AbstractStateMachine implements IStateMachine {
 	}
 
 	protected void fireEventCommitted( final IEvent<?> event ) {
+		Preconditions.checkNotNull( event );
 		threadPool.execute( new Runnable() {
 
 			@Override
@@ -98,6 +102,7 @@ public abstract class AbstractStateMachine implements IStateMachine {
 	}
 
 	protected void fireEventPushed( final IEvent<?> event ) {
+		Preconditions.checkNotNull( event );
 		threadPool.execute( new Runnable() {
 
 			@Override
@@ -112,6 +117,7 @@ public abstract class AbstractStateMachine implements IStateMachine {
 	}
 
 	protected void fireEventRolledBack( final IEvent<?> event ) {
+		Preconditions.checkNotNull( event );
 		threadPool.execute( new Runnable() {
 
 			@Override

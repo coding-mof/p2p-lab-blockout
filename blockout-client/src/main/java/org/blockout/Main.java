@@ -86,11 +86,14 @@ public class Main {
 		IWorld world = context.getBean( IWorld.class );
 		Camera camera = context.getBean( Camera.class );
 
-		InetSocketAddress address = new InetSocketAddress( arguments.getHeadlessCmd().getBootstrapAddress(), arguments
-				.getHeadlessCmd().getBootstrapPort() );
-		logger.info( "Bootstrapping from " + address );
-		ConnectionManager connectionManager = context.getBean( ConnectionManager.class );
-		connectionManager.connectTo( address );
+		if ( arguments.getHeadlessCmd().getBootstrapAddress() != null
+				&& arguments.getHeadlessCmd().getBootstrapPort() > 0 ) {
+			InetSocketAddress address = new InetSocketAddress( arguments.getHeadlessCmd().getBootstrapAddress(),
+					arguments.getHeadlessCmd().getBootstrapPort() );
+			logger.info( "Bootstrapping from " + address );
+			ConnectionManager connectionManager = context.getBean( ConnectionManager.class );
+			connectionManager.connectTo( address );
+		}
 
 		try {
 			Thread.sleep( 6000 );

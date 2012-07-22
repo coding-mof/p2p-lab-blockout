@@ -299,6 +299,12 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 
 		if ( responsibility.contains( message.getNodeId() ) ) {
+			if ( message.getAddress().equals( connectionMgr.getServerAddress() ) ) {
+				// This happens when we are already connected to this peer
+				// through another channel of route in the ring
+				logger.debug( "Discarding own introduction message:" + message );
+				return;
+			}
 			// We are the new node's successor
 			welcomeNode( connectionMgr, e, message );
 			return;
@@ -312,6 +318,17 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			public void completed( final ObservableFuture<IHash> future ) {
 				try {
 					IHash nodeId = future.get();
+					if ( nodeId.equals( localNode.getNodeId() ) ) {
+						logger.warn( "Detected cyclic routing information. Trigger stabilization protocol." );
+						executor.execute( new Runnable() {
+
+							@Override
+							public void run() {
+								stabilize();
+							}
+						} );
+						return;
+					}
 					logger.debug( "Found successor " + nodeId + " of new node " + message.getNodeId() );
 					routeMessage( message, nodeId );
 				} catch ( InterruptedException e ) {
@@ -325,25 +342,31 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 	private void welcomeNode( final IConnectionManager connectionMgr, final MessageEvent e, final IAmMessage message ) {
 
-		// mark the new connection so that no I'm message will be sent
+		// mark the new connection so that no "I'm message" will be sent
 		introductionFilter.add( message.getAddress() );
 
 		logger.info( "Connecting to new node " + message.getAddress() + " to welcome it." );
-		ConnectionFuture future = connectionMgr.connectTo( message.getAddress() );
-		future.addListener( new ConnectionFutureListener() {
+		Channel channel = getOrCreateChannel( message.getNodeId(), message.getAddress() );
+		sendWelcomeMessage( connectionMgr, message, channel );
 
-			@Override
-			public void operationComplete( final ConnectionFuture connectFuture ) throws Exception {
-				if ( !connectFuture.isSuccess() ) {
-					logger.error( "Couldn't connect to new node " + message.getAddress(), connectFuture.getCause() );
-					return;
-				}
-
-				Channel channel = connectFuture.getChannel();
-
-				sendWelcomeMessage( connectionMgr, message, channel );
-			}
-		} );
+		// ConnectionFuture future = connectionMgr.connectTo(
+		// message.getAddress() );
+		// future.addListener( new ConnectionFutureListener() {
+		//
+		// @Override
+		// public void operationComplete( final ConnectionFuture connectFuture )
+		// throws Exception {
+		// if ( !connectFuture.isSuccess() ) {
+		// logger.error( "Couldn't connect to new node " + message.getAddress(),
+		// connectFuture.getCause() );
+		// return;
+		// }
+		//
+		// Channel channel = connectFuture.getChannel();
+		//
+		// sendWelcomeMessage( connectionMgr, message, channel );
+		// }
+		// } );
 	}
 
 	private void sendWelcomeMessage( final IConnectionManager connectionMgr, final IAmMessage message,
@@ -426,7 +449,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			return future;
 		}
 		// Send a lookup message to our successor
-		Channels.write( successorChannel, new FindSuccessorMessage( localNode.getNodeId(), key ) );
+		// Channels.write( successorChannel, );
+		routeMessage( new FindSuccessorMessage( localNode.getNodeId(), key ), key );
 		return future;
 	}
 
@@ -554,38 +578,42 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 			@Override
 			public void run() {
-				ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
-				future.addFutureListener( new FutureListener<IHash>() {
-
-					@Override
-					public void completed( final ObservableFuture<IHash> future ) {
-						try {
-							HashAndAddress hash = (HashAndAddress) future.get();
-							if ( hash != null && !hash.equals( successorId ) ) {
-								logger.warn( "Stabilization detected invalid successor. Current " + successorId
-										+ ", actual " + hash );
-
-								successorChannel = getOrCreateChannel( hash, hash.getAddress() );
-								successorId = hash;
-
-								synchronized ( lookupTable ) {
-									lookupTable.put( successorId, successorChannel );
-								}
-
-								// Notify the new successor about us - so that
-								// he can adjust his responsibility
-								Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
-							}
-						} catch ( InterruptedException e ) {
-							logger.warn( "Stabilization interrupted.", e );
-						} catch ( ExecutionException e ) {
-							logger.error( "Stabilization failed.", e );
-						}
-					}
-
-				} );
+				stabilize();
 			}
 		}, stabilizationRate );
+	}
+
+	public void stabilize() {
+		ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
+		future.addFutureListener( new FutureListener<IHash>() {
+
+			@Override
+			public void completed( final ObservableFuture<IHash> future ) {
+				try {
+					HashAndAddress hash = (HashAndAddress) future.get();
+					if ( hash != null && !hash.equals( successorId ) ) {
+						logger.warn( "Stabilization detected invalid successor. Current " + successorId + ", actual "
+								+ hash );
+
+						successorChannel = getOrCreateChannel( hash, hash.getAddress() );
+						successorId = hash;
+
+						synchronized ( lookupTable ) {
+							lookupTable.put( successorId, successorChannel );
+						}
+
+						// Notify the new successor about us - so that
+						// he can adjust his responsibility
+						Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+					}
+				} catch ( InterruptedException e ) {
+					logger.warn( "Stabilization interrupted.", e );
+				} catch ( ExecutionException e ) {
+					logger.error( "Stabilization failed.", e );
+				}
+			}
+
+		} );
 	}
 
 	@Override
