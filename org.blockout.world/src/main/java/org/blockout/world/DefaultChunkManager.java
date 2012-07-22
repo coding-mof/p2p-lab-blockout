@@ -80,21 +80,38 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	}
 
 	@Override
-	public void eventPushed( final IEvent<?> event ) {
-		logger.debug( "Event pushed " + event );
-		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
-		if ( chord.getResponsibility().contains( new Hash( coordinate ) ) ) {
-			stateMachine.commitEvent( event );
-		}
-		
-		if ( !receiver.containsKey( coordinate ) ) {
-			chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), new Hash( coordinate ) );
-			if ( local.containsKey( coordinate ) ) {
-				for ( IHash address : local.get( coordinate ) ) {
-					chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), address );
+	public void eventPushed(final IEvent<?> event) {
+		logger.debug("Event pushed " + event);
+		TileCoordinate coordinate = Chunk.containingCunk(event
+				.getResponsibleTile());
+
+		// push&commit event if within own responsibility
+		if (chord.getResponsibility().contains(new Hash(coordinate))) {
+
+			// send push to anyone receiving updates for the chunk
+			if (receiver.containsKey(coordinate)) {
+				for (IHash address : receiver.get(coordinate)) {
+					chord.sendMessage(new StateMessage(event,
+							StateMessage.Type.PUSH_MESSAGE), address);
 				}
 			}
+			//commit
+			stateMachine.commitEvent(event);
+			
+		} else {
+			
+			chord.sendMessage(new StateMessage(event,
+					StateMessage.Type.PUSH_MESSAGE), new Hash(coordinate));
 		}
+
+		// send pushed event to all players local connected players receiving updates for the chunk
+		if (local.containsKey(coordinate)) {
+			for (IHash address : local.get(coordinate)) {
+				chord.sendMessage(new StateMessage(event,
+						StateMessage.Type.PUSH_MESSAGE), address);
+			}
+		}
+
 	}
 
 	@Override
@@ -157,11 +174,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 				ValidationResult result = stateMachine.pushEvent( msg.getEvent() );
 				if ( result == ValidationResult.Invalid ) {
 					eventRolledBack( msg.getEvent() );
-				}
-				if ( receiver.containsKey( Chunk.containingCunk( msg.getEvent().getResponsibleTile() ) ) ) {
-					if ( result == ValidationResult.Valid ) {
-						stateMachine.commitEvent( msg.getEvent() );
-					}
 				}
 				break;
 			default:
