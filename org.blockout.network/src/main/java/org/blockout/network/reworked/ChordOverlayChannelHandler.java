@@ -318,6 +318,17 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			public void completed( final ObservableFuture<IHash> future ) {
 				try {
 					IHash nodeId = future.get();
+					if ( nodeId.equals( localNode.getNodeId() ) ) {
+						logger.warn( "Detected cyclic routing information. Trigger stabilization protocol." );
+						executor.execute( new Runnable() {
+
+							@Override
+							public void run() {
+								stabilize();
+							}
+						} );
+						return;
+					}
 					logger.debug( "Found successor " + nodeId + " of new node " + message.getNodeId() );
 					routeMessage( message, nodeId );
 				} catch ( InterruptedException e ) {
@@ -432,7 +443,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			return future;
 		}
 		// Send a lookup message to our successor
-		Channels.write( successorChannel, new FindSuccessorMessage( localNode.getNodeId(), key ) );
+		// Channels.write( successorChannel, );
+		routeMessage( new FindSuccessorMessage( localNode.getNodeId(), key ), key );
 		return future;
 	}
 
@@ -560,38 +572,42 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 			@Override
 			public void run() {
-				ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
-				future.addFutureListener( new FutureListener<IHash>() {
-
-					@Override
-					public void completed( final ObservableFuture<IHash> future ) {
-						try {
-							HashAndAddress hash = (HashAndAddress) future.get();
-							if ( hash != null && !hash.equals( successorId ) ) {
-								logger.warn( "Stabilization detected invalid successor. Current " + successorId
-										+ ", actual " + hash );
-
-								successorChannel = getOrCreateChannel( hash, hash.getAddress() );
-								successorId = hash;
-
-								synchronized ( lookupTable ) {
-									lookupTable.put( successorId, successorChannel );
-								}
-
-								// Notify the new successor about us - so that
-								// he can adjust his responsibility
-								Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
-							}
-						} catch ( InterruptedException e ) {
-							logger.warn( "Stabilization interrupted.", e );
-						} catch ( ExecutionException e ) {
-							logger.error( "Stabilization failed.", e );
-						}
-					}
-
-				} );
+				stabilize();
 			}
 		}, stabilizationRate );
+	}
+
+	public void stabilize() {
+		ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
+		future.addFutureListener( new FutureListener<IHash>() {
+
+			@Override
+			public void completed( final ObservableFuture<IHash> future ) {
+				try {
+					HashAndAddress hash = (HashAndAddress) future.get();
+					if ( hash != null && !hash.equals( successorId ) ) {
+						logger.warn( "Stabilization detected invalid successor. Current " + successorId + ", actual "
+								+ hash );
+
+						successorChannel = getOrCreateChannel( hash, hash.getAddress() );
+						successorId = hash;
+
+						synchronized ( lookupTable ) {
+							lookupTable.put( successorId, successorChannel );
+						}
+
+						// Notify the new successor about us - so that
+						// he can adjust his responsibility
+						Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+					}
+				} catch ( InterruptedException e ) {
+					logger.warn( "Stabilization interrupted.", e );
+				} catch ( ExecutionException e ) {
+					logger.error( "Stabilization failed.", e );
+				}
+			}
+
+		} );
 	}
 
 	@Override
