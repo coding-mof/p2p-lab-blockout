@@ -70,12 +70,6 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 		this.world = world;
 		this.camera = camera;
 
-		// try {
-		// healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
-		// } catch ( Exception e ) {
-		// healthRenderer = new PrimitiveHealthRenderer();
-		// }
-
 		this.beanFactory = beanFactory;
 	}
 
@@ -156,7 +150,7 @@ public final class InGameGameState extends HUDOverlayGameState implements Screen
 	}
 
 	private IHealthRenderer getHealthRenderer() {
-		if ( null == healthRenderer ) {
+		if ( healthRenderer == null ) {
 			if ( Shader.areSupported() ) {
 				healthRenderer = new ShaderBasedHealthRenderer( camera, gameState );
 			} else {

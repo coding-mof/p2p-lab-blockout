@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.blockout.common.TileCoordinate;
 import org.blockout.world.entity.Entity;
 import org.blockout.world.entity.Player;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link IWorld} interface with optional
@@ -20,6 +22,11 @@ import org.blockout.world.entity.Player;
  * 
  */
 public class World implements IWorld, WorldAdapter {
+
+	private static final Logger						logger;
+	static {
+		logger = LoggerFactory.getLogger( World.class );
+	}
 
 	private TileCoordinate							pos;
 	private final Hashtable<TileCoordinate, Chunk>	view;
@@ -118,12 +125,13 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public void manageChunk( final Chunk chunk ) {
-		synchronized (managedChunks) {
+		logger.debug( "Managing chunk " + chunk );
+		synchronized ( managedChunks ) {
 			if ( !managedChunks.containsKey( chunk.getPosition() ) ) {
 				managedChunks.put( chunk.getPosition(), chunk );
 			}
 		}
-		
+
 	}
 
 	/**
@@ -131,7 +139,8 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public Chunk unmanageChunk( final TileCoordinate coord ) {
-		synchronized (managedChunks) {
+		logger.debug( "Stop managing chunk at " + coord );
+		synchronized ( managedChunks ) {
 			return managedChunks.remove( coord );
 		}
 	}
@@ -158,6 +167,7 @@ public class World implements IWorld, WorldAdapter {
 	 */
 	@Override
 	public void removeEntity( final Entity e ) {
+		logger.debug( "Removing entity " + e );
 		TileCoordinate c = findTile( e );
 		if ( c != null ) {
 			TileCoordinate chunkCoordinate = Chunk.containingCunk( c );
@@ -211,8 +221,8 @@ public class World implements IWorld, WorldAdapter {
 	 * method will remove all chunks no longer needed to buffer
 	 */
 	private void cleanView() {
-		
-		synchronized (view) {
+
+		synchronized ( view ) {
 			int x, y;
 			ArrayList<TileCoordinate> toRemove = new ArrayList<TileCoordinate>();
 			for ( TileCoordinate coord : view.keySet() ) {
@@ -226,7 +236,7 @@ public class World implements IWorld, WorldAdapter {
 				view.remove( tileCoordinate );
 			}
 		}
-		
+
 	}
 
 	/**

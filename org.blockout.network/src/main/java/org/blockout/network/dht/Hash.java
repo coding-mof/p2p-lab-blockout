@@ -21,7 +21,7 @@ public class Hash implements IHash {
 	}
 
 	public Hash(final String hash) {
-		value = hash;
+		value = fill( hash );
 	}
 
 	public Hash(final UUID id) {
@@ -34,6 +34,14 @@ public class Hash implements IHash {
 		HashFunction hf = Hashing.sha1();
 		HashCode hash = hf.hashString( String.valueOf( coord.hashCode() ) );
 		value = hash.toString();
+	}
+
+	private static String fill( String hash ) {
+		int diff = 40 - hash.length();
+		for ( int i = 0; i < diff; i++ ) {
+			hash = "0" + hash;
+		}
+		return hash;
 	}
 
 	@Override
@@ -53,7 +61,7 @@ public class Hash implements IHash {
 		if ( next.equals( new BigInteger( "2" ).pow( getM() ) ) ) {
 			return new Hash( BigInteger.ZERO.toString( 16 ) );
 		}
-		return new Hash( next.toString( 16 ) );
+		return new Hash( fill( next.toString( 16 ) ) );
 	}
 
 	@Override
@@ -84,8 +92,8 @@ public class Hash implements IHash {
 		BigInteger i = new BigInteger( value, 16 );
 		BigInteger next = i.subtract( BigInteger.ONE );
 		if ( next.equals( new BigInteger( "-1" ) ) ) {
-			return new Hash( new BigInteger( "2" ).pow( getM() ).subtract( BigInteger.ONE ).toString( 16 ) );
+			return new Hash( fill( new BigInteger( "2" ).pow( getM() ).subtract( BigInteger.ONE ).toString( 16 ) ) );
 		}
-		return new Hash( next.toString( 16 ) );
+		return new Hash( fill( next.toString( 16 ) ) );
 	}
 }

@@ -66,9 +66,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		this.stateMachine = stateMachine;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void eventCommitted( final IEvent<?> event ) {
 		logger.debug( "Event committed " + event );
@@ -82,9 +79,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void eventPushed( final IEvent<?> event ) {
 		logger.debug( "Event pushed " + event );
@@ -104,9 +98,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void eventRolledBack( final IEvent<?> event ) {
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
@@ -122,9 +113,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void requestChunk( final TileCoordinate position ) {
 		if ( receiver.containsKey( position ) ) {
@@ -141,9 +129,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void stopUpdating( final TileCoordinate position ) {
 		chord.sendMessage( new StopUpdatesMessage( position ), new Hash( position ) );
@@ -155,9 +140,6 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		local.remove( position );
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void enterGame( final Player player ) {
 		chord.sendMessage( new EnterGameMessage( player ), new Hash( new TileCoordinate( 0, 0 ) ) );
