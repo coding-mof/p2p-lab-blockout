@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.AnimationManager;
+import org.blockout.engine.animation.ParticleAnimation;
+import org.blockout.engine.animation.effects.SparkleEmitter;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.IWorld;
@@ -103,6 +105,9 @@ public class MonsterDeathHandler implements IEventHandler {
                 logger.info( "Spawning crate on old monster position "
                         + coordinate );
                 world.setEnityPosition( new Crate(), coordinate );
+                ParticleAnimation animation = new ParticleAnimation();
+                animation.addEffect( "sparkles", new SparkleEmitter( 3500 ) );
+                animationManager.addAnimation( animation, coordinate );
             }
         } else {
             logger.warn( "Monster " + monster + " no longer exists." );

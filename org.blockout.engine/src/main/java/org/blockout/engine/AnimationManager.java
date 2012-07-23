@@ -7,17 +7,13 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.animation.IAnimation;
-import org.blockout.engine.animation.ParticleAnimation;
-import org.blockout.engine.animation.effects.ExplosionEmitter;
 import org.newdawn.slick.Graphics;
 
 import com.google.common.base.Preconditions;
 
-@Named
 public class AnimationManager {
 
     private static class AnimationEntry {
@@ -37,48 +33,10 @@ public class AnimationManager {
     private List<AnimationEntry> animationList;
     private Camera               camera;
 
-    private ParticleAnimation    animation;
-
     @Inject
     public AnimationManager( final Camera camera ) {
         this.animationList = new LinkedList<AnimationEntry>();
         this.camera = camera;
-
-        // new Thread( new Runnable() {
-        // @Override
-        // public void run() {
-        // while(true){
-        // readLock.lock();
-        // try {
-        // animationList = new LinkedList<AnimationManager.AnimationEntry>(
-        // Collections2
-        // .filter(
-        // animationList,
-        // new Predicate<AnimationEntry>() {
-        // @Override
-        // public boolean apply(
-        // AnimationEntry arg ) {
-        // return arg.animation
-        // .completed();
-        // }
-        // } ) );
-        //
-        // } finally {
-        // readLock.unlock();
-        // }
-        //
-        // try {
-        // Thread.sleep( 1000 );
-        // } catch ( InterruptedException e ) {
-        // Thread.currentThread().interrupt();
-        // }
-        //
-        // if(Thread.interrupted()){
-        // return;
-        // }
-        // }
-        // }
-        // } ).start();
     }
 
     public void addAnimation( final IAnimation animation,
@@ -86,51 +44,73 @@ public class AnimationManager {
         Preconditions.checkNotNull( animation );
         Preconditions.checkNotNull( position );
 
+
         writeLock.lock();
         try {
             animation.start();
+            System.err.println( animation );
             animationList.add( new AnimationEntry( animation, position ) );
+
         } finally {
             writeLock.unlock();
+        }
+
+        for ( AnimationEntry entry : animationList ) {
+            System.err.println( "inlist: " + entry.animation );
         }
     }
 
     public void update( final long delta ) {
         readLock.lock();
+
         try {
+
+            List<AnimationEntry> removeMe = new LinkedList<AnimationEntry>();
             for ( AnimationEntry entry : animationList ) {
+                if( entry.animation.completed() ){
+                    System.err.println( "remove: " + entry.animation );
+                    removeMe.add( entry );
+                }
+            }
+            animationList.removeAll( removeMe );
+            // System.err.println( "update " + animationList.size() );
+
+            for ( AnimationEntry entry : animationList ) {
+                System.err.println( "update: " + entry.animation );
                 entry.animation.update( delta );
             }
-
-            getParticelAnimation().update( delta );
-        } catch ( Exception e ) {
-            e.printStackTrace();
         } finally {
             readLock.unlock();
         }
     }
 
     public void render( final Graphics g ) {
+        Camera localCam = camera.getReadOnly();
+        int tileSize = localCam.getTileSize();
+
         readLock.lock();
         try {
             for ( AnimationEntry entry : animationList ) {
-                entry.animation.render( 100, 100 );
-            }
+                TileCoordinate position = entry.position;
+                IAnimation animation = entry.animation;
 
-            getParticelAnimation().render( 100, 100 );
+                if( localCam.isInFrustum( position ) ) {
+                    int tileRelX = position.getX() - localCam.getStartTileX();
+                    int tileRelY = position.getY() - localCam.getStartTileY();
+                    
+                    int x = -localCam.getWidthOffset()
+                            + ( tileRelX * localCam.getTileSize() )
+                            + ( tileSize / 2 );
+                    int y = -localCam.getHeightOffset()
+                            + ( tileRelY * localCam.getTileSize() )
+                            - ( tileSize / 2 );
+                    System.err.println( "render: " + entry.animation );
+                    entry.animation.render( x, localCam.convertY( y )
+                            - localCam.getTileSize() );
+                }
+            }
         } finally {
             readLock.unlock();
         }
-    }
-
-    private IAnimation getParticelAnimation() {
-        if( null == animation ) {
-            animation = new ParticleAnimation();
-            animation.addEffect( "bla", new ExplosionEmitter( 5 ) );
-            animation.setLooping( true );
-            animation.start();
-        }
-
-        return animation;
     }
 }
