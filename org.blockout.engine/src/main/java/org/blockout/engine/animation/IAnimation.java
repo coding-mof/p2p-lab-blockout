@@ -55,4 +55,11 @@ public interface IAnimation {
 	 * 		True if the animation should loop, false otherwise.
 	 */
 	public void setLooping(boolean looping);
+
+    /**
+     * Returns if the animation is looping
+     * 
+     * @return True if the animation is looping, false otherwise.
+     */
+    public boolean isLooping();
 }

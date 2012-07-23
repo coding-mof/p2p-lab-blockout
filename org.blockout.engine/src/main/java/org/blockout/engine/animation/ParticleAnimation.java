@@ -173,6 +173,11 @@ public class ParticleAnimation implements IAnimation {
 		isLooping = looping;
 	}
 	
+    @Override
+    public boolean isLooping() {
+        return isLooping;
+    }
+
 	/**
 	 * Add an effect to this animation
 	 * 

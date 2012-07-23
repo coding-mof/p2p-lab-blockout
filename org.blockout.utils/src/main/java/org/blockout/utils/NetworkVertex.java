@@ -1,48 +1,43 @@
 package org.blockout.utils;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import com.google.common.base.Preconditions;
 
+/**
+ * Class to represent an vertex in the network graph
+ * 
+ * @author Florian Müller
+ */
 public class NetworkVertex implements Comparable<NetworkVertex> {
 	private String				id;
-	private final List<String>	connections;
 
-	public NetworkVertex() {
-		connections = new LinkedList<String>();
-		id = "";
-	}
-
+    /**
+     * Construct to create a new vertex with a unique id
+     * 
+     * @param id
+     *            Unique id of this vertex
+     * 
+     * @throws NullPointerException
+     *             Thrown if an argument is null
+     */
 	public NetworkVertex(final String id) {
-		this();
+        Preconditions.checkNotNull( id, "id is null" );
+
 		this.id = id;
 	}
 
-	public void setId( final String id ) {
-		this.id = id;
-	}
-
+    /**
+     * Returns the id if this vertex
+     * 
+     * @return The id of this vertex as a String
+     */
 	public String getId() {
 		return id;
-	}
-
-	public void addConnection( final String address ) {
-		connections.add( address );
-	}
-
-	public void removeConnection( final String address ) {
-		connections.remove( address );
-	}
-
-	public List<String> getConnections() {
-		return Collections.unmodifiableList( connections );
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((connections == null) ? 0 : connections.hashCode());
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
