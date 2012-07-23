@@ -1,6 +1,7 @@
 package org.blockout.world;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +53,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private final Hashtable<TileCoordinate, ArrayList<IHash>>	receiver;
 
 	private final Hashtable<TileCoordinate, ArrayList<IHash>>	local;
+	
+	private final HashSet<IEvent> pushedEvents;
 
 	public DefaultChunkManager(final WorldAdapter worldAdapter, final IChordOverlay chord) {
 		receiver = new Hashtable<TileCoordinate, ArrayList<IHash>>();
@@ -61,6 +64,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		this.chord = chord;
 		listener = new ArrayList<ChunkManagerListener>();
 		chord.addChordListener( this );
+		
+		pushedEvents = new HashSet<IEvent>();
 	}
 
 	@Override
@@ -70,6 +75,9 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	@Override
 	public void eventCommitted( final IEvent<?> event ) {
+			if(pushedEvents.contains(event)){
+				pushedEvents.remove(event);
+			}
 		logger.debug( "Event committed " + event );
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( chord.getResponsibility().contains(new Hash(coordinate))) {
@@ -90,6 +98,14 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	@Override
 	public void eventPushed(final IEvent<?> event) {
+		boolean send = true;
+			if(pushedEvents.contains(event)){
+				send = false;
+			}else{
+				pushedEvents.add(event);
+			}
+		
+		
 		logger.debug("Event pushed " + event);
 		TileCoordinate coordinate = Chunk.containingCunk(event
 				.getResponsibleTile());
@@ -98,7 +114,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		if (chord.getResponsibility().contains(new Hash(coordinate))) {
 
 			// send push to anyone receiving updates for the chunk
-			if (receiver.containsKey(coordinate)) {
+			if (send && receiver.containsKey(coordinate)) {
 				
 				clean(receiver.get(coordinate));
 				
@@ -130,6 +146,11 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	@Override
 	public void eventRolledBack( final IEvent<?> event ) {
+		
+			if(pushedEvents.contains(event)){
+				pushedEvents.remove(event);
+			}
+		
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
 			
@@ -184,13 +205,18 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private void receive( final StateMessage msg, final IHash origin ) {
 		logger.debug( "Received message " + msg + " from " + origin );
 		switch ( msg.getType() ) {
-			case ROLLBAK_MESSAGE:
+			case ROLLBAK_MESSAGE:				
 				stateMachine.rollbackEvent( msg.getEvent() );
 				break;
 			case COMMIT_MESSAGE:
 				stateMachine.commitEvent( msg.getEvent() );
 				break;
 			case PUSH_MESSAGE:
+					if(pushedEvents.contains(msg.getEvent())){
+						return;
+					}else {
+						pushedEvents.add(msg.getEvent());
+					}
 				ValidationResult result = stateMachine.pushEvent( msg.getEvent() );
 				if ( result == ValidationResult.Invalid ) {
 					eventRolledBack( msg.getEvent() );
