@@ -1,5 +1,6 @@
 package org.blockout.network.reworked;
 
+import java.math.BigInteger;
 import java.net.SocketAddress;
 
 import org.blockout.network.dht.IHash;
@@ -67,5 +68,15 @@ public class HashAndAddress implements IHash {
 	@Override
 	public boolean equals( final Object obj ) {
 		return hash.equals( obj );
+	}
+
+	@Override
+	public IHash getClosest( final IHash a, final IHash b ) {
+		return hash.getClosest( a, b );
+	}
+
+	@Override
+	public BigInteger getInteger() {
+		return hash.getInteger();
 	}
 }

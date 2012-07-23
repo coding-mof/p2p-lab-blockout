@@ -152,4 +152,9 @@ public class SpriteSheetImpl implements ISpriteSheet {
             spriteSheet.renderInUse( x, y, sx, sy );
         }
     }
+
+    @Override
+    public int getSpriteCount() {
+        return numSprites;
+    }
 }

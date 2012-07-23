@@ -98,11 +98,11 @@ public final class Camera {
 		return data.tileSize;
 	}
 
-	public int getWidthOfset() {
+	public int getWidthOffset() {
 		return data.widthOfset;
 	}
 
-	public int getHeightOfset() {
+	public int getHeightOffset() {
 		return data.heightOfset;
 	}
 

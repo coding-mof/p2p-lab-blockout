@@ -8,7 +8,7 @@ import com.google.common.base.Preconditions;
 
 /**
  * The welcome message gets send by a node already in the chord ring as response
- * to a {@link IAmMessage}. This message tells the new node what it's successor
+ * to a {@link NodeIdentificationMessage}. This message tells the new node what it's successor
  * and predecessor will be.
  * 
  * @author Marc-Christian Schulze

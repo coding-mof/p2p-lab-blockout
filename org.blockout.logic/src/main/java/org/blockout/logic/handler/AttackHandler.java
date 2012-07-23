@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.AnimationManager;
 import org.blockout.engine.animation.ParticleAnimation;
+import org.blockout.engine.animation.effects.RandomBloodSplatterEmitter;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.IWorld;
@@ -19,7 +20,6 @@ import org.blockout.world.event.IEvent;
 import org.blockout.world.event.MonsterSlayedEvent;
 import org.blockout.world.event.PlayerDiedEvent;
 import org.blockout.world.state.IStateMachine;
-import org.newdawn.slick.particles.effects.FireEmitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,8 +88,8 @@ public class AttackHandler implements IEventHandler {
         AttackEvent ae = (AttackEvent) event;
 
         ParticleAnimation animation = new ParticleAnimation();
-        animation.addEffect( "fire", new FireEmitter() );
-        animationManager.addAnimation( animation, null );
+        animation.addEffect( "blood", new RandomBloodSplatterEmitter() );
+        animationManager.addAnimation( animation, event.getResponsibleTile() );
 
         // activate objects
         Actor aggressor = world.findEntity( ae.getAggressor().getId(),
