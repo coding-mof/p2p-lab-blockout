@@ -36,6 +36,10 @@ public class Hash implements IHash {
 		value = hash.toString();
 	}
 
+	public Hash(final BigInteger i) {
+		value = fill( i.toString( 16 ) );
+	}
+
 	private static String fill( String hash ) {
 		int diff = 40 - hash.length();
 		for ( int i = 0; i < diff; i++ ) {
@@ -56,17 +60,16 @@ public class Hash implements IHash {
 
 	@Override
 	public IHash getNext() {
-		BigInteger i = new BigInteger( value, 16 );
-		BigInteger next = i.add( BigInteger.ONE );
+		BigInteger next = getInteger().add( BigInteger.ONE );
 		if ( next.equals( new BigInteger( "2" ).pow( getM() ) ) ) {
-			return new Hash( BigInteger.ZERO.toString( 16 ) );
+			return new Hash( BigInteger.ZERO );
 		}
-		return new Hash( fill( next.toString( 16 ) ) );
+		return new Hash( next );
 	}
 
 	@Override
 	public int compareTo( final IHash other ) {
-		return new BigInteger( value, 16 ).compareTo( new BigInteger( other.getValue(), 16 ) );
+		return getInteger().compareTo( other.getInteger() );
 	}
 
 	@Override
@@ -89,11 +92,28 @@ public class Hash implements IHash {
 
 	@Override
 	public IHash getPrevious() {
-		BigInteger i = new BigInteger( value, 16 );
-		BigInteger next = i.subtract( BigInteger.ONE );
+		BigInteger next = getInteger().subtract( BigInteger.ONE );
 		if ( next.equals( new BigInteger( "-1" ) ) ) {
-			return new Hash( fill( new BigInteger( "2" ).pow( getM() ).subtract( BigInteger.ONE ).toString( 16 ) ) );
+			return new Hash( new BigInteger( "2" ).pow( getM() ).subtract( BigInteger.ONE ) );
 		}
-		return new Hash( fill( next.toString( 16 ) ) );
+		return new Hash( next );
+	}
+
+	@Override
+	public IHash getClosest( final IHash a, final IHash b ) {
+		if ( a == null ) {
+			return b;
+		}
+		if ( b == null ) {
+			return a;
+		}
+		BigInteger diffA = getInteger().subtract( a.getInteger() ).abs();
+		BigInteger diffB = getInteger().subtract( b.getInteger() ).abs();
+		return new Hash( diffA.min( diffB ) );
+	}
+
+	@Override
+	public BigInteger getInteger() {
+		return new BigInteger( value, 16 );
 	}
 }

@@ -235,6 +235,7 @@ public class ConnectionManager extends SimpleChannelHandler implements IConnecti
 	public void exceptionCaught( final ChannelHandlerContext ctx, final ExceptionEvent e ) throws Exception {
 		logger.warn( "Caught exception in network stack.", e.getCause() );
 		super.exceptionCaught( ctx, e );
+		e.getChannel().close();
 	}
 
 	@Override
