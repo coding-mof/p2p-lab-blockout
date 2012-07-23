@@ -7,22 +7,20 @@ import org.blockout.network.dht.IHash;
 import com.google.common.base.Preconditions;
 
 /**
- * The join message is sent by new nodes when they enter the chord ring. As part
- * of the protocol only the TCP client sends the join message. The message then
- * gets routed through the ring until it reaches the node that is responsible
- * for the new node's id. This node will then respond with a
- * {@link WelcomeMessage}.
+ * This messages is sent by each peer when a new connection has been
+ * established. These messages are used to assign a hash value to each channel
+ * and fill the lookup table for routing.
  * 
  * @author Marc-Christian Schulze
  * 
  */
-public class IAmMessage extends AbstractMessage {
+public class NodeIdentificationMessage extends AbstractMessage {
 
 	private static final long	serialVersionUID	= -7039915306236068931L;
 	private final IHash			nodeId;
 	private final SocketAddress	address;
 
-	public IAmMessage(final IHash nodeId, final SocketAddress address) {
+	public NodeIdentificationMessage(final IHash nodeId, final SocketAddress address) {
 
 		Preconditions.checkNotNull( nodeId );
 		Preconditions.checkNotNull( address );
