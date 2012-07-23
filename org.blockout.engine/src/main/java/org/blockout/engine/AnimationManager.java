@@ -7,19 +7,20 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.animation.IAnimation;
-import org.blockout.engine.animation.ParticleAnimation;
-import org.blockout.engine.animation.effects.ExplosionEmitter;
 import org.newdawn.slick.Graphics;
 
 import com.google.common.base.Preconditions;
 
-@Named
+/**
+ * The AnimationManager handles all that are started inside the game
+ * 
+ * @author Florian Müller
+ * 
+ */
 public class AnimationManager {
-
     private static class AnimationEntry {
         public IAnimation     animation;
         public TileCoordinate position;
@@ -30,61 +31,44 @@ public class AnimationManager {
         }
     }
 
-    public final ReadWriteLock   rwLock    = new ReentrantReadWriteLock( true );
-    public final Lock            readLock  = rwLock.readLock();
-    public final Lock            writeLock = rwLock.writeLock();
+    private final ReadWriteLock  rwLock    = new ReentrantReadWriteLock( true );
+    private final Lock           readLock  = rwLock.readLock();
+    private final Lock           writeLock = rwLock.writeLock();
 
     private List<AnimationEntry> animationList;
     private Camera               camera;
 
-    private ParticleAnimation    animation;
-
+    /**
+     * Constructor to create a AnimationManager
+     * 
+     * @param camera
+     *            Camera to render animation properly
+     * 
+     * @throws NullPointerException
+     *             Thrown if the argument was null
+     */
     @Inject
     public AnimationManager( final Camera camera ) {
+        Preconditions.checkNotNull( camera, "camera is null" );
+
         this.animationList = new LinkedList<AnimationEntry>();
         this.camera = camera;
-
-        // new Thread( new Runnable() {
-        // @Override
-        // public void run() {
-        // while(true){
-        // readLock.lock();
-        // try {
-        // animationList = new LinkedList<AnimationManager.AnimationEntry>(
-        // Collections2
-        // .filter(
-        // animationList,
-        // new Predicate<AnimationEntry>() {
-        // @Override
-        // public boolean apply(
-        // AnimationEntry arg ) {
-        // return arg.animation
-        // .completed();
-        // }
-        // } ) );
-        //
-        // } finally {
-        // readLock.unlock();
-        // }
-        //
-        // try {
-        // Thread.sleep( 1000 );
-        // } catch ( InterruptedException e ) {
-        // Thread.currentThread().interrupt();
-        // }
-        //
-        // if(Thread.interrupted()){
-        // return;
-        // }
-        // }
-        // }
-        // } ).start();
     }
 
+    /**
+     * Add a new animation to the AnimationManager
+     * 
+     * @param animation
+     *            The animation
+     * @param position
+     *            On wich tile should the aniomation be rendered
+     * @throws NullPointerException
+     *             Thrown if an argument is null
+     */
     public void addAnimation( final IAnimation animation,
             final TileCoordinate position ) {
-        Preconditions.checkNotNull( animation );
-        Preconditions.checkNotNull( position );
+        Preconditions.checkNotNull( animation, "animation is null" );
+        Preconditions.checkNotNull( position, "position is null" );
 
         writeLock.lock();
         try {
@@ -95,42 +79,67 @@ public class AnimationManager {
         }
     }
 
+    /**
+     * Update the state of all active animations
+     * 
+     * @param delta
+     *            Time between two calls of update
+     */
     public void update( final long delta ) {
         readLock.lock();
         try {
+            // remove all completed animations
+            List<AnimationEntry> removeMe = new LinkedList<AnimationEntry>();
             for ( AnimationEntry entry : animationList ) {
-                entry.animation.update( delta );
+                IAnimation animation = entry.animation;
+                if( animation.completed() && !animation.isLooping() ) {
+                    removeMe.add( entry );
+                }
             }
+            animationList.removeAll( removeMe );
 
-            getParticelAnimation().update( delta );
-        } catch ( Exception e ) {
-            e.printStackTrace();
+            for ( AnimationEntry entry : animationList ) {
+                IAnimation animation = entry.animation;
+                animation.update( delta );
+            }
         } finally {
             readLock.unlock();
         }
     }
 
+    /**
+     * Render all active animations
+     * 
+     * @param g
+     *            Current graphic context
+     */
     public void render( final Graphics g ) {
+        Camera localCam = camera.getReadOnly();
+        int tileSize = localCam.getTileSize();
+
         readLock.lock();
         try {
             for ( AnimationEntry entry : animationList ) {
-                entry.animation.render( 100, 100 );
-            }
+                TileCoordinate position = entry.position;
+                IAnimation animation = entry.animation;
 
-            getParticelAnimation().render( 100, 100 );
+                if( localCam.isInFrustum( position ) ) {
+                    int tileRelX = position.getX() - localCam.getStartTileX();
+                    int tileRelY = position.getY() - localCam.getStartTileY();
+                    
+                    int x = -localCam.getWidthOffset()
+                            + ( tileRelX * localCam.getTileSize() )
+                            + ( tileSize / 2 );
+                    int y = -localCam.getHeightOffset()
+                            + ( tileRelY * localCam.getTileSize() )
+                            - ( tileSize / 2 );
+                    animation.render( x,
+                            localCam.convertY( y )
+                            - localCam.getTileSize() );
+                }
+            }
         } finally {
             readLock.unlock();
         }
-    }
-
-    private IAnimation getParticelAnimation() {
-        if( null == animation ) {
-            animation = new ParticleAnimation();
-            animation.addEffect( "bla", new ExplosionEmitter( 5 ) );
-            animation.setLooping( true );
-            animation.start();
-        }
-
-        return animation;
     }
 }

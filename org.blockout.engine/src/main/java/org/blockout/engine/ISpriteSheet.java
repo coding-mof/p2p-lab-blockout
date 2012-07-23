@@ -63,4 +63,11 @@ public interface ISpriteSheet {
 	 * 		y position where to render the sprite
 	 */
 	public void renderInUse( int spriteId, int x, int y );
+
+    /**
+     * Returns the amount of sprites inside theis spritesheet
+     * 
+     * @return
+     */
+    public int getSpriteCount();
 }

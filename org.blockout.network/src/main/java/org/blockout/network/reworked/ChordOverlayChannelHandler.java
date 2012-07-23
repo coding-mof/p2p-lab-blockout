@@ -111,6 +111,9 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				return channel;
 			}
 		}
+		if ( hash.equals( localNode.getNodeId() ) ) {
+			return null;
+		}
 
 		ConnectionFuture future = connectionMgr.connectTo( address );
 		future.awaitUninterruptibly();
@@ -132,29 +135,31 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			}
 		}
 
-		// check if it was our predecessor
-		if ( e.getChannel().equals( predecessorChannel ) ) {
-			// replace predecessor with most closest node or ourself
-			// and adjust our responsibility
-			logger.info( "Channel " + e.getChannel() + " to our predecessor " + predecessorId + " has been closed." );
-			IHash newId;
-			Channel newChannel;
-			synchronized ( lookupTable ) {
-				IHash lowerKey = lookupTable.lowerKey( predecessorId );
-				if ( lowerKey == null && !lookupTable.isEmpty() ) {
-					lowerKey = lookupTable.lastKey();
-				}
-				if ( lowerKey == null ) {
-					newId = localNode.getNodeId();
-					newChannel = null;
-				} else {
-					newId = lowerKey;
-					newChannel = lookupTable.get( lowerKey );
-				}
-			}
-			logger.info( "New predecessor will be " + predecessorId + " at " + predecessorChannel );
-			changePredecessor( newId, newChannel );
-		}
+		// // check if it was our predecessor
+		// if ( e.getChannel().equals( predecessorChannel ) ) {
+		// // replace predecessor with most closest node or ourself
+		// // and adjust our responsibility
+		// logger.info( "Channel " + e.getChannel() + " to our predecessor " +
+		// predecessorId + " has been closed." );
+		// IHash newId;
+		// Channel newChannel;
+		// synchronized ( lookupTable ) {
+		// IHash lowerKey = lookupTable.lowerKey( predecessorId );
+		// if ( lowerKey == null && !lookupTable.isEmpty() ) {
+		// lowerKey = lookupTable.lastKey();
+		// }
+		// if ( lowerKey == null ) {
+		// newId = localNode.getNodeId();
+		// newChannel = null;
+		// } else {
+		// newId = lowerKey;
+		// newChannel = lookupTable.get( lowerKey );
+		// }
+		// }
+		// logger.info( "New predecessor will be " + predecessorId + " at " +
+		// predecessorChannel );
+		// changePredecessor( newId, newChannel );
+		// }
 
 		// check if it was our successor
 		if ( e.getChannel().equals( successorChannel ) ) {
@@ -176,6 +181,23 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			}
 			logger.info( "New successor will be " + successorId + " at " + successorChannel );
 			changeSuccessor( newId, newChannel );
+			ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
+			future.addFutureListener( new FutureListener<IHash>() {
+
+				@Override
+				public void completed( final ObservableFuture<IHash> future ) {
+					try {
+						HashAndAddress haa = (HashAndAddress) future.get();
+						if ( future.isDone() && !future.isCancelled() ) {
+							changeSuccessor( haa, getOrCreateChannel( haa, haa.getAddress() ) );
+						}
+					} catch ( InterruptedException e ) {
+						logger.warn( "Inerrupted during successor lookup.", e );
+					} catch ( ExecutionException e ) {
+						logger.error( "Successor lookup failed.", e );
+					}
+				}
+			} );
 		}
 	}
 
@@ -197,10 +219,20 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		}
 
 		// Update our knowledge about the channel
-		if ( msg instanceof IAmMessage ) {
+		if ( msg instanceof NodeIdentificationMessage ) {
+			IHash nodeId = ((NodeIdentificationMessage) msg).getNodeId();
 			synchronized ( lookupTable ) {
-				lookupTable.put( ((IAmMessage) msg).getNodeId(), e.getChannel() );
+				lookupTable.put( nodeId, e.getChannel() );
 			}
+			// WrappedRange<IHash> successorRange = new WrappedRange<IHash>(
+			// localNode.getNodeId(),
+			// successorId.getPrevious() );
+			// if ( successorRange.contains( nodeId ) ) {
+			// // connected to a node which is a better successor than our
+			// // current
+			// changeSuccessor( nodeId, e.getChannel() );
+			// }
+
 		}
 
 		// check if we have to route the message
@@ -212,8 +244,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		// message is destined for us
 		if ( message instanceof FindSuccessorMessage ) {
 			handleFindSuccessorMessage( (FindSuccessorMessage) message );
-		} else if ( message instanceof IAmMessage ) {
-			handleIAmMessage( connectionMgr, e, (IAmMessage) message );
 		} else if ( message instanceof ChordEnvelope ) {
 			ChordEnvelope envelope = (ChordEnvelope) message;
 			fireMessageReceived( envelope.getSenderId(), envelope.getContent() );
@@ -229,19 +259,13 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	private void handleJoinRequestMessage( final IConnectionManager connectionMgr2, final JoinRequestMessage message ) {
-		welcomeNode( connectionMgr, message.getNodeId(), message.getAddress() );
+		if ( !message.getNodeId().equals( predecessorId ) ) {
+			welcomeNode( connectionMgr, message.getNodeId(), message.getAddress() );
+		}
 	}
 
 	private void handleIAmYourPredeccessorMessage( final MessageEvent e, final IAmYourPredeccessor msg ) {
-		// check if this not yet the case
-		if ( !msg.getNodeId().equals( predecessorId ) ) {
-			logger.info( "Got notified about new predecessor " + predecessorId + " at " + predecessorChannel );
-			synchronized ( lookupTable ) {
-				lookupTable.put( msg.getNodeId(), e.getChannel() );
-			}
-
-			changePredecessor( msg.getNodeId(), e.getChannel() );
-		}
+		changePredecessor( msg.getNodeId(), e.getChannel() );
 	}
 
 	private void handleWelcomeMessage( final MessageEvent e, final WelcomeMessage msg ) {
@@ -254,7 +278,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				+ msg.getSuccessorAddress() );
 
 		changeSuccessor( msg.getSuccessorId(), e.getChannel() );
-		changePredecessor( msg.getLowerBound().getPrevious(), null );
 	}
 
 	private void updateResponsibility( final IHash lowerBound ) {
@@ -285,19 +308,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 		routeMessage( responseMsg );
 	}
 
-	private void handleIAmMessage( final IConnectionManager connectionMgr, final MessageEvent e,
-			final IAmMessage message ) {
-
-		if ( responsibility.contains( message.getNodeId() ) ) {
-			// We are the new node's successor
-			welcomeNode( connectionMgr, message.getNodeId(), message.getAddress() );
-			return;
-		}
-
-		// Re-write message
-		routeMessage( new JoinRequestMessage( message.getNodeId(), message.getAddress() ) );
-	}
-
 	private void welcomeNode( final IConnectionManager connectionMgr, final IHash nodeId, final SocketAddress address ) {
 
 		// mark the new connection so that no "I'm message" will be sent
@@ -323,23 +333,64 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	private void changePredecessor( final IHash newPredecessor, final Channel newChannel ) {
-		predecessorId = newPredecessor;
-		predecessorChannel = newChannel;
-		firePredecessorChanged( predecessorId );
-		updateResponsibility( predecessorId.getNext() );
+		if ( !predecessorId.equals( newPredecessor ) ) {
+			predecessorId = newPredecessor;
+			predecessorChannel = newChannel;
+			if ( predecessorChannel != null && predecessorChannel.isConnected() ) {
+				synchronized ( lookupTable ) {
+					lookupTable.put( predecessorId, predecessorChannel );
+				}
+			}
+			firePredecessorChanged( predecessorId );
+			updateResponsibility( predecessorId.getNext() );
+		}
 	}
 
 	private void changeSuccessor( final IHash newSuccessor, final Channel newChannel ) {
-		successorId = newSuccessor;
-		successorChannel = newChannel;
-		fireSuccessorChanged( successorId );
-		if ( successorChannel != null && successorChannel.isConnected() ) {
+		if ( !successorId.equals( newSuccessor ) ) {
+
+			// the new successor is only valid if when have no other node in our
+			// routing table that is in the range between
+			// [localNode+1, successor-1]
+			IHash lowerBound = localNode.getNodeId().getNext();
+			WrappedRange<IHash> range = new WrappedRange<IHash>( lowerBound, newSuccessor.getPrevious() );
 			synchronized ( lookupTable ) {
-				lookupTable.put( successorId, successorChannel );
+
+				// IHash smallestMatching = null;
+				for ( IHash key : lookupTable.keySet() ) {
+					if ( range.contains( key ) ) {
+						// smallestMatching = lowerBound.getClosest( key,
+						// smallestMatching );
+						logger.debug( "New successor " + newSuccessor + " is not better than current " + successorId
+								+ "." );
+						return;
+					}
+				}
+
+				//
+				// if ( smallestMatching != null && !smallestMatching.equals(
+				// newSuccessor ) ) {
+				// logger.debug( "Invalid node " + newSuccessor +
+				// " has respond to successor lookup." );
+				// changeSuccessor( smallestMatching, lookupTable.get(
+				// smallestMatching ) );
+				// return;
+				// }
+			}
+
+			successorId = newSuccessor;
+			successorChannel = newChannel;
+			fireSuccessorChanged( successorId );
+			if ( successorChannel != null && successorChannel.isConnected() ) {
+				synchronized ( lookupTable ) {
+					lookupTable.put( successorId, successorChannel );
+				}
 			}
 			// Notify the new successor about us - so that
 			// he can adjust his responsibility
-			Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+			if ( successorChannel != null && successorChannel.isConnected() ) {
+				Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+			}
 		}
 	}
 
@@ -369,14 +420,17 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 		channels.add( e.getChannel() );
 
+		Channels.write( e.getChannel(),
+				new NodeIdentificationMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
+
 		// Introduce ourself when we have connected.
 		if ( e.getChannel().getFactory() instanceof ClientSocketChannelFactory ) {
-			// only clients introduce themself
+			// only clients send join requests
 
 			if ( !introductionFilter.contains( e.getChannel().getRemoteAddress() ) ) {
-				logger.info( "We connected to a stranger. Introduce ourself." );
+				logger.info( "We connected to a stranger. Request join." );
 				Channels.write( e.getChannel(),
-						new IAmMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
+						new JoinRequestMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
 			} else {
 				introductionFilter.remove( e.getChannel().getRemoteAddress() );
 			}
@@ -562,6 +616,15 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				stabilize();
 			}
 		}, stabilizationRate );
+		scheduler.scheduleAtFixedRate( new Runnable() {
+
+			@Override
+			public void run() {
+				if ( successorChannel != null && successorChannel.isConnected() ) {
+					Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+				}
+			}
+		}, 1000 );
 	}
 
 	public void stabilize() {
@@ -572,11 +635,9 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			public void completed( final ObservableFuture<IHash> future ) {
 				try {
 					HashAndAddress hash = (HashAndAddress) future.get();
-					if ( hash != null && !hash.equals( successorId ) ) {
-						logger.warn( "Stabilization detected invalid successor. Current " + successorId + ", actual "
-								+ hash );
-
+					if ( hash != null ) {
 						changeSuccessor( hash, getOrCreateChannel( hash, hash.getAddress() ) );
+						logger.info( "Stabilization successful." );
 					}
 				} catch ( InterruptedException e ) {
 					logger.warn( "Stabilization interrupted.", e );

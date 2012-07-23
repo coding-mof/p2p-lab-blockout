@@ -1,77 +1,81 @@
 package org.blockout.utils;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import com.google.common.base.Preconditions;
 
-public class NetworkVertex {
-    private String       id;
-    private List<String> connections;
+/**
+ * Class to represent an vertex in the network graph
+ * 
+ * @author Florian Müller
+ */
+public class NetworkVertex implements Comparable<NetworkVertex> {
+	private String				id;
 
-    public NetworkVertex() {
-        connections = new LinkedList<String>();
-        id = "";
-    }
+    /**
+     * Construct to create a new vertex with a unique id
+     * 
+     * @param id
+     *            Unique id of this vertex
+     * 
+     * @throws NullPointerException
+     *             Thrown if an argument is null
+     */
+	public NetworkVertex(final String id) {
+        Preconditions.checkNotNull( id, "id is null" );
 
-    public NetworkVertex( final String id ) {
-        this();
-        this.id = id;
-    }
+		this.id = id;
+	}
 
-    public void setId( String id ) {
-        this.id = id;
-    }
+    /**
+     * Returns the id if this vertex
+     * 
+     * @return The id of this vertex as a String
+     */
+	public String getId() {
+		return id;
+	}
 
-    public String getId() {
-        return id;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
 
-    public void addConnection( final String address ) {
-        connections.add( address );
-    }
+	@Override
+	public boolean equals( final Object obj ) {
+		if ( this == obj ) {
+			return true;
+		}
 
-    public void removeConnection( final String address ) {
-        connections.remove( address );
-    }
+		if ( obj == null ) {
+			return false;
+		}
 
-    public List<String> getConnections() {
-        return Collections.unmodifiableList( connections );
-    }
+		if ( getClass() != obj.getClass() ) {
+			return false;
+		}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ( ( connections == null ) ? 0 : connections.hashCode() );
-        result = prime * result + ( ( id == null ) ? 0 : id.hashCode() );
-        return result;
-    }
+		NetworkVertex other = (NetworkVertex) obj;
 
-    @Override
-    public boolean equals( Object obj ) {
-        if( this == obj )
-            return true;
+		if ( id == null ) {
+			if ( other.id != null ) {
+				return false;
+			}
+		} else if ( !id.equals( other.id ) ) {
+			return false;
+		}
 
-        if( obj == null )
-            return false;
+		return true;
+	}
 
-        if( getClass() != obj.getClass() )
-            return false;
+	@Override
+	public String toString() {
+		return id;
+	}
 
-        NetworkVertex other = (NetworkVertex) obj;
-
-        if( id == null ) {
-            if( other.id != null )
-                return false;
-        } else if( !id.equals( other.id ) )
-            return false;
-
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return id;
-    }
+	@Override
+	public int compareTo( final NetworkVertex o ) {
+		return id.compareTo( o.id );
+	}
 }
