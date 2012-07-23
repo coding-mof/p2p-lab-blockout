@@ -64,9 +64,9 @@ public abstract class AbstractWorldRenderer implements IWorldRenderer {
 		int curY;
 		for ( IRenderingPass pass : renderingPass ) {
 			pass.beginPass();
-			curY = -localCamera.getHeightOfset();
+			curY = -localCamera.getHeightOffset();
 			for ( int y = 0; y < localCamera.getNumVerTiles(); y++ ) {
-				curX = -localCamera.getWidthOfset();
+				curX = -localCamera.getWidthOffset();
 				for ( int x = 0; x < localCamera.getNumHorTiles(); x++ ) {
 
 					Tile tile = world.getTile( startTileX + x, startTileY + y );
