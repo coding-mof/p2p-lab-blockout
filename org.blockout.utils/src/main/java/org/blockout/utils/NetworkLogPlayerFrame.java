@@ -49,6 +49,7 @@ import com.google.common.base.Preconditions;
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.graph.SortedSparseMultigraph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.Context;
 import edu.uci.ics.jung.graph.util.EdgeType;
@@ -102,7 +103,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 	}
 
 	private void initGraph() {
-		graph = new SparseMultigraph<NetworkVertex, NetworkEdge>();
+		graph = new SortedSparseMultigraph<NetworkVertex, NetworkEdge>();
 	}
 
 	private void initLayout() {

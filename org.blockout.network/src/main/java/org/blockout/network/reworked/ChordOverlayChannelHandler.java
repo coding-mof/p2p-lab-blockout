@@ -176,6 +176,23 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			}
 			logger.info( "New successor will be " + successorId + " at " + successorChannel );
 			changeSuccessor( newId, newChannel );
+			ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
+			future.addFutureListener( new FutureListener<IHash>() {
+
+				@Override
+				public void completed( final ObservableFuture<IHash> future ) {
+					try {
+						HashAndAddress haa = (HashAndAddress) future.get();
+						if ( future.isDone() && !future.isCancelled() ) {
+							changeSuccessor( haa, getOrCreateChannel( haa, haa.getAddress() ) );
+						}
+					} catch ( InterruptedException e ) {
+						logger.warn( "Inerrupted during successor lookup.", e );
+					} catch ( ExecutionException e ) {
+						logger.error( "Successor lookup failed.", e );
+					}
+				}
+			} );
 		}
 	}
 
