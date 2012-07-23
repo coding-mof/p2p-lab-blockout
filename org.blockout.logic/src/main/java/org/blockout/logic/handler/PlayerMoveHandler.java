@@ -51,7 +51,11 @@ public class PlayerMoveHandler implements IEventHandler {
 		// }
 		logger.info( "Player " + pme.getPlayer() + " moved from tile " + pme.getOldPos() + " to tile "
 				+ pme.getNewPos() );
-		world.setPlayerPosition( pme.getPlayer(), pme.getNewPos() );
+		if( pme.getPlayer().equals( gameState.getPlayer() )){
+			world.setPlayerPosition( pme.getPlayer(), pme.getNewPos() );
+		}else{
+			world.setEnityPosition( pme.getPlayer(), pme.getNewPos() );
+		}
 	}
 
 }
