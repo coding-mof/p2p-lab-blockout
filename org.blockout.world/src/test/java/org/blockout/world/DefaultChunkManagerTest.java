@@ -82,6 +82,8 @@ public class DefaultChunkManagerTest {
 		WrappedRange<IHash> range = new WrappedRange<IHash>(top.getNext(), top.getPrevious());
 		
 		stub(chord.getResponsibility()).toReturn(range);
+		stub(a1.getValue()).toReturn(top.toString());
+		stub(a2.getValue()).toReturn(top.toString());
 	}
 
 	private void addreceivers() throws IllegalArgumentException, SecurityException, IllegalAccessException,
