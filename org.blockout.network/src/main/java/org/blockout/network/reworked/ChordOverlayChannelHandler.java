@@ -111,6 +111,9 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				return channel;
 			}
 		}
+		if ( hash.equals( localNode.getNodeId() ) ) {
+			return null;
+		}
 
 		ConnectionFuture future = connectionMgr.connectTo( address );
 		future.awaitUninterruptibly();
