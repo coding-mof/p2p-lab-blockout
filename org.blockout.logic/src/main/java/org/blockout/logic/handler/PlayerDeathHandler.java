@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.blockout.common.TileCoordinate;
 import org.blockout.engine.AnimationManager;
+import org.blockout.engine.animation.ParticleAnimation;
+import org.blockout.engine.animation.effects.SmokeExplosionEmitter;
 import org.blockout.engine.sfx.AudioType;
 import org.blockout.engine.sfx.IAudioManager;
 import org.blockout.world.IWorld;
@@ -68,6 +70,13 @@ public class PlayerDeathHandler implements IEventHandler {
         if( audioManager != null ) {
             int index = rand.nextInt( dyingSounds.length );
             audioManager.getSound( dyingSounds[index] ).play();
+        }
+
+        if( null == animationManager ) {
+            ParticleAnimation animation = new ParticleAnimation();
+            animation.addEffect( "smoke", new SmokeExplosionEmitter( 15 ) );
+            animationManager.addAnimation( animation,
+                    event.getResponsibleTile() );
         }
 
         // activate player object

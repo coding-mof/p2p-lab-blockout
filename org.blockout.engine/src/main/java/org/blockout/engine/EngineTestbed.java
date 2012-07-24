@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.blockout.engine.animation.IAnimation;
 import org.blockout.engine.animation.ParticleAnimation;
-import org.blockout.engine.animation.effects.SparkleEmitter;
+import org.blockout.engine.animation.effects.SmokeExplosionEmitter;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.BasicGame;
 import org.newdawn.slick.GameContainer;
@@ -77,7 +77,7 @@ public class EngineTestbed extends BasicGame {
         // 4, 5, 6, 7, 8 }, 1000 );
         animation = new ParticleAnimation();
         ( (ParticleAnimation) animation ).addEffect( "blood",
-                new SparkleEmitter( 5000 ) );
+                new SmokeExplosionEmitter( 20 ) );
         animation.setLooping( true );
         animation.start();
 
