@@ -48,7 +48,6 @@ import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SortedSparseMultigraph;
-import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.Context;
 import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -95,26 +94,26 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 	private PlayerState										state;
 	private NetworkLogPlayer								player;
 	private EdgesToDisplayOptions							edgesToDisplay;
-    private final List<NetworkLogMessage>                   pendingConnect;
+	private final List<NetworkLogMessage>					pendingConnect;
 
-    /**
-     * Constructor to create a new NetworkLogPlayerFrame
-     * 
-     * @param args
-     *            Optional commandline args
-     */
+	/**
+	 * Constructor to create a new NetworkLogPlayerFrame
+	 * 
+	 * @param args
+	 *            Optional commandline args
+	 */
 	public NetworkLogPlayerFrame(final String[] args) {
 		edgesToDisplay = EdgesToDisplayOptions.ALL;
-        graph = new SortedSparseMultigraph<NetworkVertex, NetworkEdge>();
-        pendingConnect = new LinkedList<NetworkLogMessage>();
+		graph = new SortedSparseMultigraph<NetworkVertex, NetworkEdge>();
+		pendingConnect = new LinkedList<NetworkLogMessage>();
 
 		initLayout();
 		changePlayerState( PlayerState.NOT_LOADED );
 	}
 
-    /**
-     * Initialize the SWING layout
-     */
+	/**
+	 * Initialize the SWING layout
+	 */
 	private void initLayout() {
 		Preconditions.checkNotNull( graph, "No graph to display" );
 
@@ -200,9 +199,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		pack();
 	}
 
-    /**
-     * Initialize the menu bar
-     */
+	/**
+	 * Initialize the menu bar
+	 */
 	private void initMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 
@@ -211,7 +210,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		menuBar.add( fileMenu );
 
 		JMenuItem open = new JMenuItem( new AbstractAction( "Open" ) {
-            private static final long serialVersionUID = 1L;
+			private static final long	serialVersionUID	= 1L;
 
 			@Override
 			public void actionPerformed( final ActionEvent e ) {
@@ -221,7 +220,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		fileMenu.add( open );
 
 		JMenuItem close = new JMenuItem( new AbstractAction( "Close" ) {
-            private static final long serialVersionUID = 1L;
+			private static final long	serialVersionUID	= 1L;
 
 			@Override
 			public void actionPerformed( final ActionEvent e ) {
@@ -239,7 +238,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		viewMenu.add( edgesMenu );
 
 		JMenuItem edgesAll = new JMenuItem( new AbstractAction( "Draw all edges" ) {
-            private static final long serialVersionUID = 1L;
+			private static final long	serialVersionUID	= 1L;
 
 			@Override
 			public void actionPerformed( final ActionEvent e ) {
@@ -250,7 +249,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		edgesMenu.add( edgesAll );
 
 		JMenuItem edgesChord = new JMenuItem( new AbstractAction( "Draw chord edges" ) {
-            private static final long serialVersionUID = 1L;
+			private static final long	serialVersionUID	= 1L;
 
 			@Override
 			public void actionPerformed( final ActionEvent e ) {
@@ -261,9 +260,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		edgesMenu.add( edgesChord );
 
 		JMenuItem edgesNet = new JMenuItem( new AbstractAction( "Draw network edges" ) {
-            private static final long serialVersionUID = 1L;
+			private static final long	serialVersionUID	= 1L;
 
-            @Override
+			@Override
 			public void actionPerformed( final ActionEvent e ) {
 				edgesToDisplay = EdgesToDisplayOptions.NETWORK;
 				updateGraph();
@@ -274,9 +273,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		setJMenuBar( menuBar );
 	}
 
-    /**
-     * Initialize the toolbar to control the player
-     */
+	/**
+	 * Initialize the toolbar to control the player
+	 */
 	private void initToolBar() {
 		JToolBar toolbar = new JToolBar();
 		toolbar.setRollover( true );
@@ -341,13 +340,13 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		getContentPane().add( toolbar, BorderLayout.NORTH );
 	}
 
-    /**
-     * Change the internal state of the player and change the UI according to
-     * this state
-     * 
-     * @param newState
-     *            The new state of the player
-     */
+	/**
+	 * Change the internal state of the player and change the UI according to
+	 * this state
+	 * 
+	 * @param newState
+	 *            The new state of the player
+	 */
 	private void changePlayerState( final PlayerState newState ) {
 		if ( state == newState ) {
 			return;
@@ -384,9 +383,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		}
 	}
 
-    /**
-     * Callback if the user wants to open some logs
-     */
+	/**
+	 * Callback if the user wants to open some logs
+	 */
 	protected void onMenuOpen() {
 		JFileChooser fileChooser = new JFileChooser( new File( "." ) );
 		fileChooser.addChoosableFileFilter( new FileFilter() {
@@ -443,9 +442,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		}
 	}
 
-    /**
-     * Callback if the user press play
-     */
+	/**
+	 * Callback if the user press play
+	 */
 	private void onPlay() {
 		changePlayerState( PlayerState.PLAYING );
 		if ( null != player ) {
@@ -453,17 +452,17 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		}
 	}
 
-    /**
-     * Callback if the user press pause
-     */
+	/**
+	 * Callback if the user press pause
+	 */
 	private void onPause() {
 		changePlayerState( PlayerState.PAUSED );
 		player.stop();
 	}
 
-    /**
-     * Callback if the user press stop
-     */
+	/**
+	 * Callback if the user press stop
+	 */
 	private void onStop() {
 		player.stop();
 		reset();
@@ -472,11 +471,11 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		changePlayerState( PlayerState.STOPPED );
 	}
 
-    /**
-     * Reset the player ti its initial state
-     */
+	/**
+	 * Reset the player ti its initial state
+	 */
 	public void reset() {
-		graph = new SparseMultigraph<NetworkVertex, NetworkEdge>();
+		graph = new SortedSparseMultigraph<NetworkVertex, NetworkEdge>();
 		pendingConnect.clear();
 		player.reset();
 	}
@@ -524,24 +523,23 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 
 	}
 
-    /**
-     * Find a pending connect with this local/remote address
-     * 
-     * A Pending connect is a connection we have seen in the log but can't
-     * confirm the other side.
-     * 
-     * @param localAddr
-     * @param remoteAddr
-     * @return
-     */
+	/**
+	 * Find a pending connect with this local/remote address
+	 * 
+	 * A Pending connect is a connection we have seen in the log but can't
+	 * confirm the other side.
+	 * 
+	 * @param localAddr
+	 * @param remoteAddr
+	 * @return
+	 */
 	private NetworkLogMessage findPendingConnect( final String localAddr, final String remoteAddr ) {
 		NetworkLogMessage result = null;
 		for ( NetworkLogMessage msg : pendingConnect ) {
 			String localAddrOther = (String) msg.getExtra( "localaddr" );
-            String remoteAddrOther = (String) msg.getExtra( "remoteaddr" );
+			String remoteAddrOther = (String) msg.getExtra( "remoteaddr" );
 
-            if( localAddr.equals( remoteAddrOther )
-                    && remoteAddr.equals( localAddrOther ) ) {
+			if ( localAddr.equals( remoteAddrOther ) && remoteAddr.equals( localAddrOther ) ) {
 				result = msg;
 				break;
 			}
@@ -554,22 +552,22 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		return result;
 	}
 
-    /**
-     * New connection arrived -> update graph
-     * 
-     * @param message
-     *            Connect message
-     */
+	/**
+	 * New connection arrived -> update graph
+	 * 
+	 * @param message
+	 *            Connect message
+	 */
 	private void updateConnected( final NetworkLogMessage message ) {
 		String id1 = (String) message.getExtra( "id" );
 		String localaddr1 = (String) message.getExtra( "localaddr" );
 		String remoteaddr1 = (String) message.getExtra( "remoteaddr" );
 
-        // Do we have a pending connect that correlates with this connection?
+		// Do we have a pending connect that correlates with this connection?
 		NetworkLogMessage pending = findPendingConnect( localaddr1, remoteaddr1 );
 
 		if ( null == pending ) {
-            // Found nothing, add it to pending connects
+			// Found nothing, add it to pending connects
 			pendingConnect.add( message );
 			return;
 		}
@@ -577,35 +575,35 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		String id2 = (String) pending.getExtra( "id" );
 		String localaddr2 = (String) pending.getExtra( "localaddr" );
 
-        // find a vertex with this id or create it
+		// find a vertex with this id or create it
 		NetworkVertex a = findVertexById( id1 );
 		if ( null == a ) {
 			a = new NetworkVertex( id1 );
 			graph.addVertex( a );
 		}
 
-        // find a vertex with this id or create it
+		// find a vertex with this id or create it
 		NetworkVertex b = findVertexById( id2 );
 		if ( null == b ) {
 			b = new NetworkVertex( id2 );
 			graph.addVertex( b );
 		}
 
-        // Add the edges to the graph
+		// Add the edges to the graph
 		graph.addEdge( new NetworkEdge( "net", localaddr1 ), a, b, EdgeType.DIRECTED );
 		graph.addEdge( new NetworkEdge( "net", localaddr2 ), b, a, EdgeType.DIRECTED );
 	}
 
-    /**
-     * A disconnect appears -> delete the connection edge
-     * 
-     * @param message
-     *            Disconnect message
-     */
+	/**
+	 * A disconnect appears -> delete the connection edge
+	 * 
+	 * @param message
+	 *            Disconnect message
+	 */
 	private void updateDisconnected( final NetworkLogMessage message ) {
 		String id = (String) message.getExtra( "id" );
 		String localaddr = (String) message.getExtra( "localaddr" );
-        String remoteaddr = (String) message.getExtra( "remoteaddr" );
+		String remoteaddr = (String) message.getExtra( "remoteaddr" );
 
 		NetworkVertex local = findVertexById( id );
 		if ( null == local ) {
@@ -614,19 +612,18 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 
 		Collection<NetworkEdge> edges = graph.getIncidentEdges( local );
 		for ( NetworkEdge edge : edges ) {
-            if( edge.getLabel().equals( localaddr )
-                    || edge.getLabel().equals( remoteaddr ) ) {
+			if ( edge.getLabel().equals( localaddr ) || edge.getLabel().equals( remoteaddr ) ) {
 				graph.removeEdge( edge );
 			}
 		}
 	}
 
-    /**
-     * The successor of a chord not has changed
-     * 
-     * @param message
-     *            Successor message
-     */
+	/**
+	 * The successor of a chord not has changed
+	 * 
+	 * @param message
+	 *            Successor message
+	 */
 	private void updateSuccessor( final NetworkLogMessage message ) {
 		String id = (String) message.getExtra( "id" );
 		String succ = (String) message.getExtra( "succid" );
@@ -654,12 +651,12 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		graph.addEdge( new NetworkEdge( "chord", "successor" ), me, other, EdgeType.DIRECTED );
 	}
 
-    /**
-     * The predecessor of a chord not has changed
-     * 
-     * @param message
-     *            predecessor message
-     */
+	/**
+	 * The predecessor of a chord not has changed
+	 * 
+	 * @param message
+	 *            predecessor message
+	 */
 	private void updatePredecessor( final NetworkLogMessage message ) {
 		String id = (String) message.getExtra( "id" );
 		String pred = (String) message.getExtra( "predid" );
@@ -687,9 +684,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 		graph.addEdge( new NetworkEdge( "chord", "predecessor" ), me, other, EdgeType.DIRECTED );
 	}
 
-    /**
-     * Relayout and redraw the graph
-     */
+	/**
+	 * Relayout and redraw the graph
+	 */
 	private void updateGraph() {
 		SwingUtilities.invokeLater( new Runnable() {
 			@Override
