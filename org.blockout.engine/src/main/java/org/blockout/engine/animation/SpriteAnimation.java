@@ -18,8 +18,8 @@ import com.google.common.base.Preconditions;
  * 
  */
 public class SpriteAnimation implements IAnimation {
-    Animation animation;
-
+    private Animation animation;
+    private boolean   isLooping;
     /**
      * Constructor to create a new sprite based animation from a spritesheet
      * 
@@ -73,7 +73,7 @@ public class SpriteAnimation implements IAnimation {
     public SpriteAnimation( ISpriteManager spriteManager,
             SpriteType[] frameTypes, int duration ) {
         Preconditions.checkNotNull( spriteManager );
-        ;
+
         Preconditions.checkArgument( 0 < frameTypes.length,
                 "Need at least one frame" );
         Preconditions.checkArgument( 0 < duration,
@@ -121,6 +121,12 @@ public class SpriteAnimation implements IAnimation {
 
     @Override
     public void setLooping( boolean looping ) {
+        isLooping = looping;
         animation.setLooping( looping );
+    }
+
+    @Override
+    public boolean isLooping() {
+        return isLooping;
     }
 }

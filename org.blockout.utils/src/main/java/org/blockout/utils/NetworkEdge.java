@@ -1,23 +1,53 @@
 package org.blockout.utils;
 
-public class NetworkEdge implements Comparable<NetworkEdge> {
+import com.google.common.base.Preconditions;
 
+/**
+ * Class to represent an edge in the network graph
+ * 
+ * @author Florian Müller
+ */
+public class NetworkEdge implements Comparable<NetworkEdge> {
 	private static long		next_index	= 0;
 
 	private final long		index;
 	private final String	type;
 	private final String	label;
 
+    /**
+     * Constructor to create a new edge
+     * 
+     * @param type
+     *            Type of the edge (network, chord,...)
+     * @param label
+     *            Label to render on this edge
+     * 
+     * @throws NullPointerException
+     *             Thrown if an argument is null
+     */
 	public NetworkEdge(final String type, final String label) {
+	    Preconditions.checkNotNull( type, "type is null" );
+        Preconditions.checkNotNull( label, "label is null" );
+	    
 		this.type = type;
 		this.label = label;
 		index = next_index++;
 	}
 
+    /**
+     * Returns the type of this edge
+     * 
+     * @return Type as a string
+     */
 	public String getType() {
 		return type;
 	}
 
+    /**
+     * Returns the label of this edge
+     * 
+     * @return Label as a string
+     */
 	public String getLabel() {
 		return label;
 	}

@@ -14,8 +14,13 @@ import org.newdawn.slick.Graphics;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * The AnimationManager handles all that are started inside the game
+ * 
+ * @author Florian Müller
+ * 
+ */
 public class AnimationManager {
-
     private static class AnimationEntry {
         public IAnimation     animation;
         public TileCoordinate position;
@@ -26,64 +31,88 @@ public class AnimationManager {
         }
     }
 
-    public final ReadWriteLock   rwLock    = new ReentrantReadWriteLock( true );
-    public final Lock            readLock  = rwLock.readLock();
-    public final Lock            writeLock = rwLock.writeLock();
+    private final ReadWriteLock  rwLock    = new ReentrantReadWriteLock( true );
+    private final Lock           readLock  = rwLock.readLock();
+    private final Lock           writeLock = rwLock.writeLock();
 
     private List<AnimationEntry> animationList;
     private Camera               camera;
 
+    /**
+     * Constructor to create a AnimationManager
+     * 
+     * @param camera
+     *            Camera to render animation properly
+     * 
+     * @throws NullPointerException
+     *             Thrown if the argument was null
+     */
     @Inject
     public AnimationManager( final Camera camera ) {
+        Preconditions.checkNotNull( camera, "camera is null" );
+
         this.animationList = new LinkedList<AnimationEntry>();
         this.camera = camera;
     }
 
+    /**
+     * Add a new animation to the AnimationManager
+     * 
+     * @param animation
+     *            The animation
+     * @param position
+     *            On wich tile should the aniomation be rendered
+     * @throws NullPointerException
+     *             Thrown if an argument is null
+     */
     public void addAnimation( final IAnimation animation,
             final TileCoordinate position ) {
-        Preconditions.checkNotNull( animation );
-        Preconditions.checkNotNull( position );
-
+        Preconditions.checkNotNull( animation, "animation is null" );
+        Preconditions.checkNotNull( position, "position is null" );
 
         writeLock.lock();
         try {
             animation.start();
-            System.err.println( animation );
             animationList.add( new AnimationEntry( animation, position ) );
-
         } finally {
             writeLock.unlock();
         }
-
-        for ( AnimationEntry entry : animationList ) {
-            System.err.println( "inlist: " + entry.animation );
-        }
     }
 
+    /**
+     * Update the state of all active animations
+     * 
+     * @param delta
+     *            Time between two calls of update
+     */
     public void update( final long delta ) {
         readLock.lock();
-
         try {
-
+            // remove all completed animations
             List<AnimationEntry> removeMe = new LinkedList<AnimationEntry>();
             for ( AnimationEntry entry : animationList ) {
-                if( entry.animation.completed() ){
-                    System.err.println( "remove: " + entry.animation );
+                IAnimation animation = entry.animation;
+                if( animation.completed() && !animation.isLooping() ) {
                     removeMe.add( entry );
                 }
             }
             animationList.removeAll( removeMe );
-            // System.err.println( "update " + animationList.size() );
 
             for ( AnimationEntry entry : animationList ) {
-                System.err.println( "update: " + entry.animation );
-                entry.animation.update( delta );
+                IAnimation animation = entry.animation;
+                animation.update( delta );
             }
         } finally {
             readLock.unlock();
         }
     }
 
+    /**
+     * Render all active animations
+     * 
+     * @param g
+     *            Current graphic context
+     */
     public void render( final Graphics g ) {
         Camera localCam = camera.getReadOnly();
         int tileSize = localCam.getTileSize();
@@ -104,8 +133,8 @@ public class AnimationManager {
                     int y = -localCam.getHeightOffset()
                             + ( tileRelY * localCam.getTileSize() )
                             - ( tileSize / 2 );
-                    System.err.println( "render: " + entry.animation );
-                    entry.animation.render( x, localCam.convertY( y )
+                    animation.render( x,
+                            localCam.convertY( y )
                             - localCam.getTileSize() );
                 }
             }

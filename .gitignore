@@ -1,4 +1,4 @@
-
+*.log
 /.metadata
 /blockout-client/profiles
 /blockout-client/target

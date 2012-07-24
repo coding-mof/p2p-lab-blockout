@@ -3,6 +3,7 @@ package org.blockout.world;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
@@ -220,6 +221,9 @@ public class World implements IWorld, WorldAdapter {
 	/**
 	 * method will remove all chunks no longer needed to buffer
 	 */
+	/**
+	 * method will remove all chunks no longer needed to buffer
+	 */
 	private void cleanView() {
 
 		synchronized ( view ) {
@@ -238,7 +242,7 @@ public class World implements IWorld, WorldAdapter {
 		}
 
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */

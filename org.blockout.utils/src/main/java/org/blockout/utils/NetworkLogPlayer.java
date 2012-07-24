@@ -11,26 +11,39 @@ import org.blockout.common.NetworkLogMessage;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * This NetworkLogPlayer reads the log entry by entry and calls a process with
+ * these entries with a little delay between them.
+ * 
+ * @author Florian Müller
+ */
 public class NetworkLogPlayer implements Runnable {
-
     public static interface IMessageProcessor {
         public void process( NetworkLogMessage message );
 
         public void finished();
     }
 
-    Lock             playLock = new ReentrantLock();
-    AtomicBoolean    play     = new AtomicBoolean();
-    AtomicInteger    delay    = new AtomicInteger();
-    AtomicInteger     index    = new AtomicInteger();
-    IMessageProcessor processor;
-    List<NetworkLogMessage> messages;
+    private Lock                    playLock = new ReentrantLock();
+    private AtomicBoolean           play     = new AtomicBoolean();
+    private AtomicInteger           delay    = new AtomicInteger();
+    private AtomicInteger           index    = new AtomicInteger();
+    private IMessageProcessor       processor;
+    private List<NetworkLogMessage> messages;
 
 
+    /**
+     * Create a new NetworkLogPlayer with a given series of log messages
+     * 
+     * @param messages
+     *            List of NwtworkLogMessages
+     * @param processor
+     *            Processor of the read messages
+     */
     public NetworkLogPlayer( final List<NetworkLogMessage> messages,
             final IMessageProcessor processor ) {
-        Preconditions.checkNotNull( messages );
-        Preconditions.checkNotNull( processor );
+        Preconditions.checkNotNull( messages, "messages is null" );
+        Preconditions.checkNotNull( processor, "processor is null" );
 
         this.messages = new LinkedList<NetworkLogMessage>( messages );
         this.processor = processor;
@@ -63,23 +76,39 @@ public class NetworkLogPlayer implements Runnable {
         playLock.unlock();
     }
 
+    /**
+     * Reset the player
+     */
     public void reset() {
         stop();
         index.set( 0 );
     }
 
+    /**
+     * Start the player
+     */
     public void play() {
         playLock.lock();
         new Thread( this ).start();
         playLock.unlock();
     }
 
+    /**
+     * Stop the player
+     */
     public void stop() {
         play.set( false );
     }
 
+    /**
+     * Set the delay between two read messages
+     * 
+     * @param delay
+     *            Message delay, have to be greater or equal zero
+     */
     public void setDelay( final int delay ) {
-        Preconditions.checkArgument( 0 <= delay );
+        Preconditions.checkArgument( 0 <= delay,
+                "Delay have to be greater or equal zero" );
         this.delay.set( delay );
     }
 }
