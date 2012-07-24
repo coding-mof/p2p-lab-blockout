@@ -48,6 +48,10 @@ public class AttackValidator implements IEventValidator {
 
 		TileCoordinate aggressorTile = world.findTile( e.getAggressor() );
 		TileCoordinate victimTile = world.findTile( e.getVictim() );
+		if ( aggressorTile == null || victimTile == null ) {
+			logger.debug( "Victim or aggressor not found." );
+			return ValidationResult.Invalid;
+		}
 		float distance = TileCoordinate.computeSquaredEuclidianDistance( aggressorTile, victimTile );
 		if ( distance > SQUARED_ATTACK_DISTANCE ) {
 			logger.debug( "Attack denied since distance " + distance + " is larger than " + SQUARED_ATTACK_DISTANCE );
