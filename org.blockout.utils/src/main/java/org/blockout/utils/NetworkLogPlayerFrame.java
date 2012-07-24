@@ -482,9 +482,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 	}
 
 	public NetworkVertex findVertexById( final String id ) {
-		System.out.println( "---" );
 		for ( NetworkVertex vertex : graph.getVertices() ) {
-			System.out.println( vertex );
 			if ( vertex.getId().equals( id ) ) {
 				return vertex;
 			}
@@ -607,6 +605,7 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 	private void updateDisconnected( final NetworkLogMessage message ) {
 		String id = (String) message.getExtra( "id" );
 		String localaddr = (String) message.getExtra( "localaddr" );
+        String remoteaddr = (String) message.getExtra( "remoteaddr" );
 
 		NetworkVertex local = findVertexById( id );
 		if ( null == local ) {
@@ -615,9 +614,9 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
 
 		Collection<NetworkEdge> edges = graph.getIncidentEdges( local );
 		for ( NetworkEdge edge : edges ) {
-			if ( edge.getLabel().equals( localaddr ) ) {
+            if( edge.getLabel().equals( localaddr )
+                    || edge.getLabel().equals( remoteaddr ) ) {
 				graph.removeEdge( edge );
-				break;
 			}
 		}
 	}
