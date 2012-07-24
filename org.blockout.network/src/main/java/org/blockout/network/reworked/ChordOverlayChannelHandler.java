@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
 import org.blockout.network.LocalNode;
@@ -38,7 +37,7 @@ import com.google.common.base.Preconditions;
  * 
  */
 @ChannelHandler.Sharable
-public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implements IChordOverlay {
+public class ChordOverlayChannelHandler extends AbstractChordHandler {
 
 	private static final Logger				logger;
 	static {
@@ -46,14 +45,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	private final Set<FindSuccessorFuture>	pendingSuccessorLookups;
-	private final List<ChordListener>		listener;
-	private volatile WrappedRange<IHash>	responsibility;
-
-	private IHash							successorId;
-	private Channel							successorChannel;
-
-	private IHash							predecessorId;
-	private Channel							predecessorChannel;
 
 	private final ChannelGroup				channels;
 	private final LocalNode					localNode;
@@ -63,8 +54,6 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 	private IConnectionManager				connectionMgr;
 	private final long						stabilizationRate;
-
-	private final LookupTable				lookupTable;
 
 	/**
 	 * Creates a new chord overlay with the initial responsibility of
@@ -78,284 +67,49 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskScheduler scheduler,
 			final TaskExecutor executor, final long stabilizationRate) {
 
+		super( localNode, executor );
+
 		Preconditions.checkNotNull( localNode );
 		Preconditions.checkNotNull( scheduler );
+		Preconditions.checkNotNull( executor );
 
 		this.localNode = localNode;
 		this.scheduler = scheduler;
 		this.executor = executor;
 		this.stabilizationRate = stabilizationRate;
 
-		successorId = localNode.getNodeId();
-		predecessorId = localNode.getNodeId();
-
-		lookupTable = new LookupTable();
 		joinRequestFilter = Collections.synchronizedList( new ArrayList<SocketAddress>() );
-
 		pendingSuccessorLookups = Collections.synchronizedSet( new HashSet<FindSuccessorFuture>() );
-		listener = new CopyOnWriteArrayList<ChordListener>();
 		channels = new DefaultChannelGroup();
 
-		IHash ownNodeId = localNode.getNodeId();
-		responsibility = new WrappedRange<IHash>( ownNodeId.getNext(), ownNodeId );
-		logger.info( "Initialized chord with range = " + responsibility );
-	}
+		addChordListener( new ChordListener() {
 
-	private Channel getOrCreateChannel( final IHash hash, final SocketAddress address ) {
-		Channel channel = lookupTable.getSingle( hash );
-		if ( channel != null ) {
-			return channel;
-		}
-		if ( hash.equals( localNode.getNodeId() ) ) {
-			return null;
-		}
-
-		ConnectionFuture future = connectionMgr.connectTo( address );
-		future.awaitUninterruptibly();
-		return future.getChannel();
-	}
-
-	@Override
-	public void channelClosed( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
-			final ChannelStateEvent e ) throws Exception {
-
-		// remove closed channels from lookup table
-		lookupTable.remove( e.getChannel() );
-
-		// check if it was our successor
-		if ( e.getChannel().equals( successorChannel ) ) {
-			logger.info( "Channel " + e.getChannel() + " to our successor " + successorId + " has been closed." );
-
-			LookupResult result = lookupTable.lookup( successorId );
-			// check if we got another channel otherwise we'll select the next
-			// higher
-			if ( result != null ) {
-				logger.info( "New successor will be " + result.getHash() + " at " + result.getChannel() );
-				changeSuccessor( result.getHash(), result.getChannel() );
-			} else {
-				// no other peer connected - falling back to single mode
-				logger.info( "No other peer connected - falling back to single mode" );
-				changeSuccessor( localNode.getNodeId(), null );
-				changePredecessor( localNode.getNodeId(), null );
-			}
-			// also query for our successor
-			ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
-			future.addFutureListener( new FutureListener<IHash>() {
-
-				@Override
-				public void completed( final ObservableFuture<IHash> future ) {
-					try {
-						HashAndAddress haa = (HashAndAddress) future.get();
-						if ( future.isDone() && !future.isCancelled() ) {
-							changeSuccessor( haa, getOrCreateChannel( haa, haa.getAddress() ) );
-						}
-					} catch ( InterruptedException e ) {
-						logger.warn( "Interrupted during successor lookup.", e );
-					} catch ( ExecutionException e ) {
-						logger.error( "Successor lookup failed.", e );
-					}
-				}
-			} );
-		}
-		super.channelClosed( connectionMgr, ctx, e );
-	}
-
-	@Override
-	public void messageReceived( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
-			final MessageEvent e ) throws Exception {
-
-		// Filter junk
-		Object message = e.getMessage();
-		if ( !(message instanceof AbstractMessage) ) {
-			logger.warn( "Discarding unknown message type: " + message );
-			return;
-		}
-		AbstractMessage msg = (AbstractMessage) message;
-
-		// We don't care if this is a response to our lookup or someone else's
-		if ( msg instanceof SuccessorFoundMessage ) {
-			completeFutures( (SuccessorFoundMessage) msg );
-		}
-
-		// Update our knowledge about the channel
-		if ( msg instanceof NodeIdentificationMessage ) {
-			IHash nodeId = ((NodeIdentificationMessage) msg).getNodeId();
-			lookupTable.put( nodeId, e.getChannel() );
-
-			// WrappedRange<IHash> successorRange = new WrappedRange<IHash>(
-			// localNode.getNodeId(),
-			// successorId.getPrevious() );
-			// if ( successorRange.contains( nodeId ) ) {
-			// // connected to a node which is a better successor than our
-			// // current
-			// changeSuccessor( nodeId, e.getChannel() );
-			// }
-
-		}
-
-		// check if we have to route the message
-		if ( msg.isRoutable() && !responsibility.contains( msg.getReceiver() ) ) {
-			routeMessage( msg );
-			return;
-		}
-
-		// message is destined for us
-		if ( message instanceof FindSuccessorMessage ) {
-			handleFindSuccessorMessage( (FindSuccessorMessage) message );
-		} else if ( message instanceof ChordEnvelope ) {
-			ChordEnvelope envelope = (ChordEnvelope) message;
-			fireMessageReceived( envelope.getSenderId(), envelope.getContent() );
-		} else if ( message instanceof WelcomeMessage ) {
-			handleWelcomeMessage( e, (WelcomeMessage) message );
-		} else if ( message instanceof IAmYourPredeccessor ) {
-			handleIAmYourPredeccessorMessage( e, (IAmYourPredeccessor) message );
-		} else if ( message instanceof JoinRequestMessage ) {
-			handleJoinRequestMessage( connectionMgr, (JoinRequestMessage) message );
-		}
-
-		super.messageReceived( connectionMgr, ctx, e );
-	}
-
-	private void handleJoinRequestMessage( final IConnectionManager connectionMgr2, final JoinRequestMessage message ) {
-		if ( message.getNodeId().equals( predecessorId ) ) {
-			// the node is already our predecessor - no reason to join again
-			return;
-		}
-		welcomeNode( connectionMgr, message.getNodeId(), message.getAddress() );
-	}
-
-	private void handleIAmYourPredeccessorMessage( final MessageEvent e, final IAmYourPredeccessor msg ) {
-		changePredecessor( msg.getNodeId(), e.getChannel() );
-	}
-
-	private void handleWelcomeMessage( final MessageEvent e, final WelcomeMessage msg ) {
-
-		lookupTable.put( msg.getSuccessorId(), e.getChannel() );
-
-		logger.info( "Joining chord ring. My successor will be " + msg.getSuccessorId() + " at "
-				+ msg.getSuccessorAddress() );
-
-		changeSuccessor( msg.getSuccessorId(), e.getChannel() );
-	}
-
-	private void updateResponsibility( final IHash lowerBound ) {
-		WrappedRange<IHash> newResponsibility;
-		newResponsibility = new WrappedRange<IHash>( lowerBound, localNode.getNodeId() );
-		WrappedRange<IHash> tmp = responsibility;
-		if ( !newResponsibility.equals( tmp ) ) {
-			logger.info( "Responsibility changed from " + tmp + " to " + newResponsibility );
-			responsibility = newResponsibility;
-			fireResponsibilityChanged( tmp, newResponsibility );
-		}
-	}
-
-	/**
-	 * Invoked when a {@link FindSuccessorMessage} has been received. It
-	 * responds with a {@link SuccessorFoundMessage} if we are the successor and
-	 * forwards the message to our successor if not.
-	 * 
-	 * @param e
-	 * @param msg
-	 */
-	private void handleFindSuccessorMessage( final FindSuccessorMessage msg ) {
-
-		logger.debug( "I'm the successor: " + responsibility + " contained " + msg.getKey() );
-		SuccessorFoundMessage responseMsg;
-		responseMsg = new SuccessorFoundMessage( msg.getOrigin(), msg.getKey(), localNode.getNodeId(),
-				connectionMgr.getServerAddress() );
-		routeMessage( responseMsg );
-	}
-
-	private void welcomeNode( final IConnectionManager connectionMgr, final IHash nodeId, final SocketAddress address ) {
-
-		// mark the new connection so that no "JoinRequest" will be sent
-		joinRequestFilter.add( address );
-
-		logger.info( "Connecting to new node " + address + " to welcome it." );
-		Channel channel = getOrCreateChannel( nodeId, address );
-		sendWelcomeMessage( connectionMgr, nodeId, address, channel );
-	}
-
-	private void sendWelcomeMessage( final IConnectionManager connectionMgr, final IHash nodeId,
-			final SocketAddress address, final Channel channel ) {
-		logger.info( "Connected to " + address + " sending welcome message." );
-		// Send welcome message
-		SocketAddress serverAddress = connectionMgr.getServerAddress();
-		WelcomeMessage welcomeMsg;
-		welcomeMsg = new WelcomeMessage( localNode.getNodeId(), serverAddress, responsibility.getLowerBound() );
-
-		Channels.write( channel, welcomeMsg );
-
-		// Accept our new predecessor
-		changePredecessor( nodeId, channel );
-	}
-
-	private void changePredecessor( final IHash newPredecessor, final Channel newChannel ) {
-		if ( !predecessorId.equals( newPredecessor ) ) {
-			predecessorId = newPredecessor;
-			predecessorChannel = newChannel;
-			if ( predecessorChannel != null && predecessorChannel.isConnected() ) {
-				lookupTable.put( predecessorId, predecessorChannel );
-			}
-			firePredecessorChanged( predecessorId );
-			updateResponsibility( predecessorId.getNext() );
-		}
-	}
-
-	private void changeSuccessor( final IHash newSuccessor, final Channel newChannel ) {
-		if ( !successorId.equals( newSuccessor ) ) {
-
-			// the new successor is only valid if when have no other node in our
-			// routing table that is in the range between
-			// [localNode+1, successor-1]
-			IHash lowerBound = localNode.getNodeId().getNext();
-			WrappedRange<IHash> range = new WrappedRange<IHash>( lowerBound, newSuccessor.getPrevious() );
-			synchronized ( lookupTable ) {
-
-				if ( lookupTable.containsAnyOf( range ) ) {
-					logger.debug( "New successor " + newSuccessor + " is not better than current " + successorId + "." );
-					return;
-				}
-
-				//
-				// if ( smallestMatching != null && !smallestMatching.equals(
-				// newSuccessor ) ) {
-				// logger.debug( "Invalid node " + newSuccessor +
-				// " has respond to successor lookup." );
-				// changeSuccessor( smallestMatching, lookupTable.get(
-				// smallestMatching ) );
-				// return;
-				// }
-			}
-
-			successorId = newSuccessor;
-			successorChannel = newChannel;
-			fireSuccessorChanged( successorId );
-			if ( successorChannel != null && successorChannel.isConnected() ) {
-				lookupTable.put( successorId, successorChannel );
+			@Override
+			public void successorChanged( final IChordOverlay chord, final IHash successor ) {
 				// Notify the new successor about us - so that
 				// he can adjust his responsibility
-				Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
+				notifySuccessorAboutUs();
 			}
-		}
-	}
 
-	/**
-	 * Completes all pending successor lookup futures that wait for the key of
-	 * the given message.
-	 * 
-	 * @param msg
-	 *            The message about the discovered successor
-	 */
-	private void completeFutures( final SuccessorFoundMessage msg ) {
-		synchronized ( pendingSuccessorLookups ) {
-			for ( FindSuccessorFuture future : pendingSuccessorLookups ) {
-				if ( future.getKey().equals( msg.getKey() ) ) {
-					future.complete( new HashAndAddress( msg.getSuccessor(), msg.getServerAddress() ) );
-					// Don't abort since there might be multiple pending lookups
-				}
+			@Override
+			public void responsibilityChanged( final IChordOverlay chord, final WrappedRange<IHash> from,
+					final WrappedRange<IHash> to ) {
+				// TODO Auto-generated method stub
+
 			}
-		}
+
+			@Override
+			public void receivedMessage( final IChordOverlay chord, final Object message, final IHash senderId ) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void predecessorChanged( final IChordOverlay chord, final IHash predecessor ) {
+				// TODO Auto-generated method stub
+
+			}
+		} );
 	}
 
 	@Override
@@ -381,13 +135,199 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 				joinRequestFilter.remove( e.getChannel().getRemoteAddress() );
 			}
 		}
-
 		super.channelConnected( connectionMgr, ctx, e );
 	}
 
 	@Override
-	public WrappedRange<IHash> getResponsibility() {
-		return responsibility;
+	public void channelClosed( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
+			final ChannelStateEvent e ) throws Exception {
+
+		// remove closed channels from lookup table
+		getLookupTable().remove( e.getChannel() );
+
+		// check if it was our successor
+		if ( e.getChannel().equals( getSuccessorChannel() ) ) {
+			logger.info( "Channel " + e.getChannel() + " to our successor " + getSuccessorId() + " has been closed." );
+
+			LookupResult result = getLookupTable().lookup( getSuccessorId() );
+			// check if we got another channel otherwise we'll select the next
+			// higher
+			if ( result != null ) {
+				logger.info( "New successor will be " + result.getHash() + " at " + result.getChannel() );
+				changeSuccessor( result.getHash(), result.getChannel() );
+			} else {
+				// no other peer connected - falling back to single mode
+				logger.info( "No other peer connected - falling back to single mode" );
+				changeSuccessor( localNode.getNodeId(), null );
+				changePredecessor( localNode.getNodeId(), null );
+			}
+			// also query for our successor
+			queryForSuccessor();
+		}
+		super.channelClosed( connectionMgr, ctx, e );
+	}
+
+	@Override
+	public void messageReceived( final IConnectionManager connectionMgr, final ChannelHandlerContext ctx,
+			final MessageEvent e ) throws Exception {
+
+		// Filter junk
+		Object message = e.getMessage();
+		if ( !(message instanceof AbstractMessage) ) {
+			logger.warn( "Discarding unknown message type: " + message );
+			return;
+		}
+		AbstractMessage msg = (AbstractMessage) message;
+
+		// We don't care if this is a response to our lookup or someone else's
+		if ( msg instanceof SuccessorFoundMessage ) {
+			completeFutures( (SuccessorFoundMessage) msg );
+		}
+
+		// Update our knowledge about the channel
+		if ( msg instanceof NodeIdentificationMessage ) {
+			IHash nodeId = ((NodeIdentificationMessage) msg).getNodeId();
+			getLookupTable().put( nodeId, e.getChannel() );
+			// maybe we find a new successor through the new connection
+			queryForSuccessor();
+		}
+
+		// check if we have to route the message
+		if ( msg.isRoutable() && !getResponsibility().contains( msg.getReceiver() ) ) {
+			routeMessage( msg );
+			return;
+		}
+
+		// message is destined for us
+		if ( message instanceof FindSuccessorMessage ) {
+			handleFindSuccessorMessage( (FindSuccessorMessage) message );
+		} else if ( message instanceof ChordEnvelope ) {
+			ChordEnvelope envelope = (ChordEnvelope) message;
+			fireMessageReceived( envelope.getSenderId(), envelope.getContent() );
+		} else if ( message instanceof WelcomeMessage ) {
+			handleWelcomeMessage( e, (WelcomeMessage) message );
+		} else if ( message instanceof IAmYourPredeccessor ) {
+			handleIAmYourPredeccessorMessage( e, (IAmYourPredeccessor) message );
+		} else if ( message instanceof JoinRequestMessage ) {
+			handleJoinRequestMessage( connectionMgr, (JoinRequestMessage) message );
+		}
+
+		super.messageReceived( connectionMgr, ctx, e );
+	}
+
+	private void handleJoinRequestMessage( final IConnectionManager connectionMgr2, final JoinRequestMessage message ) {
+		if ( message.getNodeId().equals( getPredecessorId() ) ) {
+			// the node is already our predecessor - no reason to join again
+			return;
+		}
+		welcomeNode( connectionMgr, message.getNodeId(), message.getAddress() );
+	}
+
+	private void handleIAmYourPredeccessorMessage( final MessageEvent e, final IAmYourPredeccessor msg ) {
+		changePredecessor( msg.getNodeId(), e.getChannel() );
+	}
+
+	private void handleWelcomeMessage( final MessageEvent e, final WelcomeMessage msg ) {
+
+		getLookupTable().put( msg.getSuccessorId(), e.getChannel() );
+
+		logger.info( "Joining chord ring. My successor will be " + msg.getSuccessorId() + " at "
+				+ msg.getSuccessorAddress() );
+
+		changeSuccessor( msg.getSuccessorId(), e.getChannel() );
+	}
+
+	/**
+	 * Invoked when a {@link FindSuccessorMessage} has been received. It
+	 * responds with a {@link SuccessorFoundMessage} if we are the successor and
+	 * forwards the message to our successor if not.
+	 * 
+	 * @param e
+	 * @param msg
+	 */
+	private void handleFindSuccessorMessage( final FindSuccessorMessage msg ) {
+
+		logger.debug( "I'm the successor: " + getResponsibility() + " contained " + msg.getKey() );
+		SuccessorFoundMessage responseMsg;
+		responseMsg = new SuccessorFoundMessage( msg.getOrigin(), msg.getKey(), localNode.getNodeId(),
+				connectionMgr.getServerAddress() );
+		routeMessage( responseMsg );
+	}
+
+	private void welcomeNode( final IConnectionManager connectionMgr, final IHash nodeId, final SocketAddress address ) {
+
+		// mark the new connection so that no "JoinRequest" will be sent
+		joinRequestFilter.add( address );
+
+		logger.info( "Connecting to new node " + address + " to welcome it." );
+		Channel channel = getOrCreateChannel( nodeId, address );
+		sendWelcomeMessage( connectionMgr, nodeId, address, channel );
+	}
+
+	private Channel getOrCreateChannel( final IHash hash, final SocketAddress address ) {
+		Channel channel = getLookupTable().getSingle( hash );
+		if ( channel != null ) {
+			return channel;
+		}
+		if ( hash.equals( localNode.getNodeId() ) ) {
+			return null;
+		}
+
+		ConnectionFuture future = connectionMgr.connectTo( address );
+		future.awaitUninterruptibly();
+		return future.getChannel();
+	}
+
+	private void sendWelcomeMessage( final IConnectionManager connectionMgr, final IHash nodeId,
+			final SocketAddress address, final Channel channel ) {
+		logger.info( "Connected to " + address + " sending welcome message." );
+		// Send welcome message
+		SocketAddress serverAddress = connectionMgr.getServerAddress();
+		WelcomeMessage welcomeMsg;
+		welcomeMsg = new WelcomeMessage( localNode.getNodeId(), serverAddress, getResponsibility().getLowerBound() );
+
+		Channels.write( channel, welcomeMsg );
+
+		// Accept our new predecessor
+		// changePredecessor( nodeId, channel );
+	}
+
+	/**
+	 * Completes all pending successor lookup futures that wait for the key of
+	 * the given message.
+	 * 
+	 * @param msg
+	 *            The message about the discovered successor
+	 */
+	private void completeFutures( final SuccessorFoundMessage msg ) {
+		synchronized ( pendingSuccessorLookups ) {
+			for ( FindSuccessorFuture future : pendingSuccessorLookups ) {
+				if ( future.getKey().equals( msg.getKey() ) ) {
+					future.complete( new HashAndAddress( msg.getSuccessor(), msg.getServerAddress() ) );
+					// Don't abort since there might be multiple pending lookups
+				}
+			}
+		}
+	}
+
+	private void queryForSuccessor() {
+		ObservableFuture<IHash> future = findSuccessor( localNode.getNodeId().getNext() );
+		future.addFutureListener( new FutureListener<IHash>() {
+
+			@Override
+			public void completed( final ObservableFuture<IHash> future ) {
+				try {
+					HashAndAddress haa = (HashAndAddress) future.get();
+					if ( future.isDone() && !future.isCancelled() ) {
+						changeSuccessor( haa, getOrCreateChannel( haa, haa.getAddress() ) );
+					}
+				} catch ( InterruptedException e ) {
+					logger.warn( "Interrupted during successor lookup.", e );
+				} catch ( ExecutionException e ) {
+					logger.error( "Successor lookup failed.", e );
+				}
+			}
+		} );
 	}
 
 	@Override
@@ -399,8 +339,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			return future;
 		}
 		future = new FindSuccessorFuture( pendingSuccessorLookups, key );
-		if ( responsibility.contains( key ) ) {
-			logger.debug( "LocalNode is the successor: " + responsibility + " contained " + key );
+		if ( getResponsibility().contains( key ) ) {
+			logger.debug( "LocalNode is the successor: " + getResponsibility() + " contained " + key );
 			// Local node is the successor
 			future.complete( new HashAndAddress( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
 			return future;
@@ -430,75 +370,8 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	@Override
-	public void addChordListener( final ChordListener l ) {
-		listener.add( l );
-	}
-
-	@Override
-	public void removeChordListener( final ChordListener l ) {
-		listener.remove( l );
-	}
-
-	/**
-	 * Notifies all listener about the responsibility changed using the
-	 * {@link TaskExecutor} passed in the constructor for dispatching.
-	 * 
-	 * @param from
-	 * @param to
-	 */
-	private void fireResponsibilityChanged( final WrappedRange<IHash> from, final WrappedRange<IHash> to ) {
-		for ( final ChordListener l : listener ) {
-			executor.execute( new Runnable() {
-
-				@Override
-				public void run() {
-					l.responsibilityChanged( ChordOverlayChannelHandler.this, from, to );
-				}
-			} );
-		}
-	}
-
-	private void fireSuccessorChanged( final IHash successor ) {
-		for ( final ChordListener l : listener ) {
-			executor.execute( new Runnable() {
-
-				@Override
-				public void run() {
-					l.successorChanged( ChordOverlayChannelHandler.this, successor );
-				}
-			} );
-		}
-	}
-
-	private void firePredecessorChanged( final IHash predecessor ) {
-		for ( final ChordListener l : listener ) {
-			executor.execute( new Runnable() {
-
-				@Override
-				public void run() {
-					l.predecessorChanged( ChordOverlayChannelHandler.this, predecessor );
-				}
-			} );
-		}
-	}
-
-	private void fireMessageReceived( final IHash from, final Object message ) {
-		logger.info( "Received message " + message + " from " + from );
-		for ( final ChordListener l : listener ) {
-			executor.execute( new Runnable() {
-
-				@Override
-				public void run() {
-					logger.debug( "Passing message " + message + " to " + l );
-					l.receivedMessage( ChordOverlayChannelHandler.this, message, from );
-				}
-			} );
-		}
-	}
-
-	@Override
 	public void sendMessage( final Serializable message, final IHash nodeId ) {
-		if ( responsibility.contains( nodeId ) ) {
+		if ( getResponsibility().contains( nodeId ) ) {
 
 			logger.debug( "Message " + message + " passed through loopback." );
 			fireMessageReceived( localNode.getNodeId(), message );
@@ -509,12 +382,12 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 	}
 
 	private void routeMessage( final AbstractMessage msg ) {
-		if ( lookupTable.isEmpty() ) {
+		if ( getLookupTable().isEmpty() ) {
 			logger.warn( "Lookup table is empty. Discarding " + msg );
 			return;
 		}
 
-		LookupResult lookupResult = lookupTable.lookup( msg.getReceiver() );
+		LookupResult lookupResult = getLookupTable().lookup( msg.getReceiver() );
 		if ( lookupResult != null ) {
 			Channels.write( lookupResult.getChannel(), msg );
 		}
@@ -540,11 +413,15 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 
 			@Override
 			public void run() {
-				if ( successorChannel != null && successorChannel.isConnected() ) {
-					Channels.write( successorChannel, new IAmYourPredeccessor( localNode.getNodeId() ) );
-				}
+				notifySuccessorAboutUs();
 			}
 		}, 1000 );
+	}
+
+	private void notifySuccessorAboutUs() {
+		if ( getSuccessorChannel() != null && getSuccessorChannel().isConnected() ) {
+			Channels.write( getSuccessorChannel(), new IAmYourPredeccessor( localNode.getNodeId() ) );
+		}
 	}
 
 	public void stabilize() {
@@ -567,20 +444,5 @@ public class ChordOverlayChannelHandler extends ChannelInterceptorAdapter implem
 			}
 
 		} );
-	}
-
-	@Override
-	public IHash getPredecessor() {
-		return predecessorId;
-	}
-
-	@Override
-	public IHash getSuccessor() {
-		return successorId;
-	}
-
-	@Override
-	public IHash getLocalId() {
-		return responsibility.getUpperBound();
 	}
 }
