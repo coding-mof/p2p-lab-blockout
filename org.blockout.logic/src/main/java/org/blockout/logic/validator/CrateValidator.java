@@ -36,6 +36,11 @@ public class CrateValidator implements IEventValidator {
 		TileCoordinate crateTile = world.findTile( coe.getCrate() );
 		TileCoordinate playerTile = world.findTile( coe.getPlayer() );
 
+		if ( crateTile == null || playerTile == null ) {
+			logger.info( "Crate has been removed." );
+			return ValidationResult.Invalid;
+		}
+
 		if ( crateTile.isNeighbour( playerTile ) ) {
 			return ValidationResult.Valid;
 		}
