@@ -59,6 +59,7 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 
 	private final long						stabilizationRate;
 	private final long						notificationRate;
+	private final long						propagationDelay;
 
 	/**
 	 * Creates a new chord overlay with the initial responsibility of
@@ -70,7 +71,8 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 	 *            An executor for dispatching the listener invocations.
 	 */
 	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskScheduler scheduler,
-			final TaskExecutor executor, final long stabilizationRate, final long notificationRate) {
+			final TaskExecutor executor, final long stabilizationRate, final long notificationRate,
+			final long propagationDelay) {
 
 		super( localNode, executor );
 
@@ -82,6 +84,7 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 		this.scheduler = scheduler;
 		this.stabilizationRate = stabilizationRate;
 		this.notificationRate = notificationRate;
+		this.propagationDelay = propagationDelay;
 
 		joinRequestFilter = Collections.synchronizedSet( new HashSet<SocketAddress>() );
 		pendingSuccessorLookups = Collections.synchronizedSet( new HashSet<FindSuccessorFuture>() );
@@ -128,7 +131,7 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 			final ChannelStateEvent e ) throws Exception {
 
 		// remove closed channels from lookup table
-		getLookupTable().remove( e.getChannel() );
+		HashAndAddress address = getLookupTable().remove( e.getChannel() );
 
 		// check if it was our successor
 		if ( e.getChannel().equals( getSuccessorChannel() ) ) {
@@ -149,6 +152,13 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 			// also query for our successor
 			queryForSuccessor();
 		}
+
+		// try to reconnect
+		if ( address.getHash() != null && address.getAddress() != null ) {
+			logger.info( "Trying to reconnect to " + address.getHash() + " at " + address.getAddress() );
+			getOrCreateChannel( address.getHash(), address.getAddress() );
+		}
+
 		super.channelClosed( connectionMgr, ctx, e );
 	}
 
@@ -195,9 +205,18 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 			handleIAmYourPredeccessorMessage( e, (IAmYourPredeccessor) message );
 		} else if ( message instanceof JoinRequestMessage ) {
 			handleJoinRequestMessage( connectionMgr, (JoinRequestMessage) message );
+		} else if ( message instanceof NodeListMessage ) {
+			handleNodeList( (NodeListMessage) message );
 		}
 
 		super.messageReceived( connectionMgr, ctx, e );
+	}
+
+	private void handleNodeList( final NodeListMessage message ) {
+		logger.info( "Got propagation list " + message );
+		for ( HashAndAddress haa : message.getKnownNodes() ) {
+			getOrCreateChannel( haa, haa.getAddress() );
+		}
 	}
 
 	private void handleJoinRequestMessage( final IConnectionManager connectionMgr2, final JoinRequestMessage message ) {
@@ -402,6 +421,22 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 				notifySuccessorAboutUs();
 			}
 		}, notificationRate );
+		scheduler.scheduleAtFixedRate( new Runnable() {
+
+			@Override
+			public void run() {
+				propagateKnownNodes();
+			}
+		}, propagationDelay );
+	}
+
+	private void propagateKnownNodes() {
+		Set<HashAndAddress> nodes = getLookupTable().listNodes();
+		for ( Channel channel : channels ) {
+			if ( channel.isConnected() ) {
+				Channels.write( channel, new NodeListMessage( nodes ) );
+			}
+		}
 	}
 
 	private void notifySuccessorAboutUs() {
@@ -428,7 +463,6 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 					logger.error( "Stabilization failed.", e );
 				}
 			}
-
 		} );
 	}
 }

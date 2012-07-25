@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import org.blockout.network.dht.IHash;
 import org.blockout.network.dht.WrappedRange;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.socket.ClientSocketChannelFactory;
 
 import com.google.common.collect.TreeMultimap;
 
@@ -47,6 +48,18 @@ public class LookupTable {
 		}
 	}
 
+	public Set<HashAndAddress> listNodes() {
+		Set<HashAndAddress> nodes = new HashSet<HashAndAddress>();
+		for ( IHash hash : keys ) {
+			for ( Channel c : table.get( hash ) ) {
+				if ( c.getFactory() instanceof ClientSocketChannelFactory ) {
+					nodes.add( new HashAndAddress( hash, c.getRemoteAddress() ) );
+				}
+			}
+		}
+		return nodes;
+	}
+
 	public Channel getSingle( final IHash hash ) {
 		synchronized ( table ) {
 			SortedSet<Channel> sortedSet = table.get( hash );
@@ -80,14 +93,15 @@ public class LookupTable {
 		}
 	}
 
-	public void remove( final Channel c ) {
+	public HashAndAddress remove( final Channel c ) {
 		synchronized ( table ) {
 			Set<IHash> hashes = new HashSet<IHash>();
-
+			IHash rhash = null;
 			Iterator<Entry<IHash, Channel>> iterator = table.entries().iterator();
 			while ( iterator.hasNext() ) {
 				Entry<IHash, Channel> entry = iterator.next();
 				if ( entry.getValue().equals( c ) ) {
+					rhash = entry.getKey();
 					hashes.add( entry.getKey() );
 					iterator.remove();
 				}
@@ -97,6 +111,7 @@ public class LookupTable {
 					keys.remove( hash );
 				}
 			}
+			return new HashAndAddress( rhash, c.getRemoteAddress() );
 		}
 	}
 }

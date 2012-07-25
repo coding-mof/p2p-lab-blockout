@@ -28,6 +28,7 @@
 		<constructor-arg ref="threadPool"/>
 		<constructor-arg value="${stabilizationRate}"/>
 		<constructor-arg value="${notificationRate}"/>
+		<constructor-arg value="${propagationDelay}"/>
 	</bean>
 
 	<bean name="connectionMgr" class="org.blockout.network.reworked.ConnectionManager" init-method="init">
