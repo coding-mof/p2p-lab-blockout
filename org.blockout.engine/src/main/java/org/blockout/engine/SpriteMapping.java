@@ -345,6 +345,8 @@ public class SpriteMapping {
             return 839;
         case wallway_intersection_vertical_left:
             return 840;
+        case open_door_lr:
+            return 842;
         case open_door:
             return 843;
         case closed_door:
@@ -711,6 +713,8 @@ public class SpriteMapping {
             return SpriteType.wallway_intersection_vertical_right;
         case 840:
             return SpriteType.wallway_intersection_vertical_left;
+        case 842:
+            return SpriteType.open_door_lr;
         case 843:
             return SpriteType.open_door;
         case 845:
@@ -723,6 +727,7 @@ public class SpriteMapping {
             return SpriteType.stoneground;
         case 849:
             return SpriteType.stoneground_dark;
+        case 841:
         case 850:
             return SpriteType.stoneground_mid;
         case 851:
