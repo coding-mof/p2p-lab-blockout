@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="48" height="48" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="nethack_spritesheet" tilewidth="32" tileheight="32">
+  <image source="../../../org.blockout.engine/src/main/resources/nethack_spritesheet.jpg" width="1280" height="960"/>
+ </tileset>
+ <layer name="world" width="48" height="48">
+  <data encoding="base64" compression="zlib">
+   eJztl90KwjAMhYU9mP8XooITBVHf/zmcskItTZs2J22VXRw6GGu/nCbp2nezWT9p0qSPloMWAa2Y85wy30k1H3Qen33jvAGPY/wUu/0eIY19QPtfOo/efJdADLtOVhcuv1Ft/3PySsP/NeGriWHv+ebO4HdZNXuQbz8eAf9j/BJWaZxuP9LgR9eAz38Tg6lvCb+PVaOW3zL1cBzHLcN/jt8aXocUO79S+g+XHxlnDf7W/E/l1vL/KvSfy4k8Mwy/e74ZbYBrnQBzUPxIlcynFvil/iPVQkyhWKl76MrDX4M5tKb9n/ccdBvHvvv+H0nlLxWnzX93Rgl/qRhS+SnOUn676+Tw+84qKX/u97F7JsXfQu8x/PY5fei+z2kqf2rmjMuf2/9b3hcuay6zZpycuV1+rTtlCe9r8Ev2HcWcehai+nSIP2UN7t0Becew56JYUTnE2WvJ3mvG4Jsf9e9FeZK7FjcW1HycOH+hj9bWr3nUKi+qbjh1ou2BtFZj34feo/pEq3lSUv/gATqGF+UD7sI=
+  </data>
+ </layer>
+</map>
