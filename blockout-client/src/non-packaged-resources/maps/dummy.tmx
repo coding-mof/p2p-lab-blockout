@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="48" height="48" tilewidth="32" tileheight="32">
  <tileset firstgid="1" name="nethack_spritesheet" tilewidth="32" tileheight="32">
-  <image source="../../../org.blockout.engine/src/main/resources/nethack_spritesheet.jpg" width="1280" height="960"/>
+  <image source="../../../../org.blockout.engine/src/main/resources/nethack_spritesheet.jpg" width="1280" height="960"/>
  </tileset>
  <layer name="world" width="48" height="48">
-  <data encoding="base64" compression="zlib">
-   eJztwwEJAAAMA6DBE65/meU4KNhLqqqqqqqqqqqqvjwO3/Qf
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3DAQkAAAwDoMETrn+Z5Tgo2Euqqqqqqqqqqqq+PK7sTvYAJAAA
   </data>
  </layer>
 </map>
