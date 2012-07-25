@@ -23,4 +23,5 @@
 	
 	<bean class="org.blockout.logic.handler.AttackHandler"/>
 	<bean class="org.blockout.ui.LocalPlayerMoveHandler"/>
+	 <bean class="org.blockout.logic.handler.CrateCreatorHandler"/>
 </beans>

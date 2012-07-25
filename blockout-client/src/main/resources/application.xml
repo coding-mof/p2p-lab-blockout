@@ -43,4 +43,7 @@
         <property name="audioManager" ref="audioMgr"/>
         <property name="animationManager" ref="animationMgr"/>
     </bean>
+    <bean class="org.blockout.logic.handler.CrateCreatorHandler">
+	<property name="animationManager" ref="animationManager"/>
+	</bean>
 </beans>

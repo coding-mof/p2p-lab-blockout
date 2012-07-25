@@ -97,6 +97,7 @@
 	<!-- bean class="org.blockout.logic.handler.MonsterDeathHandler" /-->
 	<bean class="org.blockout.logic.handler.PlayerMoveHandler" />
 	<bean class="org.blockout.logic.handler.RewardXPHandler" />
+	
 
 	<bean class="org.blockout.logic.validator.AttackValidator" />
 	<bean class="org.blockout.logic.validator.CollisionDetectionEventValidator" />

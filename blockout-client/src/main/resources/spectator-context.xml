@@ -54,4 +54,5 @@
 		<constructor-arg ref="aiplayer"/>
 		<constructor-arg type="long" value="${responseTime}"/>
 	</bean>
+	<bean class="org.blockout.logic.handler.CrateCreatorHandler"/>
 </beans>
