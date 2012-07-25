@@ -66,9 +66,15 @@
 	</bean>
 
 	<!-- World -->
-	<bean class="org.blockout.world.BasicChunkGenerator" />
-	<bean class="org.blockout.world.BasicChunkLoader" />
-	<bean name="world" class="org.blockout.world.World" />
+	<bean name="loader" class="org.blockout.world.BasicChunkLoader">
+		<constructor-arg value="src/non-packaged-resources/maps/" type="String"/>
+	</bean>
+	<bean name="generator" class="org.blockout.world.BasicChunkGenerator">
+		<!-- <constructor-arg ref="loader"/> -->		
+	</bean>
+	<bean name="world" class="org.blockout.world.World">
+		<constructor-arg ref="generator"/>
+	</bean>
 	<bean name="manager" class="org.blockout.world.DefaultChunkManager">
 		<constructor-arg ref="world"/>
 		<constructor-arg ref="chordOverlay"/>

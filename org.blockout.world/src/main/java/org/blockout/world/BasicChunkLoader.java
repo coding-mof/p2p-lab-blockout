@@ -1,5 +1,8 @@
 package org.blockout.world;
 
+import java.io.File;
+import java.io.FileFilter;
+
 import org.blockout.common.TileCoordinate;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.tiled.TiledMap;
@@ -7,6 +10,15 @@ import org.newdawn.slick.tiled.TiledMap;
 import com.google.common.base.Preconditions;
 
 public class BasicChunkLoader implements IChunkLoader {
+	
+	
+	private String mapfolder;
+	
+	public BasicChunkLoader(String mapfolder) {
+		Preconditions.checkNotNull(mapfolder);
+		this.mapfolder = mapfolder;
+	}
+	
 
 	@Override
 	public Chunk loadChunk( final TileCoordinate coordinate, final String tmxFile ) {
@@ -30,7 +42,10 @@ public class BasicChunkLoader implements IChunkLoader {
 		for ( int x = 0; x < Chunk.CHUNK_SIZE; x++ ) {
 			for ( int y = 0; y < Chunk.CHUNK_SIZE; y++ ) {
 				int spriteID = map.getTileId( x, y, 0 );
-				int objectID = map.getTileId( x, y, 1 );
+				int objectID = 0;
+				if(map.getLayerCount()>1){
+					objectID = map.getTileId( x, y, 1 );
+				}
 				if ( objectID >= 0 ) {
 					tiles[x][y] = new Tile( objectID, Tile.WALL_HEIGHT );
 				} else if ( spriteID >= 0 ) {
@@ -38,6 +53,26 @@ public class BasicChunkLoader implements IChunkLoader {
 				}
 			}
 		}
-		return null;
+		return tiles;
+	}
+
+
+	@Override
+	public File[] getMaps() {
+		  // Directory path here
+		  File folder = new File(mapfolder);
+		  File[] listOfFiles = folder.listFiles(new FileFilter() {
+			
+			@Override
+			public boolean accept(File pathname) {
+				if (pathname.getName().endsWith(".tmx"))
+		          {
+		               return true;
+		          }
+		          return true;
+			}
+		});
+		  
+		  return folder.listFiles();
 	}
 }
