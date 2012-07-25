@@ -44,6 +44,6 @@
         <property name="animationManager" ref="animationMgr"/>
     </bean>
     <bean class="org.blockout.logic.handler.CrateCreatorHandler">
-	<property name="animationManager" ref="animationManager"/>
+	<property name="animationManager" ref="animationMgr"/>
 	</bean>
 </beans>
