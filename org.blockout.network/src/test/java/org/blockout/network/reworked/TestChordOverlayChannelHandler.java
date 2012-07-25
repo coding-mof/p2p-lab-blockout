@@ -20,7 +20,7 @@ public class TestChordOverlayChannelHandler {
 	public void setUp() {
 		localNode = new LocalNode();
 		TaskScheduler scheduler = Mockito.mock( TaskScheduler.class );
-		chord = new ChordOverlayChannelHandler( localNode, scheduler, new SyncTaskExecutor(), 0, 0 );
+		chord = new ChordOverlayChannelHandler( localNode, scheduler, new SyncTaskExecutor(), 0, 0, 0 );
 	}
 
 	@Test
