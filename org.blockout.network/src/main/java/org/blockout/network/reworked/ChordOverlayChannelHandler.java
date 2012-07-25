@@ -131,7 +131,7 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 			final ChannelStateEvent e ) throws Exception {
 
 		// remove closed channels from lookup table
-		HashAndAddress address = getLookupTable().remove( e.getChannel() );
+		getLookupTable().remove( e.getChannel() );
 
 		// check if it was our successor
 		if ( e.getChannel().equals( getSuccessorChannel() ) ) {

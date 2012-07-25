@@ -71,7 +71,7 @@
 		<constructor-arg value="src/non-packaged-resources/maps/" type="String"/>
 	</bean>
 	<bean name="generator" class="org.blockout.world.BasicChunkGenerator">
-		<!-- <constructor-arg ref="loader"/> -->		
+		<constructor-arg ref="loader"/>
 	</bean>
 	<bean name="world" class="org.blockout.world.World">
 		<constructor-arg ref="generator"/>
