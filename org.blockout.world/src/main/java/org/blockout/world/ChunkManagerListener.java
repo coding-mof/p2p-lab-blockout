@@ -16,6 +16,6 @@ public interface ChunkManagerListener {
 	 * @param msg	the {@link IMessage} that contains all necessary informations
 	 * 					for updating the {@link Chunk}
 	 */
-	public void chunkUpdated(IMessage msg);
+	public void chunkUpdated(IMessage msg, TileCoordinate updatedChunk);
 
 }

@@ -92,7 +92,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 				}
 			}
 			
-			fireChunkUpdate( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ) );
+			fireChunkUpdate( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), Chunk.containingCunk(event.getResponsibleTile()));
+			fireChunkUpdate( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ), Chunk.containingCunk(event.getResponsibleTile()));
 		}
 	}
 
@@ -236,7 +237,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		
 		clean(receiver.get(c.getPosition()));
 		
-		fireChunkUpdate( new ChunkDeliveryMessage( c, null ) );
+		fireChunkUpdate( new ChunkDeliveryMessage( c, null ), c.getPosition() );
 		chord.sendMessage(
 				new ChunkDeliveryMessage( c, (ArrayList<IHash>) receiver.get( msg.getCoordinate() ).clone() ), origin );
 		//prevent sending updates to one self
@@ -320,7 +321,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 			coord = c.findFreeTile();
 			c.setEntityCoordinate(msg.getPlayer(), coord.getX(), coord.getY());
 		}
-		fireChunkUpdate(new EntityAddedMessage(msg.getPlayer(), coord, origin));
+		fireChunkUpdate(new EntityAddedMessage(msg.getPlayer(), coord, origin), c.getPosition());
 
 		if (!receiver.containsKey(c.getPosition())) {
 			logger.debug("Clearing receivers for " + c.getPosition());
@@ -413,10 +414,10 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		this.listener.remove( listener );
 	}
 
-	private void fireChunkUpdate( final IMessage message ) {
+	private void fireChunkUpdate( final IMessage message, TileCoordinate c) {
 		synchronized ( listener ) {
 			for ( ChunkManagerListener listener : this.listener ) {
-				listener.chunkUpdated( message );
+				listener.chunkUpdated( message, c );
 			}
 		}
 	}

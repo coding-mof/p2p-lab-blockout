@@ -28,7 +28,7 @@ public class ChordIntegrationTest {
 	private IChordOverlay createAndConnectPeer( final LocalNode node, final ChordListener listener ) {
 		ThreadPoolTaskScheduler scheduler = createPooledScheduler();
 		ChordOverlayChannelHandler overlay;
-		overlay = new ChordOverlayChannelHandler( node, scheduler, new SyncTaskExecutor(), 30000 );
+		overlay = new ChordOverlayChannelHandler( node, scheduler, new SyncTaskExecutor(), 30000, 1000 );
 		overlay.addChordListener( listener );
 		ConnectionManager mgr;
 		mgr = new ConnectionManager( new HashedWheelTimer(), new SyncTaskExecutor(), 3000, 6000, overlay );
@@ -41,7 +41,7 @@ public class ChordIntegrationTest {
 	public void setUp() {
 		localNode = new LocalNode();
 		ThreadPoolTaskScheduler scheduler = createPooledScheduler();
-		chord = new ChordOverlayChannelHandler( localNode, scheduler, new SyncTaskExecutor(), 30000 );
+		chord = new ChordOverlayChannelHandler( localNode, scheduler, new SyncTaskExecutor(), 30000, 1000 );
 		connectionMgr = new ConnectionManager( new HashedWheelTimer(), new SyncTaskExecutor(), 3000, 6000, chord );
 		connectionMgr.init();
 	}

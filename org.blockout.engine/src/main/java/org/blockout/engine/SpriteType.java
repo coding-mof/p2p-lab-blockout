@@ -19,7 +19,7 @@ public enum SpriteType {
     // Structures
     wallway_vertical, wallway_horizontal, wallway_corner_up_tight, wallway_corner_up_left, wallway_corner_down_right, wallway_corner_down_left, wallway_crossing, wallway_intersection_horizontal_up, wallway_intersection_horizontal_down, wallway_intersection_vertical_right, wallway_intersection_vertical_left,
 
-    open_door, closed_door, iron_bars, tree, stoneground, stoneground_dark, stoneground_mid, staircase_up, staircase_down, ladder_up, ladder_down, altar, grave, opulent_throne, sink, fountain, water, ice, molten_lava, lowered_drawbridge_vertical, lowered_drawbridge_horizontal, raised_drawbridge_vertical, raised_drawbridge_horizontal,
+    open_door_lr, open_door, closed_door, iron_bars, tree, stoneground, stoneground_dark, stoneground_mid, staircase_up, staircase_down, ladder_up, ladder_down, altar, grave, opulent_throne, sink, fountain, water, ice, molten_lava, lowered_drawbridge_vertical, lowered_drawbridge_horizontal, raised_drawbridge_vertical, raised_drawbridge_horizontal,
 
-    elexir_red, elexir_pink, elexir_orange, elexir_yellow, elexir_light_green, elexir_green, elexir_light_blue, elexir_violet, elexir_blue, elexir_purple
+    elexir_red, elexir_pink, elexir_orange, elexir_yellow, elexir_light_green, elexir_green, elexir_light_blue, elexir_violet, elexir_blue, elexir_purple,
 }

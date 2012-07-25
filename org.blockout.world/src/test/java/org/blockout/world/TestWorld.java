@@ -29,7 +29,7 @@ public class TestWorld {
 	
 	@Before
 	public void setUp(){
-		w = new World();
+		w = new World( new BasicChunkGenerator());
 		m = mock(IChunkManager.class);
 		w.setManager(m);
 	}

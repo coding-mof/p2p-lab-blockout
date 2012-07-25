@@ -1,5 +1,8 @@
 package org.blockout.world;
 
+
+import java.util.HashSet;
+
 import org.blockout.common.TileCoordinate;
 import org.blockout.network.dht.IHash;
 import org.blockout.network.dht.WrappedRange;
@@ -19,19 +22,34 @@ public class ReplicationHandler implements ChunkManagerListener, ChordListener {
 		logger = LoggerFactory.getLogger(ReplicationHandler.class);
 	}
 
-	private final IChordOverlay 	chord;
-	private final WorldAdapter 		adapter;
+	private final IChordOverlay 			chord;
+	private final WorldAdapter 				adapter;
+	private final HashSet<TileCoordinate>	chunksToReplicate;
 
 	public ReplicationHandler(IChordOverlay chord, WorldAdapter adapter,
 			IChunkManager manager) {
 		this.chord = chord;
 		this.adapter = adapter;
 		manager.addListener(this);
+		chunksToReplicate = new HashSet<TileCoordinate>();
 		chord.addChordListener(this);
 	}
 
 	@Override
-	public void chunkUpdated(IMessage msg) {
+	public void chunkUpdated(IMessage msg, TileCoordinate c) {
+		if(!chunksToReplicate.contains(c)){
+			chunksToReplicate.add(c);
+			if(msg instanceof ChunkDeliveryMessage){
+				chord.sendMessage(new ReplicationMessage(msg, chord.getLocalId()),
+						chord.getSuccessor());
+				return;
+			}else{
+				chord.sendMessage(new ReplicationMessage(new ChunkDeliveryMessage(adapter.getChunk(c), null), chord.getLocalId()),
+						chord.getSuccessor());
+			}
+			
+		}
+		
 		chord.sendMessage(new ReplicationMessage(msg, chord.getLocalId()),
 				chord.getSuccessor());
 	}
@@ -51,6 +69,8 @@ public class ReplicationHandler implements ChunkManagerListener, ChordListener {
 	}
 
 	private void handleReplication(ReplicationMessage message) {
+		LoggerFrame.getFrame().log("Message: "+message.getMessage(chord.getLocalId()));
+		LoggerFrame.getFrame().log("Replicants: "+message.getReplicants());
 		if (message.getReplicants().contains(chord.getLocalId())) {
 			logger.debug("dropped Replicationmessage: " + message);
 			return;
@@ -78,14 +98,19 @@ public class ReplicationHandler implements ChunkManagerListener, ChordListener {
 
     @Override
     public void predecessorChanged( IChordOverlay chord, IHash predecessor ) {
-        // TODO Auto-generated method stub
-
+    	//clearing list of chunks
+    	//if you still need to replicate them someone will tell....
+    	chunksToReplicate.clear();
     }
 
     @Override
     public void successorChanged( IChordOverlay chord, IHash successor ) {
-        // TODO Auto-generated method stub
-
+        //replicating all own chunks again to ensure consistency 
+		for (TileCoordinate coordinate : chunksToReplicate) {
+			chord.sendMessage(new ReplicationMessage(new ChunkDeliveryMessage(
+					adapter.getChunk(coordinate), null), chord.getLocalId()),
+					chord.getSuccessor());
+		}
     }
 
 }
