@@ -356,6 +356,7 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 
 	@Override
 	public void sendMessage( final Serializable message, final IHash nodeId ) {
+		logger.debug( "Sending message " + message + " to " + nodeId );
 		if ( getResponsibility().contains( nodeId ) ) {
 
 			logger.debug( "Message " + message + " passed through loopback." );
