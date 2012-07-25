@@ -114,30 +114,31 @@ public class StaticTMXWorld implements IWorld {
 				t = new Tile( spriteId, entity );
 				putEntity( entity, coord.getX(), coord.getY() );
 			} else {
-                t = new Tile( spriteId, getSpriteTypeHeight( spriteId ) );
+				t = new Tile( spriteId, getSpriteTypeHeight( spriteId ) );
 			}
 		}
 		tileCache.put( coord, t );
 		return t;
 	}
 
-    private int getSpriteTypeHeight( final int spriteId ) {
-        switch ( spriteId ) {
-        case 841: // stoneground_mid
-        case 842: // open door
-        case 843: // open_door
-        case 848: // stoneground
-        case 849: // stoneground_dark
-        case 850: // stoneground_mid
-        case 861: // ice
-        case 863: // lowered_drawbridge_vertical
-        case 864: // lowered_drawbridge_horizontal
-            return Tile.GROUND_HEIGHT;
+	private int getSpriteTypeHeight( final int spriteId ) {
+		switch ( spriteId ) {
+			case 841: // stoneground_mid
+			case 842: // open door
+			case 843: // open_door
+			case 848: // stoneground
+				// case 849: // stoneground_dark
+				// should be walls...^^
+			case 850: // stoneground_mid
+			case 861: // ice
+			case 863: // lowered_drawbridge_vertical
+			case 864: // lowered_drawbridge_horizontal
+				return Tile.GROUND_HEIGHT;
 
-        default:
-            return Tile.WALL_HEIGHT;
-        }
-    }
+			default:
+				return Tile.WALL_HEIGHT;
+		}
+	}
 
 	@Override
 	public <T extends Entity> T findEntity( final UUID id, final Class<T> clazz ) {

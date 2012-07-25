@@ -2,16 +2,13 @@ package org.blockout.network.reworked;
 
 import java.io.Serializable;
 import java.net.SocketAddress;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.blockout.network.LocalNode;
 import org.blockout.network.dht.IHash;
-import org.blockout.network.dht.WrappedRange;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -49,11 +46,19 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 	private final ChannelGroup				channels;
 	private final LocalNode					localNode;
 	private final TaskScheduler				scheduler;
-	private final TaskExecutor				executor;
-	private final List<SocketAddress>		joinRequestFilter;
+	/**
+	 * Contains the {@link SocketAddress}' of peers that we should not send a
+	 * {@link JoinRequestMessage}. The node that welcomes a new peer in the ring
+	 * stores the peer's server address in this set, so that when we have
+	 * connected to the new peer as client - we don't send a
+	 * {@link JoinRequestMessage} again.
+	 */
+	private final Set<SocketAddress>		joinRequestFilter;
 
 	private IConnectionManager				connectionMgr;
+
 	private final long						stabilizationRate;
+	private final long						notificationRate;
 
 	/**
 	 * Creates a new chord overlay with the initial responsibility of
@@ -65,7 +70,7 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 	 *            An executor for dispatching the listener invocations.
 	 */
 	public ChordOverlayChannelHandler(final LocalNode localNode, final TaskScheduler scheduler,
-			final TaskExecutor executor, final long stabilizationRate) {
+			final TaskExecutor executor, final long stabilizationRate, final long notificationRate) {
 
 		super( localNode, executor );
 
@@ -75,39 +80,20 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 
 		this.localNode = localNode;
 		this.scheduler = scheduler;
-		this.executor = executor;
 		this.stabilizationRate = stabilizationRate;
+		this.notificationRate = notificationRate;
 
-		joinRequestFilter = Collections.synchronizedList( new ArrayList<SocketAddress>() );
+		joinRequestFilter = Collections.synchronizedSet( new HashSet<SocketAddress>() );
 		pendingSuccessorLookups = Collections.synchronizedSet( new HashSet<FindSuccessorFuture>() );
 		channels = new DefaultChannelGroup();
 
-		addChordListener( new ChordListener() {
+		addChordListener( new ChordListenerAdapter() {
 
 			@Override
 			public void successorChanged( final IChordOverlay chord, final IHash successor ) {
 				// Notify the new successor about us - so that
 				// he can adjust his responsibility
 				notifySuccessorAboutUs();
-			}
-
-			@Override
-			public void responsibilityChanged( final IChordOverlay chord, final WrappedRange<IHash> from,
-					final WrappedRange<IHash> to ) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void receivedMessage( final IChordOverlay chord, final Object message, final IHash senderId ) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void predecessorChanged( final IChordOverlay chord, final IHash predecessor ) {
-				// TODO Auto-generated method stub
-
 			}
 		} );
 	}
@@ -123,14 +109,13 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 		Channels.write( e.getChannel(),
 				new NodeIdentificationMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
 
-		// Introduce ourself when we have connected.
+		// Send join request if we connect as client
 		if ( e.getChannel().getFactory() instanceof ClientSocketChannelFactory ) {
-			// only clients send join requests
-
 			if ( !joinRequestFilter.contains( e.getChannel().getRemoteAddress() ) ) {
 				logger.info( "We connected to a stranger. Request join." );
-				Channels.write( e.getChannel(),
-						new JoinRequestMessage( localNode.getNodeId(), connectionMgr.getServerAddress() ) );
+				JoinRequestMessage request;
+				request = new JoinRequestMessage( localNode.getNodeId(), connectionMgr.getServerAddress() );
+				Channels.write( e.getChannel(), request );
 			} else {
 				joinRequestFilter.remove( e.getChannel().getRemoteAddress() );
 			}
@@ -415,7 +400,7 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 			public void run() {
 				notifySuccessorAboutUs();
 			}
-		}, 1000 );
+		}, notificationRate );
 	}
 
 	private void notifySuccessorAboutUs() {

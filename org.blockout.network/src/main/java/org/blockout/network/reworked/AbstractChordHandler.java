@@ -131,13 +131,14 @@ public abstract class AbstractChordHandler extends ChannelInterceptorAdapter imp
 			// [localNode+1, successor-1]
 			IHash lowerBound = localNode.getNodeId().getNext();
 			WrappedRange<IHash> range = new WrappedRange<IHash>( lowerBound, newSuccessor.getPrevious() );
-			synchronized ( lookupTable ) {
-
-				if ( lookupTable.containsAnyOf( range ) ) {
-					logger.debug( "New successor " + newSuccessor + " is not better than current " + successorId + "." );
-					return;
-				}
-			}
+			// synchronized ( lookupTable ) {
+			//
+			// if ( lookupTable.containsAnyOf( range ) ) {
+			// logger.debug( "New successor " + newSuccessor +
+			// " is not better than current " + successorId + "." );
+			// return;
+			// }
+			// }
 
 			successorId = newSuccessor;
 			successorChannel = newChannel;
