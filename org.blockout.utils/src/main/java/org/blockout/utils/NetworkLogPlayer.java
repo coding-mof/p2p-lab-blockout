@@ -30,7 +30,7 @@ public class NetworkLogPlayer implements Runnable {
     private AtomicInteger           index    = new AtomicInteger();
     private IMessageProcessor       processor;
     private List<NetworkLogMessage> messages;
-
+    private int                     numLogMessages;
 
     /**
      * Create a new NetworkLogPlayer with a given series of log messages
@@ -46,6 +46,7 @@ public class NetworkLogPlayer implements Runnable {
         Preconditions.checkNotNull( processor, "processor is null" );
 
         this.messages = new LinkedList<NetworkLogMessage>( messages );
+        this.numLogMessages = messages.size();
         this.processor = processor;
     }
 
@@ -110,5 +111,13 @@ public class NetworkLogPlayer implements Runnable {
         Preconditions.checkArgument( 0 <= delay,
                 "Delay have to be greater or equal zero" );
         this.delay.set( delay );
+    }
+
+    public int getNumLogMessages() {
+        return numLogMessages;
+    }
+
+    public int getCurrentLogMessageIndex() {
+        return index.get();
     }
 }

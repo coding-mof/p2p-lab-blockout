@@ -1,5 +1,7 @@
 package org.blockout.world;
 
+import java.io.File;
+
 import org.blockout.common.TileCoordinate;
 
 
@@ -17,4 +19,11 @@ public interface IChunkLoader {
 	 * @return the desired Chunk
 	 */
 	public Chunk loadChunk(TileCoordinate  coordinate, String tmxFile);
+	
+	/**
+	 * will return a list of predefined maps
+	 * 
+	 * @return
+	 */
+	public File[] getMaps();
 }

@@ -35,10 +35,10 @@ public class World implements IWorld, WorldAdapter {
 	private IChunkManager							chunkManager;
 	private final IChunkGenerator					chunkGenerator;
 
-	public World() {
+	public World(IChunkGenerator generator) {
 		view = new Hashtable<TileCoordinate, Chunk>();
 		managedChunks = new Hashtable<TileCoordinate, Chunk>();
-		chunkGenerator = new BasicChunkGenerator();
+		chunkGenerator = generator;
 	}
 
 	/**
