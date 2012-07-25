@@ -153,12 +153,6 @@ public class ChordOverlayChannelHandler extends AbstractChordHandler {
 			queryForSuccessor();
 		}
 
-		// try to reconnect
-		if ( address.getHash() != null && address.getAddress() != null ) {
-			logger.info( "Trying to reconnect to " + address.getHash() + " at " + address.getAddress() );
-			getOrCreateChannel( address.getHash(), address.getAddress() );
-		}
-
 		super.channelClosed( connectionMgr, ctx, e );
 	}
 
