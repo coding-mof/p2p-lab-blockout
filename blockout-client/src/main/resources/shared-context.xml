@@ -55,11 +55,6 @@
 
 	<bean name="localNode" class="org.blockout.network.LocalNode"/>
 
-	<bean name="messageBroker" class="org.blockout.network.message.MessageBroker">
-		<constructor-arg ref="threadPool" />
-		<constructor-arg ref="chordOverlay"/>
-	</bean>
-
 	<bean class="org.blockout.engine.Camera">
 		<constructor-arg value="32" type="int" />
 		<constructor-arg value="1024" type="int" />
@@ -71,7 +66,7 @@
 		<constructor-arg value="src/non-packaged-resources/maps/" type="String"/>
 	</bean>
 	<bean name="generator" class="org.blockout.world.BasicChunkGenerator">
-		<constructor-arg ref="loader"/>
+		<!-- <constructor-arg ref="loader"/> -->
 	</bean>
 	<bean name="world" class="org.blockout.world.World">
 		<constructor-arg ref="generator"/>
@@ -80,11 +75,12 @@
 		<constructor-arg ref="world"/>
 		<constructor-arg ref="chordOverlay"/>
 	</bean>
-	<bean class="org.blockout.world.ReplicationHandler">
+	
+<!-- 	<bean class="org.blockout.world.ReplicationHandler">
 		<constructor-arg ref="world"/>
 		<constructor-arg ref="chordOverlay"/>
 		<constructor-arg ref="manager"/>
-	</bean>
+	</bean> -->
 	
 	<bean class="org.blockout.world.LocalGameState" />
 	<bean class="org.blockout.logic.PlayerManager" />

@@ -113,7 +113,7 @@ public class DefaultChunkManagerTest {
 		manager.receivedMessage( chord, msg, origin );
 		verify( iStateMachine ).pushEvent( event );
 		// rollback
-		msg = new StateMessage( event, StateMessage.Type.ROLLBAK_MESSAGE );
+		msg = new StateMessage( event, StateMessage.Type.ROLLBACK_MESSAGE );
 		manager.receivedMessage( chord, msg, origin );
 		verify( iStateMachine ).rollbackEvent( event );
 	}
@@ -186,14 +186,14 @@ public class DefaultChunkManagerTest {
 		addreceivers();
 
 		manager.eventRolledBack( e1 );
-		verify( chord ).sendMessage( new StateMessage( e1, StateMessage.Type.ROLLBAK_MESSAGE ), a1 );
-		verify( chord, never() ).sendMessage( new StateMessage( e1, StateMessage.Type.ROLLBAK_MESSAGE ), a2 );
+		verify( chord ).sendMessage( new StateMessage( e1, StateMessage.Type.ROLLBACK_MESSAGE ), a1 );
+		verify( chord, never() ).sendMessage( new StateMessage( e1, StateMessage.Type.ROLLBACK_MESSAGE ), a2 );
 		manager.eventRolledBack( e2 );
-		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.ROLLBAK_MESSAGE ), a1 );
-		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.ROLLBAK_MESSAGE ), a2 );
+		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.ROLLBACK_MESSAGE ), a1 );
+		verify( chord ).sendMessage( new StateMessage( e2, StateMessage.Type.ROLLBACK_MESSAGE ), a2 );
 		manager.eventRolledBack( e3 );
-		verify( chord, never() ).sendMessage( new StateMessage( e3, StateMessage.Type.ROLLBAK_MESSAGE ), a1 );
-		verify( chord ).sendMessage( new StateMessage( e3, StateMessage.Type.ROLLBAK_MESSAGE ), a2 );
+		verify( chord, never() ).sendMessage( new StateMessage( e3, StateMessage.Type.ROLLBACK_MESSAGE ), a1 );
+		verify( chord ).sendMessage( new StateMessage( e3, StateMessage.Type.ROLLBACK_MESSAGE ), a2 );
 	}
 
 	@Test

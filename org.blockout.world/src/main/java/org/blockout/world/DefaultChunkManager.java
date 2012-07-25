@@ -14,7 +14,6 @@ import org.blockout.network.message.IMessage;
 import org.blockout.network.reworked.ChordListener;
 import org.blockout.network.reworked.IChordOverlay;
 import org.blockout.world.entity.Player;
-import org.blockout.world.event.AttackEvent;
 import org.blockout.world.event.IEvent;
 import org.blockout.world.messeges.ChuckRequestMessage;
 import org.blockout.world.messeges.ChunkDeliveryMessage;
@@ -53,8 +52,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private final Hashtable<TileCoordinate, ArrayList<IHash>>	receiver;
 
 	private final Hashtable<TileCoordinate, ArrayList<IHash>>	local;
-	
-	private final HashSet<IEvent> pushedEvents;
+
+	private final HashSet<IEvent>								pushedEvents;
 
 	public DefaultChunkManager(final WorldAdapter worldAdapter, final IChordOverlay chord) {
 		receiver = new Hashtable<TileCoordinate, ArrayList<IHash>>();
@@ -64,7 +63,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		this.chord = chord;
 		listener = new ArrayList<ChunkManagerListener>();
 		chord.addChordListener( this );
-		
+
 		pushedEvents = new HashSet<IEvent>();
 	}
 
@@ -75,71 +74,72 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	@Override
 	public void eventCommitted( final IEvent<?> event ) {
-			if(pushedEvents.contains(event)){
-				pushedEvents.remove(event);
-			}
+		if ( pushedEvents.contains( event ) ) {
+			pushedEvents.remove( event );
+		}
 		logger.debug( "Event committed " + event );
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
-		if ( chord.getResponsibility().contains(new Hash(coordinate))) {
-			
-			if(receiver.containsKey( coordinate ) ){
-				
-				clean(receiver.get(coordinate));
-				
+		if ( chord.getResponsibility().contains( new Hash( coordinate ) ) ) {
+
+			if ( receiver.containsKey( coordinate ) ) {
+
+				clean( receiver.get( coordinate ) );
+
 				for ( IHash address : receiver.get( coordinate ) ) {
 					logger.debug( "Sending event " + event + " to " + address );
 					chord.sendMessage( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ), address );
 				}
 			}
-			
-			fireChunkUpdate( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), Chunk.containingCunk(event.getResponsibleTile()));
-			fireChunkUpdate( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ), Chunk.containingCunk(event.getResponsibleTile()));
+
+			// fireChunkUpdate( new StateMessage( event,
+			// StateMessage.Type.PUSH_MESSAGE ),
+			// Chunk.containingCunk(event.getResponsibleTile()));
+			fireChunkUpdate( new StateMessage( event, StateMessage.Type.COMMIT_MESSAGE ),
+					Chunk.containingCunk( event.getResponsibleTile() ) );
 		}
 	}
 
 	@Override
-	public void eventPushed(final IEvent<?> event) {
+	public void eventPushed( final IEvent<?> event ) {
 		boolean send = true;
-			if(pushedEvents.contains(event)){
-				send = false;
-			}else{
-				pushedEvents.add(event);
-			}
-		
-		
-		logger.debug("Event pushed " + event);
-		TileCoordinate coordinate = Chunk.containingCunk(event
-				.getResponsibleTile());
-
-		// push&commit event if within own responsibility
-		if (chord.getResponsibility().contains(new Hash(coordinate))) {
-
-			// send push to anyone receiving updates for the chunk
-			if (send && receiver.containsKey(coordinate)) {
-				
-				clean(receiver.get(coordinate));
-				
-				for (IHash address : receiver.get(coordinate)) {
-					chord.sendMessage(new StateMessage(event,
-							StateMessage.Type.PUSH_MESSAGE), address);
-				}
-			}
-			//commit
-			stateMachine.commitEvent(event);
+		if ( pushedEvents.contains( event ) ) {
+			send = false;
 		} else {
-			
-			chord.sendMessage(new StateMessage(event,
-					StateMessage.Type.PUSH_MESSAGE), new Hash(coordinate));
+			pushedEvents.add( event );
 		}
 
-		// send pushed event to all players local connected players receiving updates for the chunk
-		if (local.containsKey(coordinate)) {
-			
-			clean(local.get(coordinate));
-			
-			for (IHash address : local.get(coordinate)) {
-				chord.sendMessage(new StateMessage(event,
-						StateMessage.Type.PUSH_MESSAGE), address);
+		logger.debug( "Event pushed " + event );
+		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
+
+		// push&commit event if within own responsibility
+		if ( chord.getResponsibility().contains( new Hash( coordinate ) ) ) {
+
+			// send push to anyone receiving updates for the chunk
+			if ( send && receiver.containsKey( coordinate ) ) {
+
+				clean( receiver.get( coordinate ) );
+
+				for ( IHash address : receiver.get( coordinate ) ) {
+					chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), address );
+				}
+			}
+			// auto-commit
+			stateMachine.commitEvent( event );
+		} else {
+
+			chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), new Hash( coordinate ) );
+		}
+
+		// send pushed event to all players local connected players receiving
+		// updates for the chunk
+		if ( local.containsKey( coordinate ) ) {
+
+			clean( local.get( coordinate ) );
+
+			for ( IHash address : local.get( coordinate ) ) {
+				if ( !receiver.containsKey( coordinate ) || !receiver.get( coordinate ).contains( address ) ) {
+					chord.sendMessage( new StateMessage( event, StateMessage.Type.PUSH_MESSAGE ), address );
+				}
 			}
 		}
 
@@ -147,26 +147,26 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	@Override
 	public void eventRolledBack( final IEvent<?> event ) {
-		
-			if(pushedEvents.contains(event)){
-				pushedEvents.remove(event);
-			}
-		
+
+		if ( pushedEvents.contains( event ) ) {
+			pushedEvents.remove( event );
+		}
+
 		TileCoordinate coordinate = Chunk.containingCunk( event.getResponsibleTile() );
 		if ( receiver.containsKey( coordinate ) ) {
-			
-			clean(receiver.get(coordinate));
-			
+
+			clean( receiver.get( coordinate ) );
+
 			for ( IHash address : receiver.get( coordinate ) ) {
-				chord.sendMessage( new StateMessage( event, StateMessage.Type.ROLLBAK_MESSAGE ), address );
+				chord.sendMessage( new StateMessage( event, StateMessage.Type.ROLLBACK_MESSAGE ), address );
 			}
 		}
 		if ( local.contains( coordinate ) ) {
-			
-			clean(local.get(coordinate));
-			
+
+			clean( local.get( coordinate ) );
+
 			for ( IHash address : local.get( coordinate ) ) {
-				chord.sendMessage( new StateMessage( event, StateMessage.Type.ROLLBAK_MESSAGE ), address );
+				chord.sendMessage( new StateMessage( event, StateMessage.Type.ROLLBACK_MESSAGE ), address );
 			}
 		}
 	}
@@ -206,18 +206,18 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 	private void receive( final StateMessage msg, final IHash origin ) {
 		logger.debug( "Received message " + msg + " from " + origin );
 		switch ( msg.getType() ) {
-			case ROLLBAK_MESSAGE:				
+			case ROLLBACK_MESSAGE:
 				stateMachine.rollbackEvent( msg.getEvent() );
 				break;
 			case COMMIT_MESSAGE:
 				stateMachine.commitEvent( msg.getEvent() );
 				break;
 			case PUSH_MESSAGE:
-					if(pushedEvents.contains(msg.getEvent())){
-						return;
-					}else {
-						pushedEvents.add(msg.getEvent());
-					}
+				if ( pushedEvents.contains( msg.getEvent() ) ) {
+					return;
+				} else {
+					pushedEvents.add( msg.getEvent() );
+				}
 				ValidationResult result = stateMachine.pushEvent( msg.getEvent() );
 				if ( result == ValidationResult.Invalid ) {
 					eventRolledBack( msg.getEvent() );
@@ -234,14 +234,14 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 			logger.debug( "Clearing receivers for " + c.getPosition() );
 			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
-		
-		clean(receiver.get(c.getPosition()));
-		
+
+		clean( receiver.get( c.getPosition() ) );
+
 		fireChunkUpdate( new ChunkDeliveryMessage( c, null ), c.getPosition() );
 		chord.sendMessage(
 				new ChunkDeliveryMessage( c, (ArrayList<IHash>) receiver.get( msg.getCoordinate() ).clone() ), origin );
-		//prevent sending updates to one self
-		if(!origin.equals(chord.getLocalId())){
+		// prevent sending updates to one self
+		if ( !origin.equals( chord.getLocalId() ) ) {
 			receiver.get( c.getPosition() ).add( origin );
 		}
 	}
@@ -250,7 +250,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		Chunk c = msg.getChunk();
 		if ( local.containsKey( c.getPosition() ) ) {
 			ArrayList<IHash> localPlayers = msg.getLocalPlayers();
-			clean(localPlayers);
+			clean( localPlayers );
 			for ( IHash h : localPlayers ) {
 				if ( chord.getResponsibility().contains( h ) ) {
 					System.err.println( "Added local id to receivers" );
@@ -263,7 +263,8 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 			worldAdapter.responseChunk( c );
 
-			//telling players acting within this chunk to add this id to lacal connected players
+			// telling players acting within this chunk to add this id to lacal
+			// connected players
 			for ( IHash address : local.get( c.getPosition() ) ) {
 				chord.sendMessage( new ChunkEnteredMessage( c.getPosition() ), address );
 			}
@@ -273,9 +274,9 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	private void receive( final ChunkEnteredMessage msg, final IHash origin ) {
 		if ( local.containsKey( msg.getCoordinate() ) ) {
-			
-			clean(local.get(msg.getCoordinate()));
-			
+
+			clean( local.get( msg.getCoordinate() ) );
+
 			local.get( msg.getCoordinate() ).add( origin );
 		}
 	}
@@ -295,7 +296,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		ArrayList<ArrayList<IHash>> addresses = msg.getReceivers();
 		synchronized ( receiver ) {
 			synchronized ( worldAdapter ) {
-				for ( int i = 0; i < chunks.size(); i++ ) {					
+				for ( int i = 0; i < chunks.size(); i++ ) {
 					ArrayList<IHash> value = addresses.get( i );
 					for ( IHash h : value ) {
 						if ( chord.getResponsibility().contains( h ) ) {
@@ -312,31 +313,30 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 
 	}
 
-	public void receive(final EnterGameMessage msg, final IHash origin) {
-		Chunk c = worldAdapter.getChunk(new TileCoordinate(0, 0));
+	public void receive( final EnterGameMessage msg, final IHash origin ) {
+		Chunk c = worldAdapter.getChunk( new TileCoordinate( 0, 0 ) );
 
 		// TODO better player placement
 		TileCoordinate coord;
-		synchronized (c) {
+		synchronized ( c ) {
 			coord = c.findFreeTile();
-			c.setEntityCoordinate(msg.getPlayer(), coord.getX(), coord.getY());
+			c.setEntityCoordinate( msg.getPlayer(), coord.getX(), coord.getY() );
 		}
-		fireChunkUpdate(new EntityAddedMessage(msg.getPlayer(), coord, origin), c.getPosition());
+		fireChunkUpdate( new EntityAddedMessage( msg.getPlayer(), coord, origin ), c.getPosition() );
 
-		if (!receiver.containsKey(c.getPosition())) {
-			logger.debug("Clearing receivers for " + c.getPosition());
-			receiver.put(c.getPosition(), new ArrayList<IHash>());
+		if ( !receiver.containsKey( c.getPosition() ) ) {
+			logger.debug( "Clearing receivers for " + c.getPosition() );
+			receiver.put( c.getPosition(), new ArrayList<IHash>() );
 		}
-		chord.sendMessage(new GameEnteredMessage(c, (ArrayList<IHash>) receiver
-				.get(c.getPosition()).clone()), origin);
+		chord.sendMessage( new GameEnteredMessage( c, (ArrayList<IHash>) receiver.get( c.getPosition() ).clone() ),
+				origin );
 
 		// prevent sending updates to oneself
-		if (!origin.equals(chord.getLocalId())) {
-			receiver.get(c.getPosition()).add(origin);
+		if ( !origin.equals( chord.getLocalId() ) ) {
+			receiver.get( c.getPosition() ).add( origin );
 		}
 
-		logger.debug("Player: " + msg.getPlayer().getName() + " [" + origin
-				+ "] joined the Game");
+		logger.debug( "Player: " + msg.getPlayer().getName() + " [" + origin + "] joined the Game" );
 	}
 
 	public void receive( final GameEnteredMessage msg, final IHash origin ) {
@@ -414,7 +414,7 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		this.listener.remove( listener );
 	}
 
-	private void fireChunkUpdate( final IMessage message, TileCoordinate c) {
+	private void fireChunkUpdate( final IMessage message, final TileCoordinate c ) {
 		synchronized ( listener ) {
 			for ( ChunkManagerListener listener : this.listener ) {
 				listener.chunkUpdated( message, c );
@@ -422,27 +422,28 @@ public class DefaultChunkManager implements IChunkManager, IStateMachineListener
 		}
 	}
 
-    @Override
-    public void predecessorChanged( IChordOverlay chord, IHash predecessor ) {
-        // TODO Auto-generated method stub
+	@Override
+	public void predecessorChanged( final IChordOverlay chord, final IHash predecessor ) {
+		// TODO Auto-generated method stub
 
-    }
+	}
 
-    @Override
-    public void successorChanged( IChordOverlay chord, IHash successor ) {
-        // TODO Auto-generated method stub
+	@Override
+	public void successorChanged( final IChordOverlay chord, final IHash successor ) {
+		// TODO Auto-generated method stub
 
-    }
+	}
 
-    //method for cleaning list of receivers to prevent sending updates to one self
-    private void clean(ArrayList<IHash> adresses){
-    	synchronized (adresses) {
-    		for (Iterator<IHash> iterator = adresses.iterator(); iterator.hasNext();) {
-    			IHash iHash = iterator.next();
-    			if (chord.getResponsibility().contains(iHash)) {
-    				iterator.remove();
-    			}
-    		}
-		}    	
-    }
+	// method for cleaning list of receivers to prevent sending updates to one
+	// self
+	private void clean( final ArrayList<IHash> adresses ) {
+		synchronized ( adresses ) {
+			for ( Iterator<IHash> iterator = adresses.iterator(); iterator.hasNext(); ) {
+				IHash iHash = iterator.next();
+				if ( chord.getResponsibility().contains( iHash ) ) {
+					iterator.remove();
+				}
+			}
+		}
+	}
 }

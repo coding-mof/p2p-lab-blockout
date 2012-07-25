@@ -15,7 +15,7 @@ public class StateMessage implements IMessage {
 	private static final long	serialVersionUID	= 4413756278358237464L;
 
 	public static enum Type {
-		COMMIT_MESSAGE, PUSH_MESSAGE, ROLLBAK_MESSAGE
+		COMMIT_MESSAGE, PUSH_MESSAGE, ROLLBACK_MESSAGE
 	}
 
 	private final IEvent<?>	event;
