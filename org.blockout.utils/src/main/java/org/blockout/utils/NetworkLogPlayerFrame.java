@@ -32,7 +32,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -53,6 +52,7 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SortedSparseMultigraph;
 import edu.uci.ics.jung.graph.util.Context;
 import edu.uci.ics.jung.graph.util.EdgeType;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
@@ -207,8 +207,10 @@ public class NetworkLogPlayerFrame extends JFrame implements IMessageProcessor {
         gm.setMode( ModalGraphMouse.Mode.TRANSFORMING );
         visViewer.setGraphMouse( gm );
 
-        getContentPane()
-                .add( new JScrollPane( visViewer ), BorderLayout.CENTER );
+        GraphZoomScrollPane gzsp = new GraphZoomScrollPane( visViewer );
+        gzsp.add( visViewer );
+
+        getContentPane().add( gzsp, BorderLayout.CENTER );
 
         JPanel progressPanel = new JPanel();
         BoxLayout box = new BoxLayout( progressPanel, BoxLayout.LINE_AXIS );
